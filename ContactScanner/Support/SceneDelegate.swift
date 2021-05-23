@@ -28,6 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let tabBarController        = UITabBarController()
         tabBarController.setViewControllers([scannerVC, savedVC], animated: false)
+        tabBarController.tabBar.tintColor = .label
         
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController  = tabBarController
