@@ -11,9 +11,10 @@ import AVFoundation
 class ScannerVC: UIViewController {
     
     // MARK: - UI Objects
-    var cameraPreviewView       = CameraPreviewView()
-    var cutoutView              = UIView()
-    var numberView              = UILabel()
+    let cameraPreviewView       = CameraPreviewView()
+    let cutoutView              = UIView()
+    let captureButton           = UIButton()
+    
     
     var maskLayer               = CAShapeLayer()
     var currentOrientation      = UIDeviceOrientation.portrait
@@ -51,7 +52,8 @@ class ScannerVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configurePreviewView()
-//        configureCutoutView()
+        configureCutoutView()
+        configureCaptureButton()
         
         captureSessionQueue.async {
             self.setupCamera()
@@ -87,7 +89,6 @@ class ScannerVC: UIViewController {
         view.addSubview(cameraPreviewView)
         
         cameraPreviewView.session = captureSession
-        cameraPreviewView.backgroundColor = .systemRed
         
         cameraPreviewView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -102,9 +103,10 @@ class ScannerVC: UIViewController {
     func configureCutoutView() {
         view.addSubview(cutoutView)
     
-        cutoutView.backgroundColor  = UIColor.gray.withAlphaComponent(0.5)
+        cutoutView.backgroundColor  = UIColor.systemBackground.withAlphaComponent(0.3)
         maskLayer.backgroundColor   = UIColor.clear.cgColor
         maskLayer.fillRule          = .evenOdd
+
         cutoutView.layer.mask       = maskLayer
         
         cutoutView.translatesAutoresizingMaskIntoConstraints = false
@@ -115,6 +117,33 @@ class ScannerVC: UIViewController {
             cutoutView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             cutoutView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+    }
+    
+    func configureCaptureButton() {
+        view.addSubview(captureButton)
+        
+        let buttonHeight: CGFloat = 55
+        let symbolConfiguration = UIImage.SymbolConfiguration(pointSize: 47, weight: .ultraLight)
+        
+        captureButton.setImage(UIImage(systemName: "camera.circle")?.applyingSymbolConfiguration(symbolConfiguration), for: .normal)
+        captureButton.imageView?.tintColor  = .label
+        captureButton.backgroundColor       = .systemGray6
+        captureButton.layer.cornerRadius    = buttonHeight / 2
+        
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        captureButton.addTarget(self, action: #selector(captureButtonTapped), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -11),
+            captureButton.heightAnchor.constraint(equalToConstant: buttonHeight),
+            captureButton.widthAnchor.constraint(equalToConstant: buttonHeight),
+        ])
+    }
+    
+    @objc func captureButtonTapped() {
+        print("Button tapped")
     }
         
     // MARK: - Set Up Methods
@@ -177,45 +206,45 @@ class ScannerVC: UIViewController {
     }
     
     func calculateRegionOfInterest() {
-        let desiredHeightRatio  = 0.15
-        let desiredWidthRatio   = 0.6
-        let maxPortraitWidth    = 0.8
+        // In landscape orientation the desired ROI is specified as the ratio of
+        // buffer width to height. When the UI is rotated to portrait, keep the
+        // vertical size the same (in buffer pixels). Also try to keep the
+        // horizontal size the same up to a maximum ratio.
+        let desiredHeightRatio = 0.5
+        let desiredWidthRatio = 0.6
+        let maxPortraitWidth = 0.9
         
-        // Calculate the ROI size.
+        // Figure out size of ROI.
         let size: CGSize
         if currentOrientation.isPortrait || currentOrientation == .unknown {
             size = CGSize(width: min(desiredWidthRatio * bufferAspectRatio, maxPortraitWidth), height: desiredHeightRatio / bufferAspectRatio)
         } else {
             size = CGSize(width: desiredWidthRatio, height: desiredHeightRatio)
         }
-        
-        // Center the ROI.
-        regionOfInterest.origin = CGPoint(x: (1 - size.width)/2, y: (1 - size.height)/2)
-        regionOfInterest.size   = size
+        // Make it centered.
+        regionOfInterest.origin = CGPoint(x: (1 - size.width) / 2, y: 5*(1 - size.height) / 6)
+        regionOfInterest.size = size
         
         // ROI changed, update transform.
         setupOrientationAndTransform()
         
-        // Update the cutout to match the new ROI
+        // Update the cutout to match the new ROI.
         DispatchQueue.main.async {
+            // Wait for the next run cycle before updating the cutout. This
+            // ensures that the preview layer already has its new orientation.
             self.updateCutout()
         }
     }
     
     func updateCutout() {
-        // Calculate the current location of the cutout in layer coordinates.
-        let roiRecTransform = bottomToTopTransform.concatenating(uiRotationTransform)
-        let cutout          = cameraPreviewView.videoPreviewLayer.layerRectConverted(fromMetadataOutputRect: regionOfInterest.applying(roiRecTransform))
+        // Figure out where the cutout ends up in layer coordinates.
+        let roiRectTransform = bottomToTopTransform.concatenating(uiRotationTransform)
+        let cutout = cameraPreviewView.videoPreviewLayer.layerRectConverted(fromMetadataOutputRect: regionOfInterest.applying(roiRectTransform))
         
         // Create the mask.
         let path = UIBezierPath(rect: cutoutView.frame)
         path.append(UIBezierPath(rect: cutout))
         maskLayer.path = path.cgPath
-        
-        // Move the number label down to under cutout.
-        var numFrame        = cutout
-        numFrame.origin.y += numFrame.size.height
-        numberView.frame    = numFrame
     }
     
     func setupOrientationAndTransform() {
@@ -229,16 +258,16 @@ class ScannerVC: UIViewController {
         switch currentOrientation {
         case .landscapeLeft:
             textOrientation     = .up
-            uiRotationTransform = .identity
+            uiRotationTransform = CGAffineTransform(translationX: 0, y: 0.05)
         case .landscapeRight:
             textOrientation     = .down
-            uiRotationTransform = CGAffineTransform(translationX: 1, y: 1).rotated(by: .pi)
+            uiRotationTransform = CGAffineTransform(translationX: 1, y: 0.95).rotated(by: .pi)
         case .portraitUpsideDown:
             textOrientation     = .left
-            uiRotationTransform = CGAffineTransform(translationX: 1, y: 1).rotated(by: .pi / 2)
+            uiRotationTransform = CGAffineTransform(translationX: 1, y: 0).rotated(by: .pi / 2)
         default:
             textOrientation     = .right
-            uiRotationTransform = CGAffineTransform(translationX: 1, y: 1).rotated(by: -.pi / 2)
+            uiRotationTransform = CGAffineTransform(translationX: 0, y: 1).rotated(by: -.pi / 2)
         }
         
         // Full Vision ROI to AVF transform.
@@ -249,8 +278,8 @@ class ScannerVC: UIViewController {
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
 extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
     
-    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        // This is implemented in VisionViewController.
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        //Implemented in VisionViewController
     }
 }
 

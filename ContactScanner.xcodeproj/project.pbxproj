@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D58C82E265AB5F10022584B /* VisionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D58C82D265AB5F10022584B /* VisionVC.swift */; };
+		1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D58C82F265AB6B10022584B /* StringUtilities.swift */; };
 		1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98CF265990110024A63A /* AppDelegate.swift */; };
 		1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98D1265990110024A63A /* SceneDelegate.swift */; };
 		1DFC98D9265990130024A63A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98D8265990130024A63A /* Assets.xcassets */; };
@@ -17,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1D58C82D265AB5F10022584B /* VisionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionVC.swift; sourceTree = "<group>"; };
+		1D58C82F265AB6B10022584B /* StringUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtilities.swift; sourceTree = "<group>"; };
 		1DFC98CC265990110024A63A /* ContactScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ContactScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DFC98CF265990110024A63A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DFC98D1265990110024A63A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -39,6 +43,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1D58C82C265AB5580022584B /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				1DFC98E6265990B30024A63A /* ScannerVC.swift */,
+				1D58C82F265AB6B10022584B /* StringUtilities.swift */,
+			);
+			path = Utility;
+			sourceTree = "<group>";
+		};
 		1DFC98C3265990110024A63A = {
 			isa = PBXGroup;
 			children = (
@@ -58,6 +71,7 @@
 		1DFC98CE265990110024A63A /* ContactScanner */ = {
 			isa = PBXGroup;
 			children = (
+				1D58C82C265AB5580022584B /* Utility */,
 				1DFC98E52659904A0024A63A /* Screens */,
 				1DFC98E4265990440024A63A /* Views */,
 				1DFC98E3265990400024A63A /* Support */,
@@ -88,8 +102,8 @@
 		1DFC98E52659904A0024A63A /* Screens */ = {
 			isa = PBXGroup;
 			children = (
-				1DFC98E6265990B30024A63A /* ScannerVC.swift */,
 				1DFC98E82659928D0024A63A /* SavedVC.swift */,
+				1D58C82D265AB5F10022584B /* VisionVC.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -167,6 +181,8 @@
 				1DFC98E7265990B30024A63A /* ScannerVC.swift in Sources */,
 				1DFC98EB265995080024A63A /* CameraPreviewView.swift in Sources */,
 				1DFC98E92659928D0024A63A /* SavedVC.swift in Sources */,
+				1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */,
+				1D58C82E265AB5F10022584B /* VisionVC.swift in Sources */,
 				1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
