@@ -143,7 +143,8 @@ class ScannerVC: UIViewController {
     }
     
     @objc func captureButtonTapped() {
-        print("Button tapped")
+        print("Button tapped").self
+        
     }
         
     // MARK: - Set Up Methods
