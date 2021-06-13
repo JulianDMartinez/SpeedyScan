@@ -90,6 +90,7 @@ class VisionVC: ScannerVC {
                 try requestHandler.perform([request])
             } catch {
                 print(error)
+                //This is a printing the error.
             }
         }
     }
