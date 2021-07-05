@@ -16,22 +16,33 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let windowScene               = (scene as? UIWindowScene) else { return }
         
-        let scannerVC               = VisionVC()
-        scannerVC.tabBarItem.image  = UIImage(systemName: "doc.text.viewfinder")
-        scannerVC.title             = "Scan"
+        let scannerVC                       = ScannerVC()
+        scannerVC.tabBarItem.image          = UIImage(systemName: "doc.text.viewfinder")
+        scannerVC.title                     = "Scan"
         
-        let savedVC                 = SavedVC()
-        savedVC.tabBarItem.image    = UIImage(systemName: "tray.full")
-        savedVC.title               = "Saved Scans"
+        let savedVC                         = SavedVC()
+        savedVC.tabBarItem.image            = UIImage(systemName: "tray.full")
+        savedVC.title                       = "Saved Scans"
         
-        let tabBarController        = UITabBarController()
+        let tabBarController                = UITabBarController()
+        let tabBarControllerAppearance      = UITabBarAppearance()
+        
+        tabBarController.tabBar.tintColor   = .label
+        
+        tabBarControllerAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
+        
+        if #available(iOS 15.0, *) {
+            tabBarController.tabBar.scrollEdgeAppearance = tabBarControllerAppearance
+        } else {
+            // Fallback on earlier versions
+        }
+
         tabBarController.setViewControllers([scannerVC, savedVC], animated: false)
-        tabBarController.tabBar.tintColor = .label
         
-        window = UIWindow(windowScene: windowScene)
-        window?.rootViewController  = tabBarController
+        window                              = UIWindow(windowScene: windowScene)
+        window?.rootViewController          = tabBarController
         window?.makeKeyAndVisible()
     }
 
