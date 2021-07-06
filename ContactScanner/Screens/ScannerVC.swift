@@ -216,7 +216,6 @@ class ScannerVC: UIViewController {
         let context = CIContext()
         let cgImage = context.createCGImage(image, from: image.extent)
         uiImage  = UIImage(cgImage: cgImage!)
-        print(uiImage)
     }
     
     
@@ -250,8 +249,6 @@ class ScannerVC: UIViewController {
     
         outlineLayer.path = outlinePath.cgPath
         
-        //TODO: Add feedback to tell user when it is safe to take a photo.
-        
     }
     
     func toggleFlash() {
@@ -283,6 +280,7 @@ class ScannerVC: UIViewController {
 }
 
 extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
         guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {

@@ -9,16 +9,18 @@ import UIKit
 
 class CaptureDetailVC: UIViewController {
     
-    let image: UIImage
+    var image: UIImage
     
-    private let imageView           = UIImageView()
-    private let visualEffectView    = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
-    private let cancelButton        = CancelButton()
-    private let saveButton          = SaveButton()
+    private let imageView               = UIImageView()
+    private let imageViewContainerView  = UIView()
+    private let visualEffectView        = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+    private let cancelButton            = CancelButton()
+    private let saveButton              = SaveButton()
+    private let buttonsStackView        = UIStackView()
+    private let verticalStackView       = UIStackView()
     
     init(image: UIImage) {
         self.image = image
-        print(image)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -34,12 +36,16 @@ class CaptureDetailVC: UIViewController {
         super.viewDidLoad()
         
         configureSelf()
-        configureVisualEffectView()
         configureCancelButton()
         configureSaveButton()
         configureImageView()
-
+        configureButtonsStackView()
+        configureVerticalStackView()
+        configureVisualEffectView()
+        
     }
+    
+
     
     
     private func configureSelf() {
@@ -48,35 +54,11 @@ class CaptureDetailVC: UIViewController {
     }
     
     
-    private func configureVisualEffectView() {
-        view.addSubview(visualEffectView)
-        
-        visualEffectView.layer.cornerRadius = 20
-        visualEffectView.clipsToBounds = true
-        
-        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            visualEffectView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 5),
-            visualEffectView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            visualEffectView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 10)
-        ])
-    }
+
     
     
     private func configureCancelButton() {
-
-            view.addSubview(cancelButton)
-            
             cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-            
-            NSLayoutConstraint.activate([
-                cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-                cancelButton.centerXAnchor.constraint(equalTo: visualEffectView.centerXAnchor, constant: cancelButton.intrinsicContentSize.width/2 + 10),
-                cancelButton.heightAnchor.constraint(equalToConstant: cancelButton.buttonHeight)
-            ])
-    
     }
     
     @objc private func cancelButtonTapped() {
@@ -84,37 +66,96 @@ class CaptureDetailVC: UIViewController {
     }
     
     private func configureSaveButton() {
-
-            view.addSubview(saveButton)
-
             saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
-
-            NSLayoutConstraint.activate([
-                saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-                saveButton.centerXAnchor.constraint(equalTo: visualEffectView.centerXAnchor, constant: -(saveButton.intrinsicContentSize.width/2 + 10)),
-                saveButton.heightAnchor.constraint(equalToConstant: saveButton.buttonHeight)
-            ])
-
     }
 
     @objc private func saveButtonTapped() {
-        dismiss(animated: true, completion: nil)
+
+        let activitySheet = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        
+        activitySheet.completionWithItemsHandler = { activity, success, items, error in
+            self.dismiss(animated: true, completion: nil)
+        }
+        
+        present(activitySheet, animated: true, completion: nil)
     }
     
     
     private func configureImageView() {
-        view.addSubview(imageView)
+        
+        imageViewContainerView.addSubview(imageView)
+        imageViewContainerView.layer.shadowOpacity = 0.2
+        imageViewContainerView.layer.shadowRadius   = 3
+        imageViewContainerView.layer.shadowOffset   = CGSize(width: 1, height: 1)
+        
         imageView.image = image
         imageView.contentMode = .scaleAspectFit
+        imageView.layer.cornerRadius = 5
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: visualEffectView.topAnchor, constant: 25),
-            imageView.leadingAnchor.constraint(equalTo: visualEffectView.leadingAnchor, constant: 15),
-            imageView.trailingAnchor.constraint(equalTo: visualEffectView.trailingAnchor, constant: -15),
-            imageView.heightAnchor.constraint(lessThanOrEqualTo: visualEffectView.heightAnchor, multiplier: 0.80),
-            imageView.heightAnchor.constraint(greaterThanOrEqualTo: visualEffectView.heightAnchor, multiplier: 0.1)
+            imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor, multiplier: imageView.image!.size.height / imageView.image!.size.width),
+            imageView.topAnchor.constraint(equalTo: imageViewContainerView.topAnchor, constant: 3),
+            imageView.bottomAnchor.constraint(equalTo: imageViewContainerView.bottomAnchor),
+            imageView.centerXAnchor.constraint(equalTo: imageViewContainerView.centerXAnchor),
+            imageView.widthAnchor.constraint(lessThanOrEqualTo: imageViewContainerView.widthAnchor)
+        ])
+
+    }
+    
+    private func configureButtonsStackView() {
+
+        buttonsStackView.addArrangedSubview(saveButton)
+        buttonsStackView.addArrangedSubview(cancelButton)
+        buttonsStackView.axis       = .horizontal
+        buttonsStackView.spacing    = 10
+        buttonsStackView.distribution = .fillEqually
+        
+        buttonsStackView.layer.shadowOpacity = 0.2
+        buttonsStackView.layer.shadowRadius   = 3
+        buttonsStackView.layer.shadowOffset   = CGSize(width: 1, height: 1)
+        
+        buttonsStackView.heightAnchor.constraint(equalToConstant: 55).isActive = true
+
+    }
+    
+    private func configureVerticalStackView() {
+        view.addSubview(verticalStackView)
+        
+        verticalStackView.addArrangedSubview(imageViewContainerView)
+        verticalStackView.addArrangedSubview(buttonsStackView)
+        
+        verticalStackView.spacing = 30
+        verticalStackView.distribution = .fill
+        verticalStackView.axis = .vertical
+        verticalStackView.clipsToBounds = true
+        verticalStackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            verticalStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -27),
+            verticalStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            verticalStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            verticalStackView.heightAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.heightAnchor, multiplier: 0.92)
+        ])
+        
+    }
+    
+    private func configureVisualEffectView() {
+        view.insertSubview(visualEffectView, belowSubview: verticalStackView)
+        
+        visualEffectView.layer.cornerRadius = 20
+        visualEffectView.clipsToBounds = true
+        
+        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
+        
+
+        
+        NSLayoutConstraint.activate([
+            visualEffectView.topAnchor.constraint(equalTo: verticalStackView.topAnchor, constant: -30),
+            visualEffectView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            visualEffectView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 
