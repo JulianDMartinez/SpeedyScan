@@ -42,7 +42,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         tabBarController.setViewControllers([scannerVC, savedVC], animated: false)
         
         window                              = UIWindow(windowScene: windowScene)
-        window?.rootViewController          = tabBarController
+        window?.rootViewController          = scannerVC
         window?.makeKeyAndVisible()
     }
 

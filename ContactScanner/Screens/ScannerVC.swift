@@ -42,7 +42,7 @@ class ScannerVC: UIViewController {
     private func setCameraInput() {
         
         guard let device = AVCaptureDevice.DiscoverySession(
-            deviceTypes : [.builtInDualCamera],
+            deviceTypes : [.builtInUltraWideCamera],
             mediaType   : .video,
             position    : .back
         ).devices.first else {

@@ -30,7 +30,7 @@ class CaptureButton: UIButton {
     private func configureSelf() {
         setImage(UIImage(systemName: "camera.circle")?.applyingSymbolConfiguration(symbolConfiguration), for: .normal)
         imageView?.tintColor    = .label.withAlphaComponent(0.8)
-        backgroundColor         = .systemGray3.withAlphaComponent(0.9)
+        backgroundColor         = .systemBackground.withAlphaComponent(0.7)
         layer.cornerRadius      = buttonHeight / 2
         clipsToBounds           = true
         

@@ -31,7 +31,7 @@ class CancelButton: UIButton {
         
         titleLabel?.font        = UIFont.systemFont(ofSize: 23)
         contentEdgeInsets       = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-        backgroundColor         = .systemRed.withAlphaComponent(0.5)
+        backgroundColor         = .systemBackground.withAlphaComponent(0.7)
         layer.cornerRadius      = buttonHeight / 4
 
         clipsToBounds           = true

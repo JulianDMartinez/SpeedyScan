@@ -13,7 +13,7 @@ class CaptureDetailVC: UIViewController {
     
     private let imageView               = UIImageView()
     private let imageViewContainerView  = UIView()
-    private let visualEffectView        = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+    private let visualEffectView        = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
     private let cancelButton            = CancelButton()
     private let saveButton              = SaveButton()
     private let buttonsStackView        = UIStackView()
@@ -84,7 +84,7 @@ class CaptureDetailVC: UIViewController {
     private func configureImageView() {
         
         imageViewContainerView.addSubview(imageView)
-        imageViewContainerView.layer.shadowOpacity = 0.2
+        imageViewContainerView.layer.shadowOpacity = 0
         imageViewContainerView.layer.shadowRadius   = 3
         imageViewContainerView.layer.shadowOffset   = CGSize(width: 1, height: 1)
         
@@ -111,12 +111,14 @@ class CaptureDetailVC: UIViewController {
         buttonsStackView.axis       = .horizontal
         buttonsStackView.spacing    = 10
         buttonsStackView.distribution = .fillEqually
+        buttonsStackView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        buttonsStackView.isLayoutMarginsRelativeArrangement = true
         
-        buttonsStackView.layer.shadowOpacity = 0.2
-        buttonsStackView.layer.shadowRadius   = 3
+        buttonsStackView.layer.shadowOpacity = 0.3
+        buttonsStackView.layer.shadowRadius   = 2
         buttonsStackView.layer.shadowOffset   = CGSize(width: 1, height: 1)
         
-        buttonsStackView.heightAnchor.constraint(equalToConstant: 55).isActive = true
+        buttonsStackView.heightAnchor.constraint(equalToConstant: 75).isActive = true
 
     }
     
@@ -126,7 +128,7 @@ class CaptureDetailVC: UIViewController {
         verticalStackView.addArrangedSubview(imageViewContainerView)
         verticalStackView.addArrangedSubview(buttonsStackView)
         
-        verticalStackView.spacing = 30
+        verticalStackView.spacing = 10
         verticalStackView.distribution = .fill
         verticalStackView.axis = .vertical
         verticalStackView.clipsToBounds = true

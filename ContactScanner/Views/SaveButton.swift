@@ -25,12 +25,12 @@ class SaveButton: UIButton {
     
     private func configureSelf() {
 
-        setTitle("Save or Share", for: .normal)
+        setTitle("Save / Share", for: .normal)
         setTitleColor(.label, for: .normal)
         
         titleLabel?.font = UIFont.systemFont(ofSize: 23)
         contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-        backgroundColor         = .systemGreen.withAlphaComponent(0.5)
+        backgroundColor         = .systemBackground.withAlphaComponent(0.7)
         layer.cornerRadius      = buttonHeight / 4
 
         clipsToBounds           = true

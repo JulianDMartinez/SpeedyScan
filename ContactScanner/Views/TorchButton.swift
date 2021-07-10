@@ -30,7 +30,7 @@ class TorchButton: UIButton {
     private func configureSelf() {
         setImage(UIImage(systemName: "flashlight.off.fill")?.applyingSymbolConfiguration(symbolConfiguration), for: .normal)
         imageView?.tintColor    = .label
-        backgroundColor         = .systemGray3.withAlphaComponent(0.9)
+        backgroundColor         = .systemBackground.withAlphaComponent(0.7)
         layer.cornerRadius      = buttonHeight / 2
         clipsToBounds           = true
         
