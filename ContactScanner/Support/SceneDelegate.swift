@@ -19,27 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene               = (scene as? UIWindowScene) else { return }
         
         let scannerVC                       = ScannerVC()
-        scannerVC.tabBarItem.image          = UIImage(systemName: "doc.text.viewfinder")
-        scannerVC.title                     = "Scan"
         
-        let savedVC                         = SavedVC()
-        savedVC.tabBarItem.image            = UIImage(systemName: "tray.full")
-        savedVC.title                       = "Saved Scans"
-        
-        let tabBarController                = UITabBarController()
-        let tabBarControllerAppearance      = UITabBarAppearance()
-        
-        tabBarController.tabBar.tintColor   = .label
-        
-        tabBarControllerAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
-        
-        if #available(iOS 15.0, *) {
-            tabBarController.tabBar.scrollEdgeAppearance = tabBarControllerAppearance
-        } else {
-            // Fallback on earlier versions
-        }
 
-        tabBarController.setViewControllers([scannerVC, savedVC], animated: false)
         
         window                              = UIWindow(windowScene: windowScene)
         window?.rootViewController          = scannerVC

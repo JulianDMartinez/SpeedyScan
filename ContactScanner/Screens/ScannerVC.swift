@@ -118,6 +118,9 @@ class ScannerVC: UIViewController {
     
     
     @objc private func captureButtonTapped() {
+        
+        //TODO: Add alert for nil image before presenting CaptureDetailVC
+        
        presentCaptureDetailVC()
     }
     
