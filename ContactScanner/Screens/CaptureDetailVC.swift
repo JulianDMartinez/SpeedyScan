@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import PDFKit
 
 class CaptureDetailVC: UIViewController {
     
@@ -70,14 +71,24 @@ class CaptureDetailVC: UIViewController {
     }
 
     @objc private func saveButtonTapped() {
-
-        let activitySheet = UIActivityViewController(activityItems: [image], applicationActivities: nil)
         
+        let pdfDocument = PDFDocument()
+        let pdfPage     = PDFPage(image: image)
+
+        pdfDocument.insert(pdfPage!, at: 0)
+
+        let data = pdfDocument.dataRepresentation()
+        
+//        MARK: Activity Sheet Implementation
+        let activitySheet = UIActivityViewController(activityItems: [data as Any], applicationActivities: nil)
+
         activitySheet.completionWithItemsHandler = { activity, success, items, error in
             self.dismiss(animated: true, completion: nil)
         }
-        
+
         present(activitySheet, animated: true, completion: nil)
+        
+        
     }
     
     

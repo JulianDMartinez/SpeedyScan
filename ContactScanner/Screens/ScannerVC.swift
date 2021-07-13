@@ -21,6 +21,7 @@ class ScannerVC: UIViewController {
     private var ciImage             = CIImage()
     private var uiImage             = UIImage()
     
+    
     private lazy var previewLayer   = AVCaptureVideoPreviewLayer(session: captureSession)
     
     
