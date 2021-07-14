@@ -215,8 +215,10 @@ class ScannerVC: UIViewController {
             "inputTopRight"     : CIVector(cgPoint: topRight),
             "inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
             "inputBottomRight"  : CIVector(cgPoint: bottomRight)
+        ]).applyingFilter("CIDocumentEnhancer", parameters: [
+            "inputAmount" : 0.7
         ])
-
+        
         let context = CIContext()
         let cgImage = context.createCGImage(image, from: image.extent)
         uiImage  = UIImage(cgImage: cgImage!)
