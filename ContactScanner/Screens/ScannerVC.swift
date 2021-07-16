@@ -11,6 +11,8 @@ import Vision
 
 class ScannerVC: UIViewController {
     
+    //TODO: Add segmeted control for selection of automatic vs. manual.
+    //TODO: Add option to adjust zoom level.
 
     private let captureSession      = AVCaptureSession()
     private let videoDataOutput     = AVCaptureVideoDataOutput()
@@ -232,7 +234,7 @@ class ScannerVC: UIViewController {
         outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
         outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
         
-        //TODO: Test transform in smaller phone sizes. This transform has been hardcoded for iPhone 12 Pro Max.
+        //TODO: Test transform in smaller phone sizes. This transform is hardcoded and may only work for iPhone 12 Pro Max.
         let bottomTopTransform = CGAffineTransform(scaleX: 1.2, y: -1).translatedBy(x: -35, y: -previewLayer.frame.height)
         
         let topRight = VNImagePointForNormalizedPoint(rect.topRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)

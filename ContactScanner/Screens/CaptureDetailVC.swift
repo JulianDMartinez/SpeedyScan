@@ -15,8 +15,8 @@ class CaptureDetailVC: UIViewController {
     private let imageView               = UIImageView()
     private let imageViewContainerView  = UIView()
     private let visualEffectView        = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
-    private let cancelButton            = CancelButton()
-    private let saveButton              = SaveButton()
+    private let cancelButton            = SelectionButton()
+    private let selectionButton         = SelectionButton()
     private let buttonsStackView        = UIStackView()
     private let verticalStackView       = UIStackView()
     
@@ -50,24 +50,35 @@ class CaptureDetailVC: UIViewController {
     
     
     private func configureSelf() {
+         
         view.isOpaque = false
         view.backgroundColor = UIColor.clear
+        
     }
-    
-    
-
     
     
     private func configureCancelButton() {
-            cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        
+        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.setTitleColor(.systemRed, for: .normal)
+        
+        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        
     }
     
+    
     @objc private func cancelButtonTapped() {
+        
         dismiss(animated: true, completion: nil)
+        
     }
     
     private func configureSaveButton() {
-            saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        
+        selectionButton.setTitle("Select", for: .normal)
+        
+        selectionButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        
     }
 
     @objc private func saveButtonTapped() {
@@ -115,9 +126,10 @@ class CaptureDetailVC: UIViewController {
 
     }
     
+    
     private func configureButtonsStackView() {
 
-        buttonsStackView.addArrangedSubview(saveButton)
+        buttonsStackView.addArrangedSubview(selectionButton)
         buttonsStackView.addArrangedSubview(cancelButton)
         buttonsStackView.axis       = .horizontal
         buttonsStackView.spacing    = 10
@@ -132,6 +144,7 @@ class CaptureDetailVC: UIViewController {
         buttonsStackView.heightAnchor.constraint(equalToConstant: 75).isActive = true
 
     }
+    
     
     private func configureVerticalStackView() {
         view.addSubview(verticalStackView)
@@ -151,8 +164,8 @@ class CaptureDetailVC: UIViewController {
             verticalStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             verticalStackView.heightAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.heightAnchor, multiplier: 0.92)
         ])
-        
     }
+    
     
     private func configureVisualEffectView() {
         view.insertSubview(visualEffectView, belowSubview: verticalStackView)
@@ -171,9 +184,15 @@ class CaptureDetailVC: UIViewController {
             visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
 }
 
-extension CaptureDetailVC: UIViewControllerTransitioningDelegate {
+extension CaptureDetailVC: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        
+        let contextConfiguration = UIContextMenuConfiguration()
+        
+        return contextConfiguration
+    }
+    
     
 }

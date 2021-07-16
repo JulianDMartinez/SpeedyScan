@@ -1,5 +1,5 @@
 //
-//  UIButton.swift
+//  SaveButton.swift
 //  ContactScanner
 //
 //  Created by Julian Martinez on 7/5/21.
@@ -7,8 +7,7 @@
 
 import UIKit
 
-class CancelButton: UIButton {
-    
+class SelectionButton: UIButton {
 
     let buttonHeight: CGFloat
     
@@ -26,16 +25,14 @@ class CancelButton: UIButton {
     
     private func configureSelf() {
 
-        setTitle("Cancel", for: .normal)
         setTitleColor(.label, for: .normal)
         
-        titleLabel?.font        = UIFont.systemFont(ofSize: 23)
-        contentEdgeInsets       = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        titleLabel?.font = UIFont.systemFont(ofSize: 23)
+        contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         backgroundColor         = .systemBackground.withAlphaComponent(0.7)
         layer.cornerRadius      = buttonHeight / 4
 
         clipsToBounds           = true
         
-
     }
 }
