@@ -11,7 +11,7 @@ import Vision
 
 class ScannerVC: UIViewController {
     
-    private lazy var device         = AVCaptureDevice(uniqueID: "")
+
     private let captureSession      = AVCaptureSession()
     private let videoDataOutput     = AVCaptureVideoDataOutput()
     private let outlineLayer        = CAShapeLayer()
@@ -21,13 +21,13 @@ class ScannerVC: UIViewController {
     private var ciImage             = CIImage()
     private var uiImage             = UIImage()
     
-    
+    private lazy var device         = AVCaptureDevice(uniqueID: "")
     private lazy var previewLayer   = AVCaptureVideoPreviewLayer(session: captureSession)
     
     
     override func viewDidLoad() {
         
-        //TODO: Check for access to camera and photo/file explorer.
+        //TODO: Check for access to camera and photo. Handle case where authorization is not provided.
         
         super.viewDidLoad()
         setCameraInput()
@@ -47,7 +47,7 @@ class ScannerVC: UIViewController {
             mediaType   : .video,
             position    : .back
         ).devices.first else {
-            print("This device does not support required input device")
+            //TODO: Handle case where device is not available.
             return
         }
         
@@ -57,12 +57,10 @@ class ScannerVC: UIViewController {
             
             let cameraInput = try AVCaptureDeviceInput(device: device)
             captureSession.addInput(cameraInput)
-            
             device.unlockForConfiguration()
             
         } catch {
-            //TODO: Set up alert controller for error.
-            print(error.localizedDescription)
+            //TODO: Handle case where there is an error with setting the input.
         }
         
     }
@@ -72,23 +70,20 @@ class ScannerVC: UIViewController {
         
         videoDataOutput.videoSettings = [
             (kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)
-        ] as [
-            String : Any
-        ]
+        ] as [String : Any]
+        
         videoDataOutput.alwaysDiscardsLateVideoFrames = true
         videoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
-        
         captureSession.addOutput(videoDataOutput)
         
         guard let connection = videoDataOutput.connection(with: .video) else {
-            print("An error was encontered while unwrapping videoDataOutput connection.")
+            //TODO: Handle case where value is nil.
             return
         }
         
         connection.videoOrientation = .portrait
         connection.preferredVideoStabilizationMode = .cinematic
 
-        
     }
     
     
@@ -153,12 +148,15 @@ class ScannerVC: UIViewController {
         
         captureDetailVC.modalPresentationStyle = .overCurrentContext
         present(captureDetailVC, animated: true, completion: nil)
+        
     }
     
     
     private func setUpOutlineLayer() {
+        
         outlineLayer.frame = previewLayer.bounds
         previewLayer.insertSublayer(outlineLayer, at: 1)
+        
     }
 
     
@@ -195,9 +193,8 @@ class ScannerVC: UIViewController {
         do {
             try imageRequestHandler.perform([request])
         } catch {
-            print("The following error was encountered when trying to perform the request \(error)")
+            //TODO: Handle error.
         }
-        
     }
     
     
@@ -290,7 +287,7 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
         guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            debugPrint("Unable to get image from sample buffer.")
+            //TODO: Handle case where value is nil.
             return
         }
         
