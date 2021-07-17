@@ -75,13 +75,55 @@ class CaptureDetailVC: UIViewController {
     
     private func configureSaveButton() {
         
+        let shareImage              = UIImage(systemName: "square.and.arrow.up")
+        let shareAsPDFAction        = configureSharePDFAction()
+        let shareAsImageAction      = configureShareImageAction()
+        let saveToCameraRollAction  = configureSaveToCameraRollAction()
+        let imageMenu               = UIMenu(title: "Image", image: shareImage, options: .displayInline, children: [shareAsImageAction, saveToCameraRollAction])
+        let pdfMenu                 = UIMenu(title: "PDF", image: shareImage, options: .displayInline, children: [shareAsPDFAction])
+        
         selectionButton.setTitle("Select", for: .normal)
         
-        selectionButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        selectionButton.showsMenuAsPrimaryAction    = true
+        selectionButton.menu                        = UIMenu(children: [pdfMenu, imageMenu])
+            
+    }
+    
+    private func configureSharePDFAction() -> UIAction {
+        
+        let shareImage          = UIImage(systemName: "square.and.arrow.up")
+        
+        return UIAction(title: "Share PDF", image: shareImage) { _ in
+            self.shareAsPDF()
+        }
+        
+    }
+    
+    private func configureShareImageAction() -> UIAction {
+        
+        let shareImage          = UIImage(systemName: "square.and.arrow.up")
+        
+        return UIAction(title: "Share Image", image: shareImage) { _ in
+            self.shareAsImage()
+        }
+        
+    }
+    
+    private func configureSaveToCameraRollAction() -> UIAction {
+        
+        //TODO: Check for camera roll authorization. Handle no authorization provided.
+        
+        let saveImage       = UIImage(systemName: "photo.on.rectangle.angled")
+        
+        return UIAction(title: "Save to Camera Roll", image: saveImage) { _ in
+            //TODO: Handle error on saving to user camera roll.
+            UIImageWriteToSavedPhotosAlbum(self.image, nil, nil, nil)
+        }
         
     }
 
-    @objc private func saveButtonTapped() {
+    
+    private func shareAsPDF() {
         
         let pdfDocument = PDFDocument()
         let pdfPage     = PDFPage(image: image)
@@ -99,8 +141,20 @@ class CaptureDetailVC: UIViewController {
 
         present(activitySheet, animated: true, completion: nil)
         
+    }
+    
+    private func shareAsImage() {
+        
+        let activitySheet = UIActivityViewController(activityItems: [image as Any], applicationActivities: nil)
+
+        activitySheet.completionWithItemsHandler = { activity, success, items, error in
+            self.dismiss(animated: true, completion: nil)
+        }
+
+        present(activitySheet, animated: true, completion: nil)
         
     }
+
     
     
     private func configureImageView() {
@@ -184,15 +238,4 @@ class CaptureDetailVC: UIViewController {
             visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-}
-
-extension CaptureDetailVC: UIContextMenuInteractionDelegate {
-    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        
-        let contextConfiguration = UIContextMenuConfiguration()
-        
-        return contextConfiguration
-    }
-    
-    
 }
