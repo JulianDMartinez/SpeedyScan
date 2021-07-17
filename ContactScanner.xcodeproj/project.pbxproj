@@ -16,7 +16,7 @@
 		1DFC98E92659928D0024A63A /* SavedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98E82659928D0024A63A /* SavedVC.swift */; };
 		B908CC272691438700DDC437 /* CaptureButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC262691438700DDC437 /* CaptureButton.swift */; };
 		B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC29269370C200DDC437 /* CaptureDetailVC.swift */; };
-		B908CC2C26938E4200DDC437 /* TorchButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2B26938E4200DDC437 /* TorchButton.swift */; };
+		B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */; };
 		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,8 +32,9 @@
 		1DFC98E82659928D0024A63A /* SavedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedVC.swift; sourceTree = "<group>"; };
 		B908CC262691438700DDC437 /* CaptureButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureButton.swift; sourceTree = "<group>"; };
 		B908CC29269370C200DDC437 /* CaptureDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailVC.swift; sourceTree = "<group>"; };
-		B908CC2B26938E4200DDC437 /* TorchButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorchButton.swift; sourceTree = "<group>"; };
+		B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashToggleButton.swift; sourceTree = "<group>"; };
 		B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionButton.swift; sourceTree = "<group>"; };
+		B97216C526A36EED00D6E445 /* ContactScanner.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ContactScanner.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +75,7 @@
 		1DFC98CE265990110024A63A /* ContactScanner */ = {
 			isa = PBXGroup;
 			children = (
+				B97216C526A36EED00D6E445 /* ContactScanner.entitlements */,
 				1DFC98E52659904A0024A63A /* Screens */,
 				1DFC98E4265990440024A63A /* Views */,
 				1D58C82C265AB5580022584B /* Utility */,
@@ -99,7 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				B908CC262691438700DDC437 /* CaptureButton.swift */,
-				B908CC2B26938E4200DDC437 /* TorchButton.swift */,
+				B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */,
 				B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */,
 			);
 			path = Views;
@@ -191,7 +193,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B908CC2C26938E4200DDC437 /* TorchButton.swift in Sources */,
+				B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
 				1DFC98E92659928D0024A63A /* SavedVC.swift in Sources */,
 				1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */,
@@ -338,6 +340,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ContactScanner/ContactScanner.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = ContactScanner/Support/Info.plist;
@@ -348,7 +351,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.julianmartinezdev.ContactScanner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -357,6 +360,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ContactScanner/ContactScanner.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = ContactScanner/Support/Info.plist;
@@ -367,7 +371,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.julianmartinezdev.ContactScanner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

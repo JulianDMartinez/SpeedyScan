@@ -75,17 +75,24 @@ class CaptureDetailVC: UIViewController {
     
     private func configureSaveButton() {
         
-        let shareImage              = UIImage(systemName: "square.and.arrow.up")
-        let shareAsPDFAction        = configureSharePDFAction()
-        let shareAsImageAction      = configureShareImageAction()
-        let saveToCameraRollAction  = configureSaveToCameraRollAction()
+        let shareImage                          = UIImage(systemName: "square.and.arrow.up")
+        let saveImage                           = UIImage(systemName: "folder")
+        
+        let shareAsPDFAction                    = configureSharePDFAction()
+        let shareAsImageAction                  = configureShareImageAction()
+        let saveToCameraRollAction              = configureSaveToCameraRollAction()
+        let savePDFToReceiptsFolderAction       = configureSavePDFToReceiptsFolderAction()
+        let savePDFToContactCardsFolderAction   = configureSavePDFToContactCardsFolderAction()
+        let savePDFToOtherDocumentsFolderAction = configureSavePDFToOtherDocumentsFolderAction()
+        
+        let savePDFToFolderSubmenu        = UIMenu(title: "Save PDF to Folder", image: saveImage, children: [savePDFToReceiptsFolderAction, savePDFToContactCardsFolderAction, savePDFToOtherDocumentsFolderAction])
         let imageMenu               = UIMenu(title: "Image", image: shareImage, options: .displayInline, children: [shareAsImageAction, saveToCameraRollAction])
-        let pdfMenu                 = UIMenu(title: "PDF", image: shareImage, options: .displayInline, children: [shareAsPDFAction])
+        let pdfMenu                 = UIMenu(title: "PDF", image: shareImage, options: .displayInline, children: [shareAsPDFAction, savePDFToFolderSubmenu])
         
         selectionButton.setTitle("Select", for: .normal)
         
         selectionButton.showsMenuAsPrimaryAction    = true
-        selectionButton.menu                        = UIMenu(children: [pdfMenu, imageMenu])
+        selectionButton.menu                        = UIMenu(children: [imageMenu, pdfMenu])
             
     }
     
@@ -98,6 +105,28 @@ class CaptureDetailVC: UIViewController {
         }
         
     }
+    
+    private func configureSavePDFToReceiptsFolderAction() -> UIAction {
+    
+        return UIAction(title: "Receipts") { _ in
+            #warning("Implement save to cloud folder.")
+        }
+    }
+    
+    private func configureSavePDFToContactCardsFolderAction() -> UIAction {
+    
+        return UIAction(title: "Contact Cards") { _ in
+            #warning("Implement save to cloud folder.")
+        }
+    }
+    
+    private func configureSavePDFToOtherDocumentsFolderAction() -> UIAction {
+    
+        return UIAction(title: "Other Documents") { _ in
+            #warning("Implement save to cloud folder.")
+        }
+    }
+
     
     private func configureShareImageAction() -> UIAction {
         

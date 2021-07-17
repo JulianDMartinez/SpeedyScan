@@ -18,7 +18,7 @@ class ScannerVC: UIViewController {
     private let videoDataOutput     = AVCaptureVideoDataOutput()
     private let outlineLayer        = CAShapeLayer()
     private let captureButton       = CaptureButton()
-    private let torchButton         = TorchButton()
+    private let torchButton         = FlashToggleButton()
     private var detectedRectangle   = VNRectangleObservation()
     private var ciImage             = CIImage()
     private var uiImage             = UIImage()

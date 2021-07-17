@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TorchButton: UIButton {
+class FlashToggleButton: UIButton {
 
     
     let buttonHeight: CGFloat
@@ -16,8 +16,8 @@ class TorchButton: UIButton {
     
     override init(frame: CGRect) {
         
-        buttonHeight = 44
-        symbolConfiguration = UIImage.SymbolConfiguration(pointSize: buttonHeight - 5, weight: .ultraLight)
+        buttonHeight = 50
+        symbolConfiguration = UIImage.SymbolConfiguration(pointSize: buttonHeight - 10, weight: .ultraLight)
         super.init(frame: frame)
         
         configureSelf()
