@@ -294,42 +294,39 @@ extension CaptureDetailVC: UIDocumentPickerDelegate {
             
             let fileManager = FileManager.default
             
-            let documentDirectoryPath        = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let documentDirectoryURL        = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let testFolderURL = documentDirectoryURL.appendingPathComponent("Test Folder")
             
             do {
-                
-                let testFolderURL = documentDirectoryPath.appendingPathComponent("Test Folder")
-                
-                try fileManager.createDirectory(at: testFolderURL, withIntermediateDirectories: false, attributes: nil)
-                
-                
-                
-                let pdfDocument = PDFDocument()
-                let pdfPage     = PDFPage(image: self.image)
 
-                pdfDocument.insert(pdfPage!, at: 0)
-                
-                pdfDocument.write(to: testFolderURL.appendingPathComponent("document.pdf"))
+                try fileManager.createDirectory(at: testFolderURL, withIntermediateDirectories: false, attributes: nil)
+
                 
             } catch {
                 #warning("Handle error on creating test folder.")
             }
             
-
             let pdfDocument = PDFDocument()
             let pdfPage     = PDFPage(image: self.image)
 
             pdfDocument.insert(pdfPage!, at: 0)
             
-            pdfDocument.write(to: documentDirectoryPath.appendingPathComponent("Test Folder"))
+            pdfDocument.write(to: testFolderURL.appendingPathComponent("document.pdf"))
             
-            print(fileManager.urls(for: .documentDirectory, in: .userDomainMask))
+//            let pdfDocument = PDFDocument()
+//            let pdfPage     = PDFPage(image: self.image)
+//
+//            pdfDocument.insert(pdfPage!, at: 0)
+//
+//            pdfDocument.write(to: documentDirectoryPath.appendingPathComponent("Test Folder"))
+//
+//            print(fileManager.urls(for: .documentDirectory, in: .userDomainMask))
             
-            let documentPicker      = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf])
-                        
-            documentPicker.delegate = self
-            
-            self.present(documentPicker, animated: true)
+//            let documentPicker      = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf])
+//
+//            documentPicker.delegate = self
+//
+//            self.present(documentPicker, animated: true)
             
         }
     }
