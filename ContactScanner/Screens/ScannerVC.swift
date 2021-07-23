@@ -11,7 +11,7 @@ import Vision
 
 class ScannerVC: UIViewController {
     
-    //TODO: Add segmeted control for selection of automatic vs. manual.
+    //TODO: Add segmented control for selection of automatic vs. manual.
     //TODO: Add option to adjust zoom level.
 
     private let captureSession      = AVCaptureSession()

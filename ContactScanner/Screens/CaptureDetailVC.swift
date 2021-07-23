@@ -10,16 +10,20 @@ import PDFKit
 
 class CaptureDetailVC: UIViewController {
     
+    //MARK: Class Properties
     var image: UIImage
     
-    private let imageView               = UIImageView()
-    private let imageViewContainerView  = UIView()
-    private let visualEffectView        = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
-    private let cancelButton            = SelectionButton()
-    private let selectionButton         = SelectionButton()
-    private let buttonsStackView        = UIStackView()
-    private let verticalStackView       = UIStackView()
+    private let imageView                       = UIImageView()
+    private let imageViewContainerView          = UIView()
+    private let visualEffectView                = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
+    private let cancelButton                    = SelectionButton()
+    private let selectionButton                 = SelectionButton()
+    private let buttonsStackView                = UIStackView()
+    private let verticalStackView               = UIStackView()
     
+    private lazy var pdfDocumentTypeSelection   = String()
+    
+    //MARK: Initializers
     init(image: UIImage) {
         self.image = image
         super.init(nibName: nil, bundle: nil)
@@ -32,10 +36,10 @@ class CaptureDetailVC: UIViewController {
         super.init(coder: coder)
     }
     
-
+    
+    //MARK: Methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         configureSelf()
         configureCancelButton()
         configureSelectButton()
@@ -43,59 +47,74 @@ class CaptureDetailVC: UIViewController {
         configureButtonsStackView()
         configureVerticalStackView()
         configureVisualEffectView()
-        
     }
     
     
     private func configureSelf() {
-         
         view.isOpaque = false
         view.backgroundColor = UIColor.clear
-        
     }
     
     
     private func configureCancelButton() {
-        
         cancelButton.setTitle("Cancel", for: .normal)
         cancelButton.setTitleColor(.systemRed, for: .normal)
-        
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        
     }
     
     
     @objc private func cancelButtonTapped() {
-        
         dismiss(animated: true, completion: nil)
-        
     }
+    
     
     private func configureSelectButton() {
         
         let shareImage                          = UIImage(systemName: "square.and.arrow.up")
-//        let saveImage                           = UIImage(systemName: "folder")
-        
+        let saveImage                           = UIImage(systemName: "folder")
         let shareAsPDFAction                    = configureSharePDFAction()
         let shareAsImageAction                  = configureShareImageAction()
         let saveToCameraRollAction              = configureSaveToCameraRollAction()
-        let savePDFToFilesAction                = configureSavePDFToFilesAction()
+        let savePDFToReceiptsFolderAction       = configureSavePDFToReceiptsFolderAction()
+        let savePDFToContactCardsFolderAction   = configureSavePDFToContactCardsFolderAction()
+        let savePDFToOtherDocumentsFolderAction = configureSavePDFToOtherDocumentsFolderAction()
         
-        //MARK: By-type folder storage implementation in progress inside configureSelectButton
-//        let savePDFToReceiptsFolderAction       = configureSavePDFToReceiptsFolderAction()
-//        let savePDFToContactCardsFolderAction   = configureSavePDFToContactCardsFolderAction()
-//        let savePDFToOtherDocumentsFolderAction = configureSavePDFToOtherDocumentsFolderAction()
-//        let savePDFToFolderSubmenu        = UIMenu(title: "Save PDF to Folder", image: saveImage, children: [savePDFToReceiptsFolderAction, savePDFToContactCardsFolderAction, savePDFToOtherDocumentsFolderAction])
+        let savePDFToFolderSubmenu              = UIMenu(
+            title: "Save PDF to Folder",
+            image: saveImage,
+            children: [
+                savePDFToOtherDocumentsFolderAction,
+                savePDFToContactCardsFolderAction,
+                savePDFToReceiptsFolderAction
+            ])
         
-        let imageMenu               = UIMenu(title: "Image", image: shareImage, options: .displayInline, children: [shareAsImageAction, saveToCameraRollAction])
-        let pdfMenu                 = UIMenu(title: "PDF", image: shareImage, options: .displayInline, children: [shareAsPDFAction, savePDFToFilesAction])
+        let imageMenu                           = UIMenu(
+            title: "Image", image: shareImage,
+            options: .displayInline,
+            children: [
+                shareAsImageAction,
+                saveToCameraRollAction
+            ])
+        
+        let pdfMenu                             = UIMenu(
+            title: "PDF",
+            image: shareImage,
+            options: .displayInline,
+            children: [
+                shareAsPDFAction,
+                savePDFToFolderSubmenu
+            ])
         
         selectionButton.setTitle("Select", for: .normal)
         
         selectionButton.showsMenuAsPrimaryAction    = true
-        selectionButton.menu                        = UIMenu(children: [imageMenu, pdfMenu])
-            
+        selectionButton.menu                        = UIMenu(
+            children: [
+                imageMenu,
+                pdfMenu
+            ])
     }
+    
     
     private func configureSharePDFAction() -> UIAction {
         
@@ -104,38 +123,88 @@ class CaptureDetailVC: UIViewController {
         return UIAction(title: "Share PDF", image: shareImage) { _ in
             self.shareAsPDF()
         }
-        
     }
     
 
 
-    //TODO: Implement individual folder storage.
+
     //TODO: Implement iCloud storage.
     private func configureSavePDFToReceiptsFolderAction() -> UIAction {
         return UIAction(title: "Receipts") { _ in
-            
-            let fileManager = FileManager.default
-            
-            print(fileManager.urls(for: .documentDirectory, in: .allDomainsMask).first?.absoluteString)
-            
-            let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
-            documentPicker.delegate = self
-            self.present(documentPicker, animated: true)
+            self.pdfDocumentTypeSelection = "Receipts"
+            self.showTextEntryAlert()
         }
     }
+    
 
     private func configureSavePDFToContactCardsFolderAction() -> UIAction {
-
         return UIAction(title: "Contact Cards") { _ in
-            #warning("Implement save to cloud folder.")
+            self.pdfDocumentTypeSelection = "Contact Cards"
+            self.showTextEntryAlert()
         }
     }
+    
 
     private func configureSavePDFToOtherDocumentsFolderAction() -> UIAction {
 
         return UIAction(title: "Other Documents") { _ in
-            #warning("Implement save to cloud folder.")
+            self.pdfDocumentTypeSelection = "Other Documents"
+            self.showTextEntryAlert()
         }
+    }
+    
+    
+    func showTextEntryAlert() {
+        let title               = "File Name"
+        let message             = ""
+        let alertController     = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let cancelButtonTitle   = "Cancel"
+        let cancelAction        = UIAlertAction(title: cancelButtonTitle, style: .cancel) { _ in }
+        let rightButtonTitle    = "Ok"
+        
+        alertController.addTextField { textField in}
+        
+        let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
+            var fileName                = ""
+            let fileManager             = FileManager.default
+            let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let documentTypeFolder      = documentDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
+            
+            guard let textFields = alertController.textFields else {
+                debugPrint("An error was encountered while trying to access the text fields array.")
+                return
+            }
+            
+            guard let textFieldValue = textFields[0].text else {
+                debugPrint("An error was encountered while trying to access the text field value.")
+                return
+            }
+            
+            fileName = textFieldValue
+            
+            if !fileManager.fileExists(atPath: documentTypeFolder.path) {
+                do {
+                    try fileManager.createDirectory(at: documentTypeFolder, withIntermediateDirectories: false, attributes: nil)
+                } catch {
+                    print(error.localizedDescription)
+                }
+            }
+            
+            let pdfDocument = PDFDocument()
+            let pdfPage     = PDFPage(image: self.image)
+
+            pdfDocument.insert(pdfPage!, at: 0)
+            pdfDocument.write(to: documentTypeFolder.appendingPathComponent("\(fileName).pdf"))
+            
+            self.pdfDocumentTypeSelection = ""
+            self.dismiss(animated: true) {
+                #warning("Call for continuing of recognition.")
+            }
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(rightButtonAction)
+        present(alertController, animated: true, completion: nil)
     }
 
     
@@ -149,6 +218,7 @@ class CaptureDetailVC: UIViewController {
         
     }
     
+    
     private func configureSaveToCameraRollAction() -> UIAction {
         
         //TODO: Check for camera roll authorization. Handle no authorization provided.
@@ -159,17 +229,10 @@ class CaptureDetailVC: UIViewController {
             //TODO: Handle error on saving to user camera roll.
             UIImageWriteToSavedPhotosAlbum(self.image, nil, nil, nil)
         }
-        
-    }
-
-    private func savePDFToFiles() {
-        
-        
-        
     }
     
+    
     private func shareAsPDF() {
-        
         let pdfDocument = PDFDocument()
         let pdfPage     = PDFPage(image: image)
 
@@ -184,27 +247,22 @@ class CaptureDetailVC: UIViewController {
         }
 
         present(activitySheet, animated: true, completion: nil)
-        
     }
     
+    
     private func shareAsImage() {
-        
-        let jpgImage = image.jpegData(compressionQuality: 1.0)
-        
-        let activitySheet = UIActivityViewController(activityItems: [jpgImage as Any], applicationActivities: nil)
+        let jpgImage        = image.jpegData(compressionQuality: 1.0)
+        let activitySheet   = UIActivityViewController(activityItems: [jpgImage as Any], applicationActivities: nil)
 
         activitySheet.completionWithItemsHandler = { activity, success, items, error in
             self.dismiss(animated: true, completion: nil)
         }
 
         present(activitySheet, animated: true, completion: nil)
-        
     }
 
     
-    
     private func configureImageView() {
-        
         imageViewContainerView.addSubview(imageView)
         imageViewContainerView.layer.shadowOpacity = 0
         imageViewContainerView.layer.shadowRadius   = 3
@@ -223,12 +281,10 @@ class CaptureDetailVC: UIViewController {
             imageView.centerXAnchor.constraint(equalTo: imageViewContainerView.centerXAnchor),
             imageView.widthAnchor.constraint(lessThanOrEqualTo: imageViewContainerView.widthAnchor)
         ])
-
     }
     
     
     private func configureButtonsStackView() {
-
         buttonsStackView.addArrangedSubview(selectionButton)
         buttonsStackView.addArrangedSubview(cancelButton)
         buttonsStackView.axis       = .horizontal
@@ -242,13 +298,11 @@ class CaptureDetailVC: UIViewController {
         buttonsStackView.layer.shadowOffset   = CGSize(width: 1, height: 1)
         
         buttonsStackView.heightAnchor.constraint(equalToConstant: 75).isActive = true
-
     }
     
     
     private func configureVerticalStackView() {
         view.addSubview(verticalStackView)
-        
         verticalStackView.addArrangedSubview(imageViewContainerView)
         verticalStackView.addArrangedSubview(buttonsStackView)
         
@@ -269,14 +323,10 @@ class CaptureDetailVC: UIViewController {
     
     private func configureVisualEffectView() {
         view.insertSubview(visualEffectView, belowSubview: verticalStackView)
-        
         visualEffectView.layer.cornerRadius = 20
         visualEffectView.clipsToBounds = true
-        
         visualEffectView.translatesAutoresizingMaskIntoConstraints = false
-        
 
-        
         NSLayoutConstraint.activate([
             visualEffectView.topAnchor.constraint(equalTo: verticalStackView.topAnchor, constant: -30),
             visualEffectView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
@@ -287,48 +337,5 @@ class CaptureDetailVC: UIViewController {
 }
 
 extension CaptureDetailVC: UIDocumentPickerDelegate {
-    
-    private func configureSavePDFToFilesAction() -> UIAction {
-        
-        return UIAction(title: "Save PDF to Files") { _ in
-            
-            let fileManager = FileManager.default
-            
-            let documentDirectoryURL        = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let testFolderURL = documentDirectoryURL.appendingPathComponent("Test Folder")
-            
-            do {
-
-                try fileManager.createDirectory(at: testFolderURL, withIntermediateDirectories: false, attributes: nil)
-
-                
-            } catch {
-                #warning("Handle error on creating test folder.")
-            }
-            
-            let pdfDocument = PDFDocument()
-            let pdfPage     = PDFPage(image: self.image)
-
-            pdfDocument.insert(pdfPage!, at: 0)
-            
-            pdfDocument.write(to: testFolderURL.appendingPathComponent("document.pdf"))
-            
-//            let pdfDocument = PDFDocument()
-//            let pdfPage     = PDFPage(image: self.image)
-//
-//            pdfDocument.insert(pdfPage!, at: 0)
-//
-//            pdfDocument.write(to: documentDirectoryPath.appendingPathComponent("Test Folder"))
-//
-//            print(fileManager.urls(for: .documentDirectory, in: .userDomainMask))
-            
-//            let documentPicker      = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf])
-//
-//            documentPicker.delegate = self
-//
-//            self.present(documentPicker, animated: true)
-            
-        }
-    }
     
 }
