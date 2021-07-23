@@ -10,16 +10,14 @@ import AVFoundation
 import Vision
 
 class ScannerVC: UIViewController {
-    
-    //TODO: Add segmented control for selection of automatic vs. manual.
-    //TODO: Add option to adjust zoom level.
 
     private let captureSession      = AVCaptureSession()
     private let videoDataOutput     = AVCaptureVideoDataOutput()
     private let outlineLayer        = CAShapeLayer()
     private let captureButton       = CaptureButton()
-    private let torchButton         = FlashToggleButton()
+    private let flashActivationButton         = FlashToggleButton()
     private var detectedRectangle   = VNRectangleObservation()
+    
     private var ciImage             = CIImage()
     private var uiImage             = UIImage()
     
@@ -28,48 +26,39 @@ class ScannerVC: UIViewController {
     
     
     override func viewDidLoad() {
-        
-        //TODO: Check for access to camera and photo. Handle case where authorization is not provided.
-        
         super.viewDidLoad()
-        setCameraInput()
-        setCameraOutput()
-        setCameraPreview()
-        setUpOutlineLayer()
-        setCaptureButton()
-        setTorchButton()
-        
+        configureCameraInput()
+        configureCameraOutput()
+        configureCameraPreview()
+        configureUpOutlineLayer()
+        configureCaptureButton()
+        configureFlashActivationButton()
     }
     
     
-    private func setCameraInput() {
-        
+    private func configureCameraInput() {
         guard let device = AVCaptureDevice.DiscoverySession(
             deviceTypes : [.builtInUltraWideCamera],
             mediaType   : .video,
             position    : .back
         ).devices.first else {
-            //TODO: Handle case where device is not available.
+            #warning("Handle error")
             return
         }
         
         self.device = device
         
         do {
-            
             let cameraInput = try AVCaptureDeviceInput(device: device)
             captureSession.addInput(cameraInput)
             device.unlockForConfiguration()
-            
         } catch {
-            //TODO: Handle case where there is an error with setting the input.
+            #warning("Handle error")
         }
-        
     }
     
     
-    private func setCameraOutput() {
-        
+    private func configureCameraOutput() {
         videoDataOutput.videoSettings = [
             (kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)
         ] as [String : Any]
@@ -85,23 +74,20 @@ class ScannerVC: UIViewController {
         
         connection.videoOrientation = .portrait
         connection.preferredVideoStabilizationMode = .cinematic
-
     }
     
     
-    private func setCameraPreview() {
-        
+    private func configureCameraPreview() {
         previewLayer.frame          = view.frame
         previewLayer.videoGravity   = .resizeAspectFill
         
         view.layer.addSublayer(previewLayer)
         
         captureSession.startRunning()
-        
     }
     
     
-    private func setCaptureButton() {
+    private func configureCaptureButton() {
         view.addSubview(captureButton)
         
         captureButton.addTarget(self, action: #selector(captureButtonTapped), for: .touchUpInside)
@@ -116,28 +102,25 @@ class ScannerVC: UIViewController {
     
     
     @objc private func captureButtonTapped() {
-        
-        //TODO: Add alert for nil image before presenting CaptureDetailVC
-        
        presentCaptureDetailVC()
     }
     
     
-    private func setTorchButton() {
-        view.addSubview(torchButton)
-
-        torchButton.addTarget(self, action: #selector(torchButtonTapped), for: .touchUpInside)
+    private func configureFlashActivationButton() {
+        view.addSubview(flashActivationButton)
+        
+        flashActivationButton.addTarget(self, action: #selector(flashActivationButtonTapped), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
-            torchButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 20),
-            torchButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-            torchButton.heightAnchor.constraint(equalToConstant: torchButton.buttonHeight),
-            torchButton.widthAnchor.constraint(equalToConstant: torchButton.buttonHeight)
+            flashActivationButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 20),
+            flashActivationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
+            flashActivationButton.heightAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight),
+            flashActivationButton.widthAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight)
         ])
     }
     
     
-    @objc private func torchButtonTapped() {
+    @objc private func flashActivationButtonTapped() {
        toggleFlash()
     }
     
@@ -154,16 +137,13 @@ class ScannerVC: UIViewController {
     }
     
     
-    private func setUpOutlineLayer() {
-        
+    private func configureUpOutlineLayer() {
         outlineLayer.frame = previewLayer.bounds
         previewLayer.insertSublayer(outlineLayer, at: 1)
-        
     }
 
     
     private func detectRectangle(in image: CVPixelBuffer) {
-        
         ciImage = CIImage(cvPixelBuffer: image)
         
         let request = VNDetectRectanglesRequest { request, error in
@@ -201,7 +181,6 @@ class ScannerVC: UIViewController {
     
     
     private func doPerspectiveCorrection(_ observation: VNRectangleObservation, from ciImage: CIImage) {
-
         var image = ciImage
         
         let topLeft     = observation.topLeft.scaled(to: ciImage.extent.size)
@@ -225,7 +204,6 @@ class ScannerVC: UIViewController {
     
     
     private func drawBoundingBox(rect: VNRectangleObservation) {
-        
         let outlinePath = UIBezierPath()
         
         outlineLayer.lineCap        = .butt
@@ -234,13 +212,12 @@ class ScannerVC: UIViewController {
         outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
         outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
         
-        //TODO: Test transform in smaller phone sizes. This transform is hardcoded and may only work for iPhone 12 Pro Max.
         let bottomTopTransform = CGAffineTransform(scaleX: 1.2, y: -1).translatedBy(x: -35, y: -previewLayer.frame.height)
         
-        let topRight = VNImagePointForNormalizedPoint(rect.topRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
-        let topLeft = VNImagePointForNormalizedPoint(rect.topLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
+        let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
+        let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
         let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
-        let bottomLeft = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
+        let bottomLeft  = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
         
         outlinePath.move(to: topLeft)
         outlinePath.addLine(to: topRight)
@@ -253,11 +230,10 @@ class ScannerVC: UIViewController {
         outlinePath.addLine(to: topLeft)
     
         outlineLayer.path = outlinePath.cgPath
-        
     }
     
+    
     func toggleFlash() {
-        
         guard let device = device else {return}
         
         guard device.hasTorch else { return }
@@ -280,9 +256,8 @@ class ScannerVC: UIViewController {
             print(error)
         }
     }
-    
-    
 }
+
 
 extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
     
@@ -296,6 +271,7 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
         detectRectangle(in: frame)
     }
 }
+
 
 extension CGPoint {
    func scaled(to size: CGSize) -> CGPoint {
