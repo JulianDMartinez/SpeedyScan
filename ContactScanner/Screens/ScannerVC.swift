@@ -9,21 +9,20 @@ import UIKit
 import AVFoundation
 import Vision
 
-class ScannerVC: UIViewController {
+class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 
-    private let captureSession      = AVCaptureSession()
-    private let videoDataOutput     = AVCaptureVideoDataOutput()
-    private let outlineLayer        = CAShapeLayer()
-    private let captureButton       = CaptureButton()
-    private let flashActivationButton         = FlashToggleButton()
-    private var detectedRectangle   = VNRectangleObservation()
+    private let captureSession              = AVCaptureSession()
+    private let videoDataOutput             = AVCaptureVideoDataOutput()
+    private let outlineLayer                = CAShapeLayer()
+    private let captureButton               = CaptureButton()
+    private let flashActivationButton       = FlashToggleButton()
+    private var detectedRectangle           = VNRectangleObservation()
     
-    private var ciImage             = CIImage()
-    private var uiImage             = UIImage()
+    private var ciImage                     = CIImage()
+    private var uiImage                     = UIImage()
     
-    private lazy var device         = AVCaptureDevice(uniqueID: "")
-    private lazy var previewLayer   = AVCaptureVideoPreviewLayer(session: captureSession)
-    
+    private lazy var device                 = AVCaptureDevice(uniqueID: "")
+    private lazy var previewLayer           = AVCaptureVideoPreviewLayer(session: captureSession)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,7 +67,7 @@ class ScannerVC: UIViewController {
         captureSession.addOutput(videoDataOutput)
         
         guard let connection = videoDataOutput.connection(with: .video) else {
-            //TODO: Handle case where value is nil.
+            #warning("Handle error")
             return
         }
         
@@ -102,7 +101,7 @@ class ScannerVC: UIViewController {
     
     
     @objc private func captureButtonTapped() {
-       presentCaptureDetailVC()
+        presentCaptureDetailVC()
     }
     
     
@@ -132,6 +131,7 @@ class ScannerVC: UIViewController {
         let captureDetailVC = CaptureDetailVC(image: uiImage)
         
         captureDetailVC.modalPresentationStyle = .overCurrentContext
+        
         present(captureDetailVC, animated: true, completion: nil)
         
     }
@@ -144,38 +144,46 @@ class ScannerVC: UIViewController {
 
     
     private func detectRectangle(in image: CVPixelBuffer) {
-        ciImage = CIImage(cvPixelBuffer: image)
-        
-        let request = VNDetectRectanglesRequest { request, error in
-            DispatchQueue.main.async { [self] in
-                guard let results = request.results as? [VNRectangleObservation] else {
-                    print("There was an error obtaining the rectangle observations.")
-                    return
-                }
-                
-                guard let rect = results.first else {
-                    return
-                }
-                
-                self.detectedRectangle = rect
-                
-                self.drawBoundingBox(rect: self.detectedRectangle)
-    
+        DispatchQueue.main.async {
+            
+            guard self.presentedViewController == nil else {
+                self.drawBoundingBox(rect: VNRectangleObservation())
+                return
             }
-        }
-        
-        request.minimumAspectRatio  = VNAspectRatio(0.1)
-        request.maximumAspectRatio  = VNAspectRatio(4)
-        request.minimumSize         = Float(0.2)
-        request.minimumConfidence   = 1.0
-        request.maximumObservations = 1
-        
-        let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: image, options: [:])
-        
-        do {
-            try imageRequestHandler.perform([request])
-        } catch {
-            //TODO: Handle error.
+ 
+                self.ciImage = CIImage(cvPixelBuffer: image)
+                
+                let request = VNDetectRectanglesRequest { request, error in
+                    DispatchQueue.main.async { [self] in
+                        guard let results = request.results as? [VNRectangleObservation] else {
+                            print("There was an error obtaining the rectangle observations.")
+                            return
+                        }
+                        
+                        guard let rect = results.first else {
+                            return
+                        }
+                        
+                        self.detectedRectangle = rect
+                        
+                        self.drawBoundingBox(rect: self.detectedRectangle)
+            
+                    }
+                }
+                
+                request.minimumAspectRatio  = VNAspectRatio(0.1)
+                request.maximumAspectRatio  = VNAspectRatio(4)
+                request.minimumSize         = Float(0.2)
+                request.minimumConfidence   = 1.0
+                request.maximumObservations = 1
+                
+                let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: image, options: [:])
+                
+                do {
+                    try imageRequestHandler.perform([request])
+                } catch {
+                    #warning("Handle error")
+                }
         }
     }
     
@@ -204,8 +212,15 @@ class ScannerVC: UIViewController {
     
     
     private func drawBoundingBox(rect: VNRectangleObservation) {
+        
         let outlinePath = UIBezierPath()
         
+//        guard presentedViewController == nil else {
+//            outlineLayer.strokeColor    = UIColor.systemGray2.withAlphaComponent(0).cgColor
+//            outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0).cgColor
+//            return
+//        }
+    
         outlineLayer.lineCap        = .butt
         outlineLayer.lineJoin       = .round
         outlineLayer.lineWidth      = 2
@@ -253,7 +268,7 @@ class ScannerVC: UIViewController {
 
             device.unlockForConfiguration()
         } catch {
-            print(error)
+            #warning("Handle error.")
         }
     }
 }
@@ -264,7 +279,7 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
         guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            //TODO: Handle case where value is nil.
+            #warning("Handle error.")
             return
         }
         

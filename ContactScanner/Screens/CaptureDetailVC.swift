@@ -72,6 +72,7 @@ class CaptureDetailVC: UIViewController {
         
         let shareImage                          = UIImage(systemName: "square.and.arrow.up")
         let saveImage                           = UIImage(systemName: "folder")
+        
         let shareAsPDFAction                    = configureSharePDFAction()
         let shareAsImageAction                  = configureShareImageAction()
         let saveToCameraRollAction              = configureSaveToCameraRollAction()
@@ -336,6 +337,3 @@ class CaptureDetailVC: UIViewController {
     }
 }
 
-extension CaptureDetailVC: UIDocumentPickerDelegate {
-    
-}
