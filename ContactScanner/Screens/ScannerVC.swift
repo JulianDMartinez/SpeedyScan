@@ -52,7 +52,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
             captureSession.addInput(cameraInput)
             device.unlockForConfiguration()
         } catch {
-            #warning("Handle error")
+            #warning("Handle error with error.")
         }
     }
     
