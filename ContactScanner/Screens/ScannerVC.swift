@@ -41,7 +41,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
             mediaType   : .video,
             position    : .back
         ).devices.first else {
-            #warning("Handle error")
+            #warning("Handle error with alert.")
             return
         }
         
@@ -214,12 +214,6 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
     private func drawBoundingBox(rect: VNRectangleObservation) {
         
         let outlinePath = UIBezierPath()
-        
-//        guard presentedViewController == nil else {
-//            outlineLayer.strokeColor    = UIColor.systemGray2.withAlphaComponent(0).cgColor
-//            outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0).cgColor
-//            return
-//        }
     
         outlineLayer.lineCap        = .butt
         outlineLayer.lineJoin       = .round
