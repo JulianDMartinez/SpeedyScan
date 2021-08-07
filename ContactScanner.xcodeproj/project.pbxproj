@@ -13,11 +13,13 @@
 		1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98D1265990110024A63A /* SceneDelegate.swift */; };
 		1DFC98D9265990130024A63A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98D8265990130024A63A /* Assets.xcassets */; };
 		1DFC98DC265990130024A63A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98DA265990130024A63A /* LaunchScreen.storyboard */; };
-		1DFC98E92659928D0024A63A /* SavedVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98E82659928D0024A63A /* SavedVC.swift */; };
 		B908CC272691438700DDC437 /* CaptureButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC262691438700DDC437 /* CaptureButton.swift */; };
 		B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC29269370C200DDC437 /* CaptureDetailVC.swift */; };
 		B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */; };
 		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
+		B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */; };
+		B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */; };
+		B9F6D41326BF17CF00DFAE86 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41226BF17CF00DFAE86 /* Document.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,12 +31,14 @@
 		1DFC98D8265990130024A63A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1DFC98DB265990130024A63A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1DFC98DD265990130024A63A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1DFC98E82659928D0024A63A /* SavedVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedVC.swift; sourceTree = "<group>"; };
 		B908CC262691438700DDC437 /* CaptureButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureButton.swift; sourceTree = "<group>"; };
 		B908CC29269370C200DDC437 /* CaptureDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailVC.swift; sourceTree = "<group>"; };
 		B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashToggleButton.swift; sourceTree = "<group>"; };
 		B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionButton.swift; sourceTree = "<group>"; };
 		B97216C526A36EED00D6E445 /* ContactScanner.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ContactScanner.entitlements; sourceTree = "<group>"; };
+		B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMetadataManager.swift; sourceTree = "<group>"; };
+		B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
+		B9F6D41226BF17CF00DFAE86 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				1D58C82F265AB6B10022584B /* StringUtilities.swift */,
+				B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -76,7 +81,8 @@
 			isa = PBXGroup;
 			children = (
 				B97216C526A36EED00D6E445 /* ContactScanner.entitlements */,
-				1DFC98E52659904A0024A63A /* Screens */,
+				1DFC98E52659904A0024A63A /* Controller */,
+				B9F6D40D26BEBB7400DFAE86 /* Managers */,
 				1DFC98E4265990440024A63A /* Views */,
 				1D58C82C265AB5580022584B /* Utility */,
 				B908CC282691472600DDC437 /* Extensions */,
@@ -107,14 +113,13 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		1DFC98E52659904A0024A63A /* Screens */ = {
+		1DFC98E52659904A0024A63A /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				1DFC98E82659928D0024A63A /* SavedVC.swift */,
 				1D58C82D265AB5F10022584B /* ScannerVC.swift */,
 				B908CC29269370C200DDC437 /* CaptureDetailVC.swift */,
 			);
-			path = Screens;
+			path = Controller;
 			sourceTree = "<group>";
 		};
 		B908CC282691472600DDC437 /* Extensions */ = {
@@ -122,6 +127,15 @@
 			children = (
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		B9F6D40D26BEBB7400DFAE86 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */,
+				B9F6D41226BF17CF00DFAE86 /* Document.swift */,
+			);
+			path = Managers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -193,14 +207,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */,
 				B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
-				1DFC98E92659928D0024A63A /* SavedVC.swift in Sources */,
 				1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */,
 				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,
 				B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */,
 				B908CC272691438700DDC437 /* CaptureButton.swift in Sources */,
+				B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */,
+				B9F6D41326BF17CF00DFAE86 /* Document.swift in Sources */,
 				1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

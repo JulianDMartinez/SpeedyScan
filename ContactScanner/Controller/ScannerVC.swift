@@ -20,6 +20,8 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
     
     private var ciImage                     = CIImage()
     private var uiImage                     = UIImage()
+	
+	private(set) var cloudMetadataManager: CloudMetadataManager?
     
     private lazy var device                 = AVCaptureDevice(uniqueID: "")
     private lazy var previewLayer           = AVCaptureVideoPreviewLayer(session: captureSession)

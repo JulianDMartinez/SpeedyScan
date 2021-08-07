@@ -167,6 +167,9 @@ class CaptureDetailVC: UIViewController {
         
         let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
             var fileName                = ""
+			
+			//MARK: Save to Folder (Local) Implementation
+			/*
             let fileManager             = FileManager.default
             let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let documentTypeFolder      = documentDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
@@ -196,6 +199,7 @@ class CaptureDetailVC: UIViewController {
 
             pdfDocument.insert(pdfPage!, at: 0)
             pdfDocument.write(to: documentTypeFolder.appendingPathComponent("\(fileName).pdf"))
+			 */
             
             self.pdfDocumentTypeSelection = ""
             self.dismiss(animated: true) {
@@ -241,7 +245,7 @@ class CaptureDetailVC: UIViewController {
 
         let data = pdfDocument.dataRepresentation()
         
-        let activitySheet = UIActivityViewController(activityItems: [data as Any], applicationActivities: nil)
+		let activitySheet = UIActivityViewController(activityItems: [data as Any], applicationActivities: nil)
 
         activitySheet.completionWithItemsHandler = { activity, success, items, error in
             self.dismiss(animated: true, completion: nil)
