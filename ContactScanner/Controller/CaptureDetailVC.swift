@@ -22,6 +22,8 @@ class CaptureDetailVC: UIViewController {
     private let verticalStackView               = UIStackView()
     
     private lazy var pdfDocumentTypeSelection   = String()
+	
+	private(set) var cloudMetadataManager: CloudMetadataManager?
     
     //MARK: Initializers
     init(image: UIImage) {
@@ -31,7 +33,6 @@ class CaptureDetailVC: UIViewController {
     
     
     required init?(coder: NSCoder) {
-        //Non-utilized required initializer
         image = UIImage()
         super.init(coder: coder)
     }
@@ -155,36 +156,44 @@ class CaptureDetailVC: UIViewController {
     }
     
     
-    func showTextEntryAlert() {
+	func showTextEntryAlert() {
         let title               = "File Name"
         let message             = ""
         let alertController     = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let cancelButtonTitle   = "Cancel"
         let cancelAction        = UIAlertAction(title: cancelButtonTitle, style: .cancel) { _ in }
         let rightButtonTitle    = "Ok"
+		let dateFormatter 		= DateFormatter()
+		
+		dateFormatter.dateFormat = "YYYY-MM-dd HHmmss a"
+		
+		let defaultFileNameTime		= dateFormatter.string(from: Date())
         
-        alertController.addTextField { textField in}
+        alertController.addTextField { textField in
+			textField.clearButtonMode 	= .whileEditing
+			textField.text				= "\(defaultFileNameTime)"
+		}
         
         let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
             var fileName                = ""
 			
-			//MARK: Save to Folder (Local) Implementation
-			/*
+			guard let textFields = alertController.textFields else {
+				debugPrint("An error was encountered while trying to access the text fields array.")
+				return
+			}
+			
+			guard let textFieldValue = textFields[0].text else {
+				debugPrint("An error was encountered while trying to access the text field value.")
+				return
+			}
+			
+			fileName = textFieldValue
+			
+			//MARK: Save to Local Folder Implementation
+			
             let fileManager             = FileManager.default
             let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let documentTypeFolder      = documentDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
-            
-            guard let textFields = alertController.textFields else {
-                debugPrint("An error was encountered while trying to access the text fields array.")
-                return
-            }
-            
-            guard let textFieldValue = textFields[0].text else {
-                debugPrint("An error was encountered while trying to access the text field value.")
-                return
-            }
-            
-            fileName = textFieldValue
             
             if !fileManager.fileExists(atPath: documentTypeFolder.path) {
                 do {
@@ -199,8 +208,8 @@ class CaptureDetailVC: UIViewController {
 
             pdfDocument.insert(pdfPage!, at: 0)
             pdfDocument.write(to: documentTypeFolder.appendingPathComponent("\(fileName).pdf"))
-			 */
             
+			//MARK: End of Local or Cloud Save Implementation
             self.pdfDocumentTypeSelection = ""
             self.dismiss(animated: true) {
                 #warning("Call for continuing of recognition.")
