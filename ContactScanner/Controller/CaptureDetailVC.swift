@@ -23,7 +23,7 @@ class CaptureDetailVC: UIViewController {
     
     private lazy var pdfDocumentTypeSelection   = String()
 	
-	private(set) var cloudMetadataManager: CloudMetadataManager?
+	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.ContactScanner")
     
     //MARK: Initializers
     init(image: UIImage) {
@@ -81,8 +81,8 @@ class CaptureDetailVC: UIViewController {
         let savePDFToContactCardsFolderAction   = configureSavePDFToContactCardsFolderAction()
         let savePDFToOtherDocumentsFolderAction = configureSavePDFToOtherDocumentsFolderAction()
         
-        let savePDFToFolderSubmenu              = UIMenu(
-            title: "Save PDF to Folder",
+        let savePDFToAppleCloudFolderSubmenu              = UIMenu(
+            title: "Save PDF to iCloud",
             image: saveImage,
             children: [
                 savePDFToOtherDocumentsFolderAction,
@@ -104,7 +104,7 @@ class CaptureDetailVC: UIViewController {
             options: .displayInline,
             children: [
                 shareAsPDFAction,
-                savePDFToFolderSubmenu
+                savePDFToAppleCloudFolderSubmenu
             ])
         
         selectionButton.setTitle("Select", for: .normal)
@@ -114,7 +114,7 @@ class CaptureDetailVC: UIViewController {
             children: [
                 imageMenu,
                 pdfMenu
-            ])
+			])
     }
     
     
@@ -165,7 +165,7 @@ class CaptureDetailVC: UIViewController {
         let rightButtonTitle    = "Ok"
 		let dateFormatter 		= DateFormatter()
 		
-		dateFormatter.dateFormat = "YYYY-MM-dd HHmmss a"
+		dateFormatter.dateFormat = "YYYY-MM-dd hhmmss a"
 		
 		let defaultFileNameTime		= dateFormatter.string(from: Date())
         
@@ -189,37 +189,75 @@ class CaptureDetailVC: UIViewController {
 			
 			fileName = textFieldValue
 			
+			//MARK: Save to iCloud Drive Folder Implementation
+//			self.configureCloudMetadataManager {
+				guard let cloudRootURL 			= self.cloudMetadataManager?.containerRootURL else {
+					print("An error was encountered while accessing the iCloud root URL")
+					return
+				}
+				
+				let fileManager         		= FileManager.default
+				let cloudDocumentsDirectoryURL 	= cloudRootURL.appendingPathComponent("Documents")
+				let documentTypeFolderURL 		= cloudDocumentsDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
+				
+				if !fileManager.fileExists(atPath: documentTypeFolderURL.path) {
+					do {
+						try fileManager.createDirectory(at: documentTypeFolderURL, withIntermediateDirectories: false, attributes: nil)
+					} catch {
+						print(error.localizedDescription)
+					}
+				}
+				
+				let fileURL = documentTypeFolderURL.appendingPathComponent(fileName).appendingPathExtension("pdf")
+				
+				
+				let pdfDocument = PDFDocument()
+				let pdfPage     = PDFPage(image: self.image)
+
+				pdfDocument.insert(pdfPage!, at: 0)
+				pdfDocument.write(to: fileURL)
+			
+				//Class Reset After Performing Local or iCloud Drive Save
+				
+				self.pdfDocumentTypeSelection = ""
+				self.dismiss(animated: true) {
+				#warning("Call for continuing of recognition.")
+				}
+//			}
+
 			//MARK: Save to Local Folder Implementation
 			
-            let fileManager             = FileManager.default
-            let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let documentTypeFolder      = documentDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
+//            let fileManager             = FileManager.default
+//            let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+//            let documentTypeFolder      = documentDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
+//
+//            if !fileManager.fileExists(atPath: documentTypeFolder.path) {
+//                do {
+//                    try fileManager.createDirectory(at: documentTypeFolder, withIntermediateDirectories: false, attributes: nil)
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            }
+//
+//            let pdfDocument = PDFDocument()
+//            let pdfPage     = PDFPage(image: self.image)
+//
+//            pdfDocument.insert(pdfPage!, at: 0)
+//            pdfDocument.write(to: documentTypeFolder.appendingPathComponent("\(fileName).pdf"))
             
-            if !fileManager.fileExists(atPath: documentTypeFolder.path) {
-                do {
-                    try fileManager.createDirectory(at: documentTypeFolder, withIntermediateDirectories: false, attributes: nil)
-                } catch {
-                    print(error.localizedDescription)
-                }
-            }
-            
-            let pdfDocument = PDFDocument()
-            let pdfPage     = PDFPage(image: self.image)
 
-            pdfDocument.insert(pdfPage!, at: 0)
-            pdfDocument.write(to: documentTypeFolder.appendingPathComponent("\(fileName).pdf"))
-            
-			//MARK: End of Local or Cloud Save Implementation
-            self.pdfDocumentTypeSelection = ""
-            self.dismiss(animated: true) {
-                #warning("Call for continuing of recognition.")
-            }
         }
         
         alertController.addAction(cancelAction)
         alertController.addAction(rightButtonAction)
         present(alertController, animated: true, completion: nil)
     }
+	
+//	private func configureCloudMetadataManager(completionHandler: (() -> Void)) {
+//		guard let manager = CloudMetadataManager(containerIdentifier: "iCloud.ContactScanner") else {return}
+//		cloudMetadataManager = manager
+//		completionHandler()
+//	}
 
     
     private func configureShareImageAction() -> UIAction {
