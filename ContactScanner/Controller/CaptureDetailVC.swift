@@ -69,32 +69,38 @@ class CaptureDetailVC: UIViewController {
 	
 	private func configureSelectButton() {
 		
-		let shareImage                          = UIImage(systemName: "square.and.arrow.up")
-		let saveImage                           = UIImage(systemName: "folder")
+		let shareImage                          		= UIImage(systemName: "square.and.arrow.up")
+		let localSaveImage                           	= UIImage(systemName: "folder")
+		let cloudSaveImage								= UIImage(systemName: "icloud.and.arrow.up")
 		
-		let shareAsPDFAction                    = configureSharePDFAction()
-		let shareAsImageAction                  = configureShareImageAction()
-		let saveToCameraRollAction              = configureSaveToCameraRollAction()
-		let savePDFToReceiptsFolderAction       = configureSavePDFToReceiptsFolderAction()
-		let savePDFToContactCardsFolderAction   = configureSavePDFToContactCardsFolderAction()
-		let savePDFToOtherDocumentsFolderAction = configureSavePDFToOtherDocumentsFolderAction()
+		let shareAsPDFAction                    		= configureSharePDFAction()
+		let shareAsImageAction                  		= configureShareImageAction()
+		let saveToCameraRollAction              		= configureSaveToCameraRollAction()
+		
+		let savePDFToReceiptsCloudFolderAction       	= configureSavePDFToReceiptsCloudFolderAction()
+		let savePDFToContactCardsCloudFolderAction   	= configureSavePDFToContactCardsCloudFolderAction()
+		let savePDFToOtherDocumentsCloudFolderAction 	= configureSavePDFToOtherDocumentsCloudFolderAction()
+		
+		let savePDFToReceiptsLocalFolderAction       	= configureSavePDFToReceiptsLocalFolderAction()
+		let savePDFToContactCardsLocalFolderAction   	= configureSavePDFToContactCardsLocalFolderAction()
+		let savePDFToOtherDocumentsLocalFolderAction 	= configureSavePDFToOtherDocumentsLocalFolderAction()
 		
 		let savePDFToCloudFolderSubmenu              = UIMenu(
-			title: "Save PDF to iCloud",
-			image: saveImage,
+			title: "Save PDF to iCloud Folder",
+			image: cloudSaveImage,
 			children: [
-				savePDFToOtherDocumentsFolderAction,
-				savePDFToContactCardsFolderAction,
-				savePDFToReceiptsFolderAction
+				savePDFToOtherDocumentsCloudFolderAction,
+				savePDFToContactCardsCloudFolderAction,
+				savePDFToReceiptsCloudFolderAction
 			])
 		
 		let savePDFToDeviceSubmenu              = UIMenu(
-			title: "Save PDF to Device",
-			image: saveImage,
+			title: "Save PDF to Local Folder",
+			image: localSaveImage,
 			children: [
-				savePDFToOtherDocumentsFolderAction,
-				savePDFToContactCardsFolderAction,
-				savePDFToReceiptsFolderAction
+				savePDFToOtherDocumentsLocalFolderAction,
+				savePDFToContactCardsLocalFolderAction,
+				savePDFToReceiptsLocalFolderAction
 			])
 		
 		let imageMenu                           = UIMenu(
@@ -111,8 +117,8 @@ class CaptureDetailVC: UIViewController {
 			options: .displayInline,
 			children: [
 				shareAsPDFAction,
-				savePDFToCloudFolderSubmenu,
-				savePDFToDeviceSubmenu
+				savePDFToDeviceSubmenu,
+				savePDFToCloudFolderSubmenu
 			])
 		
 		selectionButton.setTitle("Select", for: .normal)
@@ -127,7 +133,6 @@ class CaptureDetailVC: UIViewController {
 	
 	
 	private func configureSharePDFAction() -> UIAction {
-		
 		let shareImage          = UIImage(systemName: "square.and.arrow.up")
 		
 		return UIAction(title: "Share PDF", image: shareImage) { _ in
@@ -135,28 +140,47 @@ class CaptureDetailVC: UIViewController {
 		}
 	}
 	
-	private func configureSavePDFToReceiptsFolderAction() -> UIAction {
+	private func configureSavePDFToReceiptsCloudFolderAction() -> UIAction {
 		return UIAction(title: "Receipts") { action in
-			self.showTextEntryAlert(forDocumentType: action.title)
+			self.showCloudSaveTextEntryAlert(forDocumentType: action.title)
 		}
 	}
 	
 	
-	private func configureSavePDFToContactCardsFolderAction() -> UIAction {
+	private func configureSavePDFToContactCardsCloudFolderAction() -> UIAction {
 		return UIAction(title: "Contact Cards") { action in
-			self.showTextEntryAlert(forDocumentType: action.title)
+			self.showCloudSaveTextEntryAlert(forDocumentType: action.title)
 		}
 	}
 	
 	
-	private func configureSavePDFToOtherDocumentsFolderAction() -> UIAction {
-		
+	private func configureSavePDFToOtherDocumentsCloudFolderAction() -> UIAction {
 		return UIAction(title: "Other Documents") { action in
-			self.showTextEntryAlert(forDocumentType: action.title)
+			self.showCloudSaveTextEntryAlert(forDocumentType: action.title)
 		}
 	}
 	
-	func showTextEntryAlert(forDocumentType documentType: String) {
+	private func configureSavePDFToReceiptsLocalFolderAction() -> UIAction {
+		return UIAction(title: "Receipts") { action in
+			self.showLocalSaveTextEntryAlert(forDocumentType: action.title)
+		}
+	}
+	
+	
+	private func configureSavePDFToContactCardsLocalFolderAction() -> UIAction {
+		return UIAction(title: "Contact Cards") { action in
+			self.showLocalSaveTextEntryAlert(forDocumentType: action.title)
+		}
+	}
+	
+	
+	private func configureSavePDFToOtherDocumentsLocalFolderAction() -> UIAction {
+		return UIAction(title: "Other Documents") { action in
+			self.showLocalSaveTextEntryAlert(forDocumentType: action.title)
+		}
+	}
+	
+	func showCloudSaveTextEntryAlert(forDocumentType documentType: String) {
 		let title               	= "File Name"
 		let message             	= ""
 		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -188,8 +212,6 @@ class CaptureDetailVC: UIViewController {
 			
 			fileName = textFieldValue
 			
-			//MARK: Save to iCloud Drive Folder Implementation
-			//			self.configureCloudMetadataManager {
 			guard let cloudRootURL 			= self.cloudMetadataManager?.containerRootURL else {
 				print("An error was encountered while accessing the iCloud root URL")
 				return
@@ -215,43 +237,14 @@ class CaptureDetailVC: UIViewController {
 				}
 			}
 			
-			let fileURL = documentTypeFolderURL.appendingPathComponent(fileName).appendingPathExtension("pdf")
-			
-			
+			let fileURL 	= documentTypeFolderURL.appendingPathComponent(fileName).appendingPathExtension("pdf")
 			let pdfDocument = PDFDocument()
 			let pdfPage     = PDFPage(image: self.image)
 			
 			pdfDocument.insert(pdfPage!, at: 0)
 			pdfDocument.write(to: fileURL)
 			
-			//Class Reset After Performing Local or iCloud Drive Save
-			
-			self.dismiss(animated: true) {
-#warning("Call for continuing of recognition.")
-			}
-			//			}
-			
-			//MARK: Save to Local Folder Implementation
-			
-			//            let fileManager             = FileManager.default
-			//            let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-			//            let documentTypeFolder      = documentDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
-			//
-			//            if !fileManager.fileExists(atPath: documentTypeFolder.path) {
-			//                do {
-			//                    try fileManager.createDirectory(at: documentTypeFolder, withIntermediateDirectories: false, attributes: nil)
-			//                } catch {
-			//                    print(error.localizedDescription)
-			//                }
-			//            }
-			//
-			//            let pdfDocument = PDFDocument()
-			//            let pdfPage     = PDFPage(image: self.image)
-			//
-			//            pdfDocument.insert(pdfPage!, at: 0)
-			//            pdfDocument.write(to: documentTypeFolder.appendingPathComponent("\(fileName).pdf"))
-			
-			
+			self.dismiss(animated: true)
 		}
 		
 		alertController.addAction(cancelAction)
@@ -259,6 +252,65 @@ class CaptureDetailVC: UIViewController {
 		present(alertController, animated: true, completion: nil)
 	}
 	
+	
+	func showLocalSaveTextEntryAlert(forDocumentType documentType: String) {
+		let title               	= "File Name"
+		let message             	= ""
+		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
+		let cancelButtonTitle   	= "Cancel"
+		let cancelAction        	= UIAlertAction(title: cancelButtonTitle, style: .cancel) { _ in }
+		let rightButtonTitle    	= "Ok"
+		let dateFormatter 			= DateFormatter()
+		
+		dateFormatter.dateFormat = "YYYY-MM-dd hhmmss a"
+		
+		let defaultFileNameTime		= dateFormatter.string(from: Date())
+		
+		alertController.addTextField { textField in
+			textField.text				= "\(defaultFileNameTime)"
+		}
+		
+		let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
+			var fileName                = ""
+			
+			guard let textFields = alertController.textFields else {
+				debugPrint("An error was encountered while trying to access the text fields array.")
+				return
+			}
+			
+			guard let textFieldValue = textFields[0].text else {
+				debugPrint("An error was encountered while trying to access the text field value.")
+				return
+			}
+			
+			fileName = textFieldValue
+			
+			let fileManager             = FileManager.default
+			let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+			let documentTypeFolderURL   = documentDirectoryURL.appendingPathComponent(documentType)
+			
+			if !fileManager.fileExists(atPath: documentTypeFolderURL.path) {
+				do {
+					try fileManager.createDirectory(at: documentTypeFolderURL, withIntermediateDirectories: false, attributes: nil)
+				} catch {
+					print(error.localizedDescription)
+				}
+			}
+			
+			let pdfDocument = PDFDocument()
+			let pdfPage     = PDFPage(image: self.image)
+			let fileURL		= documentTypeFolderURL.appendingPathComponent("\(fileName).pdf")
+			
+			pdfDocument.insert(pdfPage!, at: 0)
+			pdfDocument.write(to: fileURL)
+			
+			self.dismiss(animated: true)
+		}
+		
+		alertController.addAction(cancelAction)
+		alertController.addAction(rightButtonAction)
+		present(alertController, animated: true, completion: nil)
+	}
 	
 	
 	private func configureShareImageAction() -> UIAction {
