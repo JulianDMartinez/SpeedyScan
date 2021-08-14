@@ -10,6 +10,20 @@ import UIKit
 class SelectionButton: UIButton {
 
     let buttonHeight: CGFloat
+	
+	private let normalBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.7)
+	private let highlightedBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.2)
+	private let highlightDuration: TimeInterval = 0.25
+	
+	override var isHighlighted: Bool {
+		didSet {
+			if oldValue == false && isHighlighted {
+				highlight()
+			} else if oldValue == true && !isHighlighted {
+				unhighlight()
+			}
+		}
+	}
     
     override init(frame: CGRect) {
         
@@ -29,10 +43,24 @@ class SelectionButton: UIButton {
         
         titleLabel?.font = UIFont.systemFont(ofSize: 23)
         contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-        backgroundColor         = .systemBackground.withAlphaComponent(0.7)
+        backgroundColor         = normalBackgroundColor
         layer.cornerRadius      = buttonHeight / 4
 
         clipsToBounds           = true
         
     }
+	
+	private func highlight() {
+		animateBackground(to: highlightedBackgroundColor, duration: highlightDuration)
+	}
+	
+	private func unhighlight() {
+		animateBackground(to: normalBackgroundColor, duration: highlightDuration)
+	}
+	
+	private func animateBackground(to color: UIColor, duration: TimeInterval) {
+		UIView.animate(withDuration: duration) {
+			self.backgroundColor = color
+		}
+	}
 }
