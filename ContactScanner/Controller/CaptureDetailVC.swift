@@ -20,9 +20,7 @@ class CaptureDetailVC: UIViewController {
 	private let selectionButton                 = SelectionButton()
 	private let buttonsStackView                = UIStackView()
 	private let verticalStackView               = UIStackView()
-	
-	private lazy var pdfDocumentTypeSelection   = String()
-	
+		
 	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.ContactScanner")
 	
 	//MARK: Initializers
@@ -113,7 +111,8 @@ class CaptureDetailVC: UIViewController {
 			options: .displayInline,
 			children: [
 				shareAsPDFAction,
-				savePDFToCloudFolderSubmenu
+				savePDFToCloudFolderSubmenu,
+				savePDFToDeviceSubmenu
 			])
 		
 		selectionButton.setTitle("Select", for: .normal)
@@ -136,50 +135,41 @@ class CaptureDetailVC: UIViewController {
 		}
 	}
 	
-	
-	
-	
-	//TODO: Implement iCloud storage.
 	private func configureSavePDFToReceiptsFolderAction() -> UIAction {
-		return UIAction(title: "Receipts") { _ in
-			self.pdfDocumentTypeSelection = "Receipts"
-			self.showTextEntryAlert()
+		return UIAction(title: "Receipts") { action in
+			self.showTextEntryAlert(forDocumentType: action.title)
 		}
 	}
 	
 	
 	private func configureSavePDFToContactCardsFolderAction() -> UIAction {
-		return UIAction(title: "Contact Cards") { _ in
-			self.pdfDocumentTypeSelection = "Contact Cards"
-			self.showTextEntryAlert()
+		return UIAction(title: "Contact Cards") { action in
+			self.showTextEntryAlert(forDocumentType: action.title)
 		}
 	}
 	
 	
 	private func configureSavePDFToOtherDocumentsFolderAction() -> UIAction {
 		
-		return UIAction(title: "Other Documents") { _ in
-			self.pdfDocumentTypeSelection = "Other Documents"
-			self.showTextEntryAlert()
+		return UIAction(title: "Other Documents") { action in
+			self.showTextEntryAlert(forDocumentType: action.title)
 		}
 	}
 	
-	
-	func showTextEntryAlert() {
-		let title               = "File Name"
-		let message             = ""
-		let alertController     = UIAlertController(title: title, message: message, preferredStyle: .alert)
-		let cancelButtonTitle   = "Cancel"
-		let cancelAction        = UIAlertAction(title: cancelButtonTitle, style: .cancel) { _ in }
-		let rightButtonTitle    = "Ok"
-		let dateFormatter 		= DateFormatter()
+	func showTextEntryAlert(forDocumentType documentType: String) {
+		let title               	= "File Name"
+		let message             	= ""
+		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
+		let cancelButtonTitle   	= "Cancel"
+		let cancelAction        	= UIAlertAction(title: cancelButtonTitle, style: .cancel) { _ in }
+		let rightButtonTitle    	= "Ok"
+		let dateFormatter 			= DateFormatter()
 		
 		dateFormatter.dateFormat = "YYYY-MM-dd hhmmss a"
 		
 		let defaultFileNameTime		= dateFormatter.string(from: Date())
 		
 		alertController.addTextField { textField in
-			textField.clearButtonMode 	= .whileEditing
 			textField.text				= "\(defaultFileNameTime)"
 		}
 		
@@ -207,7 +197,7 @@ class CaptureDetailVC: UIViewController {
 			
 			let fileManager         		= FileManager.default
 			let cloudDocumentsDirectoryURL 	= cloudRootURL.appendingPathComponent("Documents")
-			let documentTypeFolderURL 		= cloudDocumentsDirectoryURL.appendingPathComponent(self.pdfDocumentTypeSelection)
+			let documentTypeFolderURL 		= cloudDocumentsDirectoryURL.appendingPathComponent(documentType)
 			
 			if !fileManager.fileExists(atPath: cloudDocumentsDirectoryURL.path) {
 				do {
@@ -236,7 +226,6 @@ class CaptureDetailVC: UIViewController {
 			
 			//Class Reset After Performing Local or iCloud Drive Save
 			
-			self.pdfDocumentTypeSelection = ""
 			self.dismiss(animated: true) {
 #warning("Call for continuing of recognition.")
 			}
@@ -270,11 +259,6 @@ class CaptureDetailVC: UIViewController {
 		present(alertController, animated: true, completion: nil)
 	}
 	
-	//	private func configureCloudMetadataManager(completionHandler: (() -> Void)) {
-	//		guard let manager = CloudMetadataManager(containerIdentifier: "iCloud.ContactScanner") else {return}
-	//		cloudMetadataManager = manager
-	//		completionHandler()
-	//	}
 	
 	
 	private func configureShareImageAction() -> UIAction {
