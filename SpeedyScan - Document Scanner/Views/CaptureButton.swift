@@ -1,6 +1,6 @@
 //
 //  CaptureButton.swift
-//  ContactScanner
+//  SpeedyScan
 //
 //  Created by Julian Martinez on 7/3/21.
 //

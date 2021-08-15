@@ -1,6 +1,6 @@
 //
 //  TorchButton.swift
-//  ContactScanner
+//  SpeedyScan
 //
 //  Created by Julian Martinez on 7/5/21.
 //

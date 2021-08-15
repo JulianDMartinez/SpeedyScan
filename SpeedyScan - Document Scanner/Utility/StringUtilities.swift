@@ -1,6 +1,6 @@
 //
 //  StringUtilities.swift
-//  ContactScanner
+//  SpeedyScan
 //
 //  Created by Julian Martinez on 5/23/21.
 //

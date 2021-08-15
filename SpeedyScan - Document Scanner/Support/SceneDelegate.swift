@@ -1,6 +1,6 @@
 //
 //  SceneDelegate.swift
-//  ContactScanner
+//  SpeedyScan
 //
 //  Created by Julian Martinez on 5/22/21.
 //
