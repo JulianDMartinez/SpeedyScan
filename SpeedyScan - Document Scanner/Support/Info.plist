@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Contact Scanner</string>
+	<string>SpeedyScan</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -68,12 +68,12 @@
 	<true/>
 	<key>NSUbiquitousContainers</key>
 	<dict>
-		<key>iCloud.ContactScanner</key>
+		<key>iCloud.SpeedyScan</key>
 		<dict>
 			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 			<true/>
 			<key>NSUbiquitousContainerName</key>
-			<string>Contact Scanner</string>
+			<string>SpeedyScan</string>
 			<key>NSUbiquitousContainerSupportedFolderLevels</key>
 			<string>ANY</string>
 		</dict>

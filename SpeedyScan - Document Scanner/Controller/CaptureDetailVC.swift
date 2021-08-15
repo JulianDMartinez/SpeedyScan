@@ -22,7 +22,7 @@ class CaptureDetailVC: UIViewController {
 	private let buttonsStackView                = UIStackView()
 	private let verticalStackView               = UIStackView()
 		
-	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.ContactScanner")
+	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.SpeedyScan")
 	
 	//MARK: Initializers
 	init(image: UIImage) {

@@ -24,7 +24,7 @@
 /* Begin PBXFileReference section */
 		1D58C82D265AB5F10022584B /* ScannerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerVC.swift; sourceTree = "<group>"; };
 		1D58C82F265AB6B10022584B /* StringUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtilities.swift; sourceTree = "<group>"; };
-		1DFC98CC265990110024A63A /* ContactScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ContactScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DFC98CC265990110024A63A /* SpeedyScan - Document Scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SpeedyScan - Document Scanner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DFC98CF265990110024A63A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DFC98D1265990110024A63A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		1DFC98D8265990130024A63A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -34,7 +34,7 @@
 		B908CC29269370C200DDC437 /* CaptureDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailVC.swift; sourceTree = "<group>"; };
 		B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashToggleButton.swift; sourceTree = "<group>"; };
 		B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionButton.swift; sourceTree = "<group>"; };
-		B97216C526A36EED00D6E445 /* ContactScanner.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ContactScanner.entitlements; sourceTree = "<group>"; };
+		B9B299AF26C96CC4001C3946 /* SpeedyScan - Document Scanner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SpeedyScan - Document Scanner.entitlements"; sourceTree = "<group>"; };
 		B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMetadataManager.swift; sourceTree = "<group>"; };
 		B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -62,8 +62,7 @@
 		1DFC98C3265990110024A63A = {
 			isa = PBXGroup;
 			children = (
-				B9F6D41426C09E1800DFAE86 /* Model */,
-				1DFC98CE265990110024A63A /* ContactScanner */,
+				1DFC98CE265990110024A63A /* SpeedyScan - Document Scanner */,
 				1DFC98CD265990110024A63A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -71,15 +70,15 @@
 		1DFC98CD265990110024A63A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1DFC98CC265990110024A63A /* ContactScanner.app */,
+				1DFC98CC265990110024A63A /* SpeedyScan - Document Scanner.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1DFC98CE265990110024A63A /* ContactScanner */ = {
+		1DFC98CE265990110024A63A /* SpeedyScan - Document Scanner */ = {
 			isa = PBXGroup;
 			children = (
-				B97216C526A36EED00D6E445 /* ContactScanner.entitlements */,
+				B9B299AF26C96CC4001C3946 /* SpeedyScan - Document Scanner.entitlements */,
 				1DFC98E52659904A0024A63A /* Controller */,
 				B9F6D40D26BEBB7400DFAE86 /* Managers */,
 				1DFC98E4265990440024A63A /* Views */,
@@ -87,7 +86,7 @@
 				B908CC282691472600DDC437 /* Extensions */,
 				1DFC98E3265990400024A63A /* Support */,
 			);
-			path = ContactScanner;
+			path = "SpeedyScan - Document Scanner";
 			sourceTree = "<group>";
 		};
 		1DFC98E3265990400024A63A /* Support */ = {
@@ -136,19 +135,12 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		B9F6D41426C09E1800DFAE86 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1DFC98CB265990110024A63A /* ContactScanner */ = {
+		1DFC98CB265990110024A63A /* SpeedyScan - Document Scanner */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DFC98E0265990130024A63A /* Build configuration list for PBXNativeTarget "ContactScanner" */;
+			buildConfigurationList = 1DFC98E0265990130024A63A /* Build configuration list for PBXNativeTarget "SpeedyScan - Document Scanner" */;
 			buildPhases = (
 				1DFC98C8265990110024A63A /* Sources */,
 				1DFC98C9265990110024A63A /* Frameworks */,
@@ -158,9 +150,9 @@
 			);
 			dependencies = (
 			);
-			name = ContactScanner;
+			name = "SpeedyScan - Document Scanner";
 			productName = ContactScanner;
-			productReference = 1DFC98CC265990110024A63A /* ContactScanner.app */;
+			productReference = 1DFC98CC265990110024A63A /* SpeedyScan - Document Scanner.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -177,7 +169,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1DFC98C7265990110024A63A /* Build configuration list for PBXProject "ContactScanner" */;
+			buildConfigurationList = 1DFC98C7265990110024A63A /* Build configuration list for PBXProject "SpeedyScan - Document Scanner" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -190,7 +182,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1DFC98CB265990110024A63A /* ContactScanner */,
+				1DFC98CB265990110024A63A /* SpeedyScan - Document Scanner */,
 			);
 		};
 /* End PBXProject section */
@@ -290,6 +282,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -345,6 +338,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -360,16 +354,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ContactScanner/ContactScanner.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
-				INFOPLIST_FILE = ContactScanner/Support/Info.plist;
+				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.julianmartinezdev.ContactScanner;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.julianmartinezdev.SpeedyScan---Document-Scanner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -380,15 +376,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ContactScanner/ContactScanner.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
-				INFOPLIST_FILE = ContactScanner/Support/Info.plist;
+				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.julianmartinezdev.ContactScanner;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.julianmartinezdev.SpeedyScan---Document-Scanner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -398,7 +394,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DFC98C7265990110024A63A /* Build configuration list for PBXProject "ContactScanner" */ = {
+		1DFC98C7265990110024A63A /* Build configuration list for PBXProject "SpeedyScan - Document Scanner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DFC98DE265990130024A63A /* Debug */,
@@ -407,7 +403,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DFC98E0265990130024A63A /* Build configuration list for PBXNativeTarget "ContactScanner" */ = {
+		1DFC98E0265990130024A63A /* Build configuration list for PBXNativeTarget "SpeedyScan - Document Scanner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DFC98E1265990130024A63A /* Debug */,

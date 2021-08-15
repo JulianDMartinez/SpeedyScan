@@ -42,7 +42,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 				let alert = UIAlertController(
 					title: "Enable Camera Access",
-					message: "To scan please enable camera access in Settings -> Contact Scanner",
+					message: "To scan please enable camera access in Settings -> SpeedyScan",
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
@@ -64,7 +64,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 				let alert = UIAlertController(
 					title: "Enable Camera Access",
-					message: "To scan please enable camera access in Settings -> Contact Scanner",
+					message: "To scan please enable camera access in Settings -> SpeedyScan",
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
