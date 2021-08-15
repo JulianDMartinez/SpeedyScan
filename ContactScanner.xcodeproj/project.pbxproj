@@ -19,7 +19,6 @@
 		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
 		B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */; };
 		B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */; };
-		B9F6D41626C09E2400DFAE86 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41526C09E2400DFAE86 /* Document.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,7 +37,6 @@
 		B97216C526A36EED00D6E445 /* ContactScanner.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ContactScanner.entitlements; sourceTree = "<group>"; };
 		B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMetadataManager.swift; sourceTree = "<group>"; };
 		B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
-		B9F6D41526C09E2400DFAE86 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,7 +139,6 @@
 		B9F6D41426C09E1800DFAE86 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				B9F6D41526C09E2400DFAE86 /* Document.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -219,7 +216,6 @@
 				B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
 				1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */,
-				B9F6D41626C09E2400DFAE86 /* Document.swift in Sources */,
 				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,
 				B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */,

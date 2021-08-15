@@ -57,7 +57,7 @@ class CloudMetadataManager {
 		
 		metadataQuery.notificationBatchingInterval 	= 1
 		metadataQuery.searchScopes					= [NSMetadataQueryUbiquitousDataScope, NSMetadataQueryUbiquitousDocumentsScope]
-		metadataQuery.predicate						= NSPredicate(format: "%K LIKE %@", NSMetadataItemFSNameKey, "*." + Document.extensionName)
+		metadataQuery.predicate						= NSPredicate(format: "%K LIKE %@", NSMetadataItemFSNameKey, "*." + "pdf")
 		metadataQuery.sortDescriptors				= [NSSortDescriptor(key: NSMetadataItemFSNameKey, ascending: true)]
 		metadataQuery.start()
 	}

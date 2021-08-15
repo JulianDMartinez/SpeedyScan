@@ -7,6 +7,7 @@
 
 import UIKit
 import PDFKit
+import Photos
 
 class CaptureDetailVC: UIViewController {
 	
@@ -323,16 +324,29 @@ class CaptureDetailVC: UIViewController {
 		
 	}
 	
-	
 	private func configureSaveToCameraRollAction() -> UIAction {
-		
-		//TODO: Check for camera roll authorization. Handle no authorization provided.
 		
 		let saveImage       = UIImage(systemName: "photo.on.rectangle.angled")
 		
 		return UIAction(title: "Save to Camera Roll", image: saveImage) { _ in
-			//TODO: Handle error on saving to user camera roll.
-			UIImageWriteToSavedPhotosAlbum(self.image, nil, nil, nil)
+			PHPhotoLibrary.requestAuthorization { status in
+				guard status == .authorized else {
+					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+					let alert = UIAlertController(
+						title: "Enable Photo Library Access",
+						message: "Enable Photo Library Access to save to Camera Roll.",
+						preferredStyle: .alert)
+					
+					alert.addAction(okayAlertAction)
+					self.present(alert, animated: true)
+					return
+				}
+				UIImageWriteToSavedPhotosAlbum(self.image, nil, nil, nil)
+				
+				DispatchQueue.main.async {
+					self.dismiss(animated: true)
+				}
+			}
 		}
 	}
 	
