@@ -16,7 +16,8 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	private let outlineLayer                = CAShapeLayer()
 	private let captureButton               = CaptureButton()
 	private let flashActivationButton       = FlashToggleButton()
-	private var detectedRectangle           = VNRectangleObservation()
+	
+	private var detectedRectangle: VNRectangleObservation?
 	
 	private var ciImage: CIImage?
 	private var uiImage                     = UIImage()
@@ -177,7 +178,8 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
 	
 	@objc private func captureButtonTapped() {
-		presentCaptureDetailVC()
+		
+		presentCaptureDetailVC(with: ciImage)
 		
 		guard let device = device else {return}
 		guard device.hasTorch else { return }
@@ -214,19 +216,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	}
 	
 	
-	func presentCaptureDetailVC() {
-		
-		guard let image = ciImage else {
-			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-			let alert = UIAlertController(
-				title: "No Object Detected",
-				message: "Ensure scan object is identified by app and try again.",
-				preferredStyle: .alert)
-			
-			alert.addAction(okayAlertAction)
-			self.present(alert, animated: true)
-			return
-		}
+	func presentCaptureDetailVC(with image: CIImage?) {
 		
 		doPerspectiveCorrection(detectedRectangle, from: image)
 		
@@ -244,12 +234,18 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		previewLayer.insertSublayer(outlineLayer, at: 1)
 	}
 	
+	private func resetRecognition() {
+		self.detectedRectangle = nil
+		self.drawBoundingBox(rect: VNRectangleObservation())
+		self.ciImage = nil
+		self.uiImage = UIImage()
+	}
 	
 	private func detectRectangle(in image: CVPixelBuffer) {
+		
 		DispatchQueue.main.async {
-			
 			guard self.presentedViewController == nil else {
-				self.drawBoundingBox(rect: VNRectangleObservation())
+				self.resetRecognition()
 				return
 			}
 			
@@ -272,19 +268,25 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 					}
 					
 					guard let rect = results.first else {
+						resetRecognition()
 						return
 					}
 					
 					self.detectedRectangle = rect
 					
-					self.drawBoundingBox(rect: self.detectedRectangle)
+					guard let detectedRectangle = self.detectedRectangle else {
+						return
+					}
+
+					
+					self.drawBoundingBox(rect: detectedRectangle)
 					
 				}
 			}
 			
 			request.minimumAspectRatio  = VNAspectRatio(0.1)
 			request.maximumAspectRatio  = VNAspectRatio(4)
-			request.minimumSize         = Float(0.2)
+			request.minimumSize         = Float(0.15)
 			request.minimumConfidence   = 1.0
 			request.maximumObservations = 1
 			
@@ -308,13 +310,26 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	}
 	
 	
-	private func doPerspectiveCorrection(_ observation: VNRectangleObservation, from ciImage: CIImage) {
-		var image = ciImage
+	private func doPerspectiveCorrection(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
 		
-		let topLeft     = observation.topLeft.scaled(to: ciImage.extent.size)
-		let topRight    = observation.topRight.scaled(to: ciImage.extent.size)
-		let bottomLeft  = observation.bottomLeft.scaled(to: ciImage.extent.size)
-		let bottomRight = observation.bottomRight.scaled(to: ciImage.extent.size)
+		guard let unwrappedCIImage = ciImage, let unwrappedObservation = observation else {
+			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+			let alert = UIAlertController(
+				title: "No Object Detected",
+				message: "Move the camera closer to the object until the recognition box is shown",
+				preferredStyle: .alert)
+			
+			alert.addAction(okayAlertAction)
+			self.present(alert, animated: true)
+			return
+		}
+		
+		var image = unwrappedCIImage
+		
+		let topLeft     = unwrappedObservation.topLeft.scaled(to: unwrappedCIImage.extent.size)
+		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
+		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
+		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
 		
 		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
 			"inputTopLeft"      : CIVector(cgPoint: topLeft),
