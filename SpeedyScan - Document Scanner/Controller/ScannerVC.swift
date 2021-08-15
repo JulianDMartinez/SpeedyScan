@@ -38,16 +38,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		case .authorized:
 			configureRecognitionPreviewCaptureSession()
 		case .notDetermined:
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Enable Camera Access",
-					message: "To scan please enable camera access in Settings -> SpeedyScan",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
+			configureRecognitionPreviewCaptureSession()
 		case .restricted:
 			DispatchQueue.main.async {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
