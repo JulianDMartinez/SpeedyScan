@@ -27,7 +27,7 @@
 		1DFC98CC265990110024A63A /* SpeedyScan - Document Scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SpeedyScan - Document Scanner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DFC98CF265990110024A63A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DFC98D1265990110024A63A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		1DFC98D8265990130024A63A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1DFC98D8265990130024A63A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "SpeedyScan - Document Scanner/Support/Assets.xcassets"; sourceTree = SOURCE_ROOT; };
 		1DFC98DB265990130024A63A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1DFC98DD265990130024A63A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B908CC262691438700DDC437 /* CaptureButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureButton.swift; sourceTree = "<group>"; };
@@ -92,9 +92,9 @@
 		1DFC98E3265990400024A63A /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				1DFC98D8265990130024A63A /* Assets.xcassets */,
 				1DFC98CF265990110024A63A /* AppDelegate.swift */,
 				1DFC98D1265990110024A63A /* SceneDelegate.swift */,
-				1DFC98D8265990130024A63A /* Assets.xcassets */,
 				1DFC98DA265990130024A63A /* LaunchScreen.storyboard */,
 				1DFC98DD265990130024A63A /* Info.plist */,
 			);
@@ -354,6 +354,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -376,6 +377,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J658BJ7LAB;

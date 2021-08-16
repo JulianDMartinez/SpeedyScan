@@ -28,7 +28,7 @@ class CloudMetadataManager {
 	
 	init?(containerIdentifier: String?) {
 		guard FileManager.default.ubiquityIdentityToken != nil else {
-#warning("Implement alert controller - iCloud isn't enabled yet. Please enable iCloud and run again.")
+		#warning("TODO: Implement alert controller - iCloud isn't enabled yet. Please enable iCloud and run again.")
 			return
 		}
 		
@@ -44,7 +44,7 @@ class CloudMetadataManager {
 		//Observe and handle NSMetadataQuery's Notifications
 		// Post .metadataDidChange from main queue and return after clients finish handling it.
 		
-#warning("Implement alert controller - ⛔️ Failed to retrieve iCloud container URL for containerIdentifier. Make sure your iCloud is available and run again")
+		#warning("TODO: Implement alert controller - ⛔️ Failed to retrieve iCloud container URL for containerIdentifier. Make sure your iCloud is available and run again")
 		let names: [NSNotification.Name] 	= [.NSMetadataQueryDidFinishGathering, .NSMetadataQueryDidUpdate]
 		let publishers 						= names.map { NotificationCenter.default.publisher(for: $0) }
 		

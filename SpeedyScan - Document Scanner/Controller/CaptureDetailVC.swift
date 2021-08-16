@@ -196,6 +196,7 @@ class CaptureDetailVC: UIViewController {
 		
 		alertController.addTextField { textField in
 			textField.text				= "\(defaultFileNameTime)"
+			textField.clearButtonMode 	= .always
 		}
 		
 		let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
@@ -269,6 +270,7 @@ class CaptureDetailVC: UIViewController {
 		
 		alertController.addTextField { textField in
 			textField.text				= "\(defaultFileNameTime)"
+			textField.clearButtonMode	= .always
 		}
 		
 		let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
