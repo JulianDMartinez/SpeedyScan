@@ -43,7 +43,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 				let alert = UIAlertController(
 					title: "Device Not Supported",
-					message: "Device not supported. Please submit a request for added support.",
+					message: "Please submit a request to the developer for added support.",
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
