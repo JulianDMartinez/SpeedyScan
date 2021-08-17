@@ -34,6 +34,24 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	}
 	
 	private func verifyAndConfigureRecognitionPreviewCaptureSession() {
+		
+		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInUltraWideCamera, .builtInDualCamera, .builtInWideAngleCamera],
+																	  mediaType: .video, position: .back)
+	
+		guard !deviceDiscoverySession.devices.isEmpty else {
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Device Not Supported",
+					message: "Device not supported. Please submit a request for added support.",
+					preferredStyle: .alert)
+				
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+			return
+		}
+		
 		switch AVCaptureDevice.authorizationStatus(for: .video) {
 		case .authorized:
 			configureRecognitionPreviewCaptureSession()
@@ -77,7 +95,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
 	private func configureCameraInput() {
 		guard let device = AVCaptureDevice.DiscoverySession(
-			deviceTypes : [.builtInUltraWideCamera, .builtInDualCamera],
+			deviceTypes : [.builtInUltraWideCamera, .builtInDualCamera, .builtInWideAngleCamera],
 			mediaType   : .video,
 			position    : .back
 			
