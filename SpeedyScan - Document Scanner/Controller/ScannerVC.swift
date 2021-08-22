@@ -11,31 +11,35 @@ import Vision
 
 class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
-	private let captureSession              = AVCaptureSession()
-	private let videoDataOutput             = AVCaptureVideoDataOutput()
-	private let outlineLayer                = CAShapeLayer()
-	private let captureButton               = CaptureButton()
-	private let flashActivationButton       = FlashToggleButton()
+	//MARK: Class Properties
 	
-	private var detectedRectangle: VNRectangleObservation?
+	private let captureSession              		= AVCaptureSession()
+	private let videoDataOutput             		= AVCaptureVideoDataOutput()
+	private let outlineLayer                		= CAShapeLayer()
+	private let captureButton               		= CaptureButton()
+	private let flashActivationButton       		= FlashToggleButton()
 	
-	private var ciImage: CIImage?
-	private var uiImage                     = UIImage()
-	private var framesWithoutRecognitionCounter   = 0
+	private var detectedRectangle	: VNRectangleObservation?
 	
-	private lazy var device                 = AVCaptureDevice(uniqueID: "")
-	private lazy var previewLayer           = AVCaptureVideoPreviewLayer(session: captureSession)
+	private var ciImage				: CIImage?
+	private var uiImage                     		= UIImage()
+	private var framesWithoutRecognitionCounter   	= 0
+	
+	private lazy var device                 		= AVCaptureDevice(uniqueID: "")
+	private lazy var previewLayer           		= AVCaptureVideoPreviewLayer(session: captureSession)
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 	}
 	
+	//Start configuration of preview capture session to ensure cases where the the user returns to a state where the view had already been loaded.
 	override func viewWillAppear(_ animated: Bool) {
 		verifyAndConfigureRecognitionPreviewCaptureSession()
 	}
 	
 	private func verifyAndConfigureRecognitionPreviewCaptureSession() {
 		
+		//Start of verification of camera devices support.
 		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInUltraWideCamera, .builtInDualCamera, .builtInWideAngleCamera],
 																	  mediaType: .video, position: .back)
 	
@@ -53,41 +57,19 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 			return
 		}
 		
-		switch AVCaptureDevice.authorizationStatus(for: .video) {
-		case .authorized:
-			configureRecognitionPreviewCaptureSession()
-		case .notDetermined:
-			configureRecognitionPreviewCaptureSession()
-		case .restricted:
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Camera Restriction",
-					message: "Unable configure camera session due to device restriction.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		case .denied:
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Enable Camera Access",
-					message: "To scan please enable camera access in Settings -> SpeedyScan",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		@unknown default:
+		// Verify if camera access authorization is provided and configure preview layer if it is or is not determined yet.
+		guard verifyCameraAccessOrNotDetermined() else {
 			return
 		}
+		
+		configureRecognitionPreviewCaptureSession()
 	}
 	
-	private func verifyCameraAccess() -> Bool {
+	private func verifyCameraAccessOrNotDetermined() -> Bool {
 		switch AVCaptureDevice.authorizationStatus(for: .video) {
 		case .authorized:
+			return true
+		case .notDetermined:
 			return true
 		case .restricted:
 			DispatchQueue.main.async {
@@ -242,7 +224,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
 	@objc private func captureButtonTapped() {
 		
-		guard verifyCameraAccess() else {
+		guard verifyCameraAccessOrNotDetermined() else {
 			return
 		}
 		
