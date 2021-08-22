@@ -43,7 +43,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 				let alert = UIAlertController(
 					title: "Device Not Supported",
-					message: "Please submit a request to the developer for added support.",
+					message: "Please submit a request to julian.martinez.s@outlook.com for added support.",
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
@@ -81,6 +81,59 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 			}
 		@unknown default:
 			return
+		}
+	}
+	
+	private func verifyCameraAccess() -> Bool {
+		switch AVCaptureDevice.authorizationStatus(for: .video) {
+		case .authorized:
+			return true
+		case .restricted:
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Camera Restriction",
+					message: "Unable configure camera session due to device restriction.",
+					preferredStyle: .alert)
+				
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+			return false
+		case .denied:
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Enable Camera Access",
+					message: "To scan please enable camera access in Settings -> SpeedyScan",
+					preferredStyle: .alert)
+				
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+			return false
+		case .notDetermined:
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Access Error",
+					message: "An error was encountered while verifying camera access. Please contact the developer at julian.martinez.s@outlook.com with steps to reproduce error.",
+					preferredStyle: .alert)
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+			return false
+		@unknown default:
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Access Error",
+					message: "An error was encountered while verifying camera access. Please contact the developer at julian.martinez.s@outlook.com with steps to reproduce error.",
+					preferredStyle: .alert)
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+			return false
 		}
 	}
 	
@@ -187,6 +240,10 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
 	
 	@objc private func captureButtonTapped() {
+		
+		guard verifyCameraAccess() else {
+			return
+		}
 		
 		presentCaptureDetailVC(with: ciImage)
 		
@@ -325,7 +382,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
 				title: "No Object Detected",
-				message: "Move the camera closer to the object until the recognition box is shown",
+				message: "Move the camera closer to the object until the recognition box is shown, or place object on a contrasting background.",
 				preferredStyle: .alert)
 			
 			alert.addAction(okayAlertAction)
