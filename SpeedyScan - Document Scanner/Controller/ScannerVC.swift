@@ -100,7 +100,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 				let alert = UIAlertController(
 					title: "Access Error",
-					message: "An error was encountered while verifying camera access. Please contact the developer at julian.martinez.s@outlook.com with steps to reproduce error.",
+					message: "An error was encountered while verifying camera access.",
 					preferredStyle: .alert)
 				alert.addAction(okayAlertAction)
 				self.present(alert, animated: true)
@@ -111,7 +111,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 				let alert = UIAlertController(
 					title: "Access Error",
-					message: "An error was encountered while verifying camera access. Please contact the developer at julian.martinez.s@outlook.com with steps to reproduce error.",
+					message: "An error was encountered while verifying camera access.",
 					preferredStyle: .alert)
 				alert.addAction(okayAlertAction)
 				self.present(alert, animated: true)
@@ -194,6 +194,8 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		}
 		
 		connection.videoOrientation = .portrait
+		
+		//Stabilization added to smooth out the movement of the bounding box on screen.
 		connection.preferredVideoStabilizationMode = .cinematic
 	}
 	
@@ -205,6 +207,65 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		view.layer.addSublayer(previewLayer)
 		
 		captureSession.startRunning()
+	}
+	
+	
+	private func configureFlashActivationButton() {
+		view.addSubview(flashActivationButton)
+		
+		flashActivationButton.addTarget(self, action: #selector(flashActivationButtonTapped), for: .touchUpInside)
+		
+		NSLayoutConstraint.activate([
+			flashActivationButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 20),
+			flashActivationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
+			flashActivationButton.heightAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight),
+			flashActivationButton.widthAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight)
+		])
+	}
+	
+	
+	@objc private func flashActivationButtonTapped() {
+		toggleFlash()
+	}
+	
+	func toggleFlash() {
+		guard let device = device else {return}
+		
+		guard device.hasTorch else { return }
+		
+		do {
+			try device.lockForConfiguration()
+			
+			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
+				device.torchMode = AVCaptureDevice.TorchMode.off
+			} else {
+				do {
+					try device.setTorchModeOn(level: 0.1)
+				} catch {
+					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+					let alert = UIAlertController(
+						title: "Flash Toggle",
+						message: "An error was encountered while toggling flash light.",
+						preferredStyle: .alert)
+					
+					alert.addAction(okayAlertAction)
+					self.present(alert, animated: true)
+				}
+			}
+			
+			device.unlockForConfiguration()
+		} catch {
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Flash Toggle",
+					message: "An error was encountered while toggling flash light.",
+					preferredStyle: .alert)
+				
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+		}
 	}
 	
 	
@@ -230,6 +291,11 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		
 		presentCaptureDetailVC(with: ciImage)
 		
+		//Turn off flash light if it is on when transitioning to detail view.
+		turnOffFlash()
+	}
+	
+	func turnOffFlash() {
 		guard let device = device else {return}
 		guard device.hasTorch else { return }
 		
@@ -242,27 +308,8 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		} catch {
 			print(error)
 		}
-		
 	}
 	
-	
-	private func configureFlashActivationButton() {
-		view.addSubview(flashActivationButton)
-		
-		flashActivationButton.addTarget(self, action: #selector(flashActivationButtonTapped), for: .touchUpInside)
-		
-		NSLayoutConstraint.activate([
-			flashActivationButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 20),
-			flashActivationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-			flashActivationButton.heightAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight),
-			flashActivationButton.widthAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight)
-		])
-	}
-	
-	
-	@objc private func flashActivationButtonTapped() {
-		toggleFlash()
-	}
 	
 	
 	func presentCaptureDetailVC(with image: CIImage?) {
@@ -283,6 +330,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		previewLayer.insertSublayer(outlineLayer, at: 1)
 	}
 	
+	
 	private func resetRecognition() {
 		self.detectedRectangle = nil
 		self.drawBoundingBox(rect: VNRectangleObservation())
@@ -290,9 +338,12 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		self.uiImage = UIImage()
 	}
 	
+	
 	private func detectRectangle(in image: CVPixelBuffer) {
 		
 		DispatchQueue.main.async {
+			
+			//Stop recognition if ScannerVC is not presented.
 			guard self.presentedViewController == nil else {
 				self.resetRecognition()
 				return
@@ -318,6 +369,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 					
 					guard let rect = results.first else {
 						
+						//Allow up to 5 frames without recognition to prevent abrupt reset of drawing on screen.
 						if framesWithoutRecognitionCounter > 5 {
 							resetRecognition()
 						} else {
@@ -431,47 +483,6 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		outlinePath.addLine(to: topLeft)
 		
 		outlineLayer.path = outlinePath.cgPath
-	}
-	
-	
-	func toggleFlash() {
-		guard let device = device else {return}
-		
-		guard device.hasTorch else { return }
-		
-		do {
-			try device.lockForConfiguration()
-			
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
-				device.torchMode = AVCaptureDevice.TorchMode.off
-			} else {
-				do {
-					try device.setTorchModeOn(level: 0.1)
-				} catch {
-					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-					let alert = UIAlertController(
-						title: "Flash Toggle",
-						message: "An error was encountered while toggling flash light.",
-						preferredStyle: .alert)
-					
-					alert.addAction(okayAlertAction)
-					self.present(alert, animated: true)
-				}
-			}
-			
-			device.unlockForConfiguration()
-		} catch {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Flash Toggle",
-					message: "An error was encountered while toggling flash light.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		}
 	}
 }
 
