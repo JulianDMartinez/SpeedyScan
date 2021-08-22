@@ -21,6 +21,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
 	private var ciImage: CIImage?
 	private var uiImage                     = UIImage()
+	private var framesWithoutRecognitionCounter   = 0
 	
 	private lazy var device                 = AVCaptureDevice(uniqueID: "")
 	private lazy var previewLayer           = AVCaptureVideoPreviewLayer(session: captureSession)
@@ -334,9 +335,17 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 					}
 					
 					guard let rect = results.first else {
-						resetRecognition()
+						
+						if framesWithoutRecognitionCounter > 5 {
+							resetRecognition()
+						} else {
+							framesWithoutRecognitionCounter += 1
+						}
+					
 						return
 					}
+					
+					framesWithoutRecognitionCounter = 0
 					
 					self.detectedRectangle = rect
 					
