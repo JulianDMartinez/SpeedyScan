@@ -18,7 +18,9 @@ class ScannerVC: UIViewController {
 	private let outlineLayer                		= CAShapeLayer()
 	private let captureButton               		= CaptureButton()
 	private let flashActivationButton       		= FlashToggleButton()
-	private let photoSettings 						= AVCapturePhotoSettings(format: [AVVideoCodecKey : AVVideoCodecType.hevc])
+	private let photoSettings 						= AVCapturePhotoSettings(format: [
+		AVVideoCodecKey 	: AVVideoCodecType.hevc
+	])
 	private let photoOutput 						= AVCapturePhotoOutput()
 	
 	private var detectedRectangle	: VNRectangleObservation?
@@ -193,7 +195,7 @@ class ScannerVC: UIViewController {
 		//Stabilization added to smooth out the movement of the bounding box on screen.
 		connection.preferredVideoStabilizationMode = .cinematic
 		
-		photoOutput.isHighResolutionCaptureEnabled = true
+		photoOutput.maxPhotoQualityPrioritization = .speed
 		
 		guard captureSession.canAddOutput(photoOutput) else {return}
 		
@@ -300,13 +302,14 @@ class ScannerVC: UIViewController {
 		
 		let currentPhotoCaptureSettings = AVCapturePhotoSettings(from: photoSettings)
 		
+		print(currentPhotoCaptureSettings.format)
+		
 		photoOutput.capturePhoto(with: currentPhotoCaptureSettings, delegate: self)
 	
 		
 //		presentCaptureDetailVC(with: ciImage)
 		
 		//Turn off flash light if it is on when transitioning to detail view.
-		turnOffFlash()
 	}
 	
 	func turnOffFlash() {
@@ -449,28 +452,32 @@ class ScannerVC: UIViewController {
 		
 		var image = unwrappedCIImage
 		
-//		let topLeft     = unwrappedObservation.topLeft.scaled(to: unwrappedCIImage.extent.size)
-//		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
-//		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
-//		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
+		let topLeft     = unwrappedObservation.topLeft.scaled(to: unwrappedCIImage.extent.size)
+		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
+		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
+		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
 //
-//		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
-//			"inputTopLeft"      : CIVector(cgPoint: topLeft),
-//			"inputTopRight"     : CIVector(cgPoint: topRight),
-//			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
-//			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
-//		]).applyingFilter("CIDocumentEnhancer", parameters: [
-//			"inputAmount" : 0.7
-//		]).applyingFilter("CIColorControls", parameters: [
-//			"inputBrightness" : -0.35,
-//			"inputContrast"   : 1.2
-//		]).applyingFilter("CISharpenLuminance", parameters: [
-//			"inputSharpness" : 1.0
-//		])
+		image =
+		
+		image.applyingFilter("CIPerspectiveCorrection", parameters: [
+			"inputTopLeft"      : CIVector(cgPoint: topLeft),
+			"inputTopRight"     : CIVector(cgPoint: topRight),
+			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
+			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
+		])
+			.applyingFilter("CIDocumentEnhancer", parameters: [
+			"inputAmount" : 1
+		])
+			.applyingFilter("CIColorControls", parameters: [
+			"inputBrightness" : -0.35,
+			"inputContrast"   : 1.2
+		]).applyingFilter("CISharpenLuminance", parameters: [
+			"inputSharpness" : 1.0
+		])
 		
 		let context = CIContext()
 		let cgImage = context.createCGImage(image, from: image.extent)
-		uiImage  = UIImage(cgImage: cgImage!)
+		uiImage  = UIImage(cgImage: cgImage!, scale: 1, orientation: .up)
 	}
 	
 	
@@ -518,8 +525,12 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
 
 extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-		let ciImage = CIImage(cgImage: photo.cgImageRepresentation()!)
+		var ciImage = CIImage(cgImage: photo.cgImageRepresentation()!)
+		
+		ciImage = ciImage.oriented(.right)
+		
 		presentCaptureDetailVC(with: ciImage)
+		turnOffFlash()
 	}
 }
 
