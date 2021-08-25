@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D58C82D265AB5F10022584B /* ScannerVC.swift */; };
-		1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D58C82F265AB6B10022584B /* StringUtilities.swift */; };
 		1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98CF265990110024A63A /* AppDelegate.swift */; };
 		1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98D1265990110024A63A /* SceneDelegate.swift */; };
 		1DFC98D9265990130024A63A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98D8265990130024A63A /* Assets.xcassets */; };
@@ -23,7 +22,6 @@
 
 /* Begin PBXFileReference section */
 		1D58C82D265AB5F10022584B /* ScannerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerVC.swift; sourceTree = "<group>"; };
-		1D58C82F265AB6B10022584B /* StringUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtilities.swift; sourceTree = "<group>"; };
 		1DFC98CC265990110024A63A /* SpeedyScan - Document Scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SpeedyScan - Document Scanner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DFC98CF265990110024A63A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DFC98D1265990110024A63A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -53,7 +51,6 @@
 		1D58C82C265AB5580022584B /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				1D58C82F265AB6B10022584B /* StringUtilities.swift */,
 				B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */,
 			);
 			path = Utility;
@@ -83,7 +80,6 @@
 				B9F6D40D26BEBB7400DFAE86 /* Managers */,
 				1DFC98E4265990440024A63A /* Views */,
 				1D58C82C265AB5580022584B /* Utility */,
-				B908CC282691472600DDC437 /* Extensions */,
 				1DFC98E3265990400024A63A /* Support */,
 			);
 			path = "SpeedyScan - Document Scanner";
@@ -118,13 +114,6 @@
 				B908CC29269370C200DDC437 /* CaptureDetailVC.swift */,
 			);
 			path = Controller;
-			sourceTree = "<group>";
-		};
-		B908CC282691472600DDC437 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Extensions;
 			sourceTree = "<group>";
 		};
 		B9F6D40D26BEBB7400DFAE86 /* Managers */ = {
@@ -207,7 +196,6 @@
 				B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */,
 				B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
-				1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */,
 				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,
 				B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */,

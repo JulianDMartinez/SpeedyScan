@@ -9,7 +9,7 @@ import UIKit
 import AVFoundation
 import Vision
 
-class ScannerVC: UIViewController, UIDocumentPickerDelegate {
+class ScannerVC: UIViewController {
 	
 	//MARK: Class Properties
 	
@@ -18,6 +18,8 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	private let outlineLayer                		= CAShapeLayer()
 	private let captureButton               		= CaptureButton()
 	private let flashActivationButton       		= FlashToggleButton()
+	private let photoSettings 						= AVCapturePhotoSettings(format: [AVVideoCodecKey : AVVideoCodecType.hevc])
+	private let photoOutput 						= AVCapturePhotoOutput()
 	
 	private var detectedRectangle	: VNRectangleObservation?
 	
@@ -27,6 +29,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
 	private lazy var device                 		= AVCaptureDevice(uniqueID: "")
 	private lazy var previewLayer           		= AVCaptureVideoPreviewLayer(session: captureSession)
+
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -91,17 +94,6 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 					message: "To scan please enable camera access in Settings -> SpeedyScan",
 					preferredStyle: .alert)
 				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return false
-		case .notDetermined:
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Access Error",
-					message: "An error was encountered while verifying camera access.",
-					preferredStyle: .alert)
 				alert.addAction(okayAlertAction)
 				self.present(alert, animated: true)
 			}
@@ -171,14 +163,17 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 	
 	
 	private func configureCameraOutput() {
+		
+		captureSession.beginConfiguration()
+		
 		videoDataOutput.videoSettings = [
 			(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)
 		] as [String : Any]
-		
+
 		videoDataOutput.alwaysDiscardsLateVideoFrames = true
 		videoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
 		captureSession.addOutput(videoDataOutput)
-		
+
 		guard let connection = videoDataOutput.connection(with: .video) else {
 			DispatchQueue.main.async {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
@@ -186,17 +181,27 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 					title: "Camera Configuration Error",
 					message: "An error was encountered while trying to configure the device built in camera.",
 					preferredStyle: .alert)
-				
+
 				alert.addAction(okayAlertAction)
 				self.present(alert, animated: true)
 			}
 			return
 		}
-		
+
 		connection.videoOrientation = .portrait
-		
+
 		//Stabilization added to smooth out the movement of the bounding box on screen.
 		connection.preferredVideoStabilizationMode = .cinematic
+		
+		photoOutput.isHighResolutionCaptureEnabled = true
+		
+		guard captureSession.canAddOutput(photoOutput) else {return}
+		
+		captureSession.sessionPreset = .photo
+		captureSession.addOutput(photoOutput)
+		
+		captureSession.commitConfiguration()
+		
 	}
 	
 	
@@ -289,7 +294,16 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 			return
 		}
 		
-		presentCaptureDetailVC(with: ciImage)
+		guard let photoOutputConnection = photoOutput.connection(with: .video) else {fatalError("Unable to establish photo capture connection")}
+		
+		photoOutputConnection.videoOrientation = .portrait
+		
+		let currentPhotoCaptureSettings = AVCapturePhotoSettings(from: photoSettings)
+		
+		photoOutput.capturePhoto(with: currentPhotoCaptureSettings, delegate: self)
+	
+		
+//		presentCaptureDetailVC(with: ciImage)
 		
 		//Turn off flash light if it is on when transitioning to detail view.
 		turnOffFlash()
@@ -435,19 +449,24 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		
 		var image = unwrappedCIImage
 		
-		let topLeft     = unwrappedObservation.topLeft.scaled(to: unwrappedCIImage.extent.size)
-		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
-		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
-		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
-		
-		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
-			"inputTopLeft"      : CIVector(cgPoint: topLeft),
-			"inputTopRight"     : CIVector(cgPoint: topRight),
-			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
-			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
-		]).applyingFilter("CIDocumentEnhancer", parameters: [
-			"inputAmount" : 0.7
-		])
+//		let topLeft     = unwrappedObservation.topLeft.scaled(to: unwrappedCIImage.extent.size)
+//		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
+//		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
+//		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
+//
+//		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
+//			"inputTopLeft"      : CIVector(cgPoint: topLeft),
+//			"inputTopRight"     : CIVector(cgPoint: topRight),
+//			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
+//			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
+//		]).applyingFilter("CIDocumentEnhancer", parameters: [
+//			"inputAmount" : 0.7
+//		]).applyingFilter("CIColorControls", parameters: [
+//			"inputBrightness" : -0.35,
+//			"inputContrast"   : 1.2
+//		]).applyingFilter("CISharpenLuminance", parameters: [
+//			"inputSharpness" : 1.0
+//		])
 		
 		let context = CIContext()
 		let cgImage = context.createCGImage(image, from: image.extent)
@@ -465,7 +484,7 @@ class ScannerVC: UIViewController, UIDocumentPickerDelegate {
 		outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
 		outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
 		
-		let bottomTopTransform = CGAffineTransform(scaleX: 1.2, y: -1).translatedBy(x: -previewLayer.frame.width/12, y: -previewLayer.frame.height)
+		let bottomTopTransform = CGAffineTransform(scaleX: 1.5, y: -1).translatedBy(x: 0, y: -previewLayer.frame.height)
 		
 		let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
 		let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
@@ -492,8 +511,15 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
 	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
 		
 		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
-		
 		detectRectangle(in: frame)
+		
+	}
+}
+
+extension ScannerVC: AVCapturePhotoCaptureDelegate {
+	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+		let ciImage = CIImage(cgImage: photo.cgImageRepresentation()!)
+		presentCaptureDetailVC(with: ciImage)
 	}
 }
 
