@@ -48,7 +48,7 @@ class CaptureDetailVC: UIViewController {
 		configureButtonsStackView()
 		configureVerticalStackView()
 		configureVisualEffectView()
-		image = compressImage(image: image)
+//		image = compressImage(image: image)
 	}
 	
 	
@@ -387,7 +387,7 @@ class CaptureDetailVC: UIViewController {
 	private func compressImage(image: UIImage) -> UIImage {
 		//Downsampling of image.
 		
-		let imageReductionFactor = 0.2
+		let imageReductionFactor = 1.0
 		
 		let reducedImageSize = CGSize(width: image.size.width * imageReductionFactor, height: image.size.height * imageReductionFactor)
 		

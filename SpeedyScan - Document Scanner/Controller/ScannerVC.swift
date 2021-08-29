@@ -15,23 +15,24 @@ class ScannerVC: UIViewController {
 	
 	private let captureSession              		= AVCaptureSession()
 	private let videoDataOutput             		= AVCaptureVideoDataOutput()
+	private let previewView							= UIView()
 	private let outlineLayer                		= CAShapeLayer()
 	private let captureButton               		= CaptureButton()
 	private let flashActivationButton       		= FlashToggleButton()
 	private let photoSettings 						= AVCapturePhotoSettings(format: [
 		AVVideoCodecKey 	: AVVideoCodecType.hevc
 	])
+	
 	private let photoOutput 						= AVCapturePhotoOutput()
 	
 	private var detectedRectangle	: VNRectangleObservation?
-	
+
 	private var ciImage				: CIImage?
 	private var uiImage                     		= UIImage()
 	private var framesWithoutRecognitionCounter   	= 0
 	
 	private lazy var device                 		= AVCaptureDevice(uniqueID: "")
 	private lazy var previewLayer           		= AVCaptureVideoPreviewLayer(session: captureSession)
-
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -39,13 +40,13 @@ class ScannerVC: UIViewController {
 	
 	//Start configuration of preview capture session to ensure cases where the the user returns to a state where the view had already been loaded.
 	override func viewWillAppear(_ animated: Bool) {
-		verifyAndConfigureRecognitionPreviewCaptureSession()
+		verifyAndConfigureCaptureSession()
 	}
 	
-	private func verifyAndConfigureRecognitionPreviewCaptureSession() {
+	private func verifyAndConfigureCaptureSession() {
 		
 		//Start of verification of camera devices support.
-		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInUltraWideCamera, .builtInDualCamera, .builtInWideAngleCamera],
+		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera],
 																	  mediaType: .video, position: .back)
 	
 		guard !deviceDiscoverySession.devices.isEmpty else {
@@ -67,7 +68,7 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
-		configureRecognitionPreviewCaptureSession()
+		configureCaptureSession()
 	}
 	
 	private func verifyCameraAccessOrNotDetermined() -> Bool {
@@ -114,7 +115,8 @@ class ScannerVC: UIViewController {
 		}
 	}
 	
-	private func configureRecognitionPreviewCaptureSession() {
+	private func configureCaptureSession() {
+		view.backgroundColor = .systemBackground
 		configureCameraInput()
 		configureCameraOutput()
 		configureCameraPreview()
@@ -125,7 +127,7 @@ class ScannerVC: UIViewController {
 	
 	private func configureCameraInput() {
 		guard let device = AVCaptureDevice.DiscoverySession(
-			deviceTypes : [.builtInUltraWideCamera, .builtInDualCamera, .builtInWideAngleCamera],
+			deviceTypes : [.builtInWideAngleCamera],
 			mediaType   : .video,
 			position    : .back
 			
@@ -143,9 +145,12 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
+		
 		self.device = device
 		
 		do {
+			try device.lockForConfiguration()
+			device.focusMode = .continuousAutoFocus
 			let cameraInput = try AVCaptureDeviceInput(device: device)
 			captureSession.addInput(cameraInput)
 			device.unlockForConfiguration()
@@ -195,7 +200,8 @@ class ScannerVC: UIViewController {
 		//Stabilization added to smooth out the movement of the bounding box on screen.
 		connection.preferredVideoStabilizationMode = .cinematic
 		
-		photoOutput.maxPhotoQualityPrioritization = .speed
+		photoOutput.maxPhotoQualityPrioritization 	= .quality
+		photoOutput.isHighResolutionCaptureEnabled	= true
 		
 		guard captureSession.canAddOutput(photoOutput) else {return}
 		
@@ -208,8 +214,14 @@ class ScannerVC: UIViewController {
 	
 	
 	private func configureCameraPreview() {
-		previewLayer.frame          = view.frame
-		previewLayer.videoGravity   = .resizeAspectFill
+		
+		let previewFrame = view.frame
+		
+//		CGRect(x: 0, y: 0, width: view.frame.height, height: view.frame.height)
+		
+		previewLayer.frame          = previewFrame
+		previewLayer.videoGravity   = .resizeAspect
+		
 		
 		view.layer.addSublayer(previewLayer)
 		
@@ -302,7 +314,7 @@ class ScannerVC: UIViewController {
 		
 		let currentPhotoCaptureSettings = AVCapturePhotoSettings(from: photoSettings)
 		
-		print(currentPhotoCaptureSettings.format)
+		currentPhotoCaptureSettings.isAutoVirtualDeviceFusionEnabled = false
 		
 		photoOutput.capturePhoto(with: currentPhotoCaptureSettings, delegate: self)
 	
@@ -355,8 +367,7 @@ class ScannerVC: UIViewController {
 		self.uiImage = UIImage()
 	}
 	
-	
-	private func detectRectangle(in image: CVPixelBuffer) {
+	private func detectRectangle(in image: CIImage) {
 		
 		DispatchQueue.main.async {
 			
@@ -366,7 +377,89 @@ class ScannerVC: UIViewController {
 				return
 			}
 			
-			self.ciImage = CIImage(cvPixelBuffer: image)
+			self.ciImage = image
+			
+			let request = VNDetectRectanglesRequest { request, error in
+				DispatchQueue.main.async { [self] in
+					guard let results = request.results as? [VNRectangleObservation] else {
+						DispatchQueue.main.async {
+							let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+							let alert = UIAlertController(
+								title: "Document Recognition Error",
+								message: "An error was encountered while configuring recognition.",
+								preferredStyle: .alert)
+							
+							alert.addAction(okayAlertAction)
+							self.present(alert, animated: true)
+						}
+						return
+					}
+					
+					guard let rect = results.first else {
+						
+						//Allow up to 5 frames without recognition to prevent abrupt reset of drawing on screen.
+						if framesWithoutRecognitionCounter > 5 {
+							resetRecognition()
+						} else {
+							framesWithoutRecognitionCounter += 1
+						}
+						
+						return
+					}
+					
+					framesWithoutRecognitionCounter = 0
+					
+					self.detectedRectangle = rect
+					
+					guard let detectedRectangle = self.detectedRectangle else {
+						return
+					}
+					
+					
+					self.drawBoundingBox(rect: detectedRectangle)
+					
+					self.presentCaptureDetailVC(with: self.ciImage)
+					self.turnOffFlash()
+					
+				}
+			}
+			
+			request.minimumAspectRatio  = VNAspectRatio(0.1)
+			request.maximumAspectRatio  = VNAspectRatio(4)
+			request.minimumSize         = Float(0.15)
+			request.minimumConfidence   = 1.0
+			request.maximumObservations = 1
+			
+			let imageRequestHandler = VNImageRequestHandler(ciImage: self.ciImage!, options: [:])
+			
+			do {
+				try imageRequestHandler.perform([request])
+			} catch {
+				DispatchQueue.main.async {
+					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+					let alert = UIAlertController(
+						title: "Document Recognition Error",
+						message: "An error was encountered while performing recognition.",
+						preferredStyle: .alert)
+					
+					alert.addAction(okayAlertAction)
+					self.present(alert, animated: true)
+				}
+			}
+		}
+	}
+	
+	private func detectRectangle(in cvBuffer: CVPixelBuffer) {
+		
+		DispatchQueue.main.async {
+			
+			//Stop recognition if ScannerVC is not presented.
+			guard self.presentedViewController == nil else {
+				self.resetRecognition()
+				return
+			}
+			
+			self.ciImage = CIImage(cvPixelBuffer: cvBuffer)
 			
 			let request = VNDetectRectanglesRequest { request, error in
 				DispatchQueue.main.async { [self] in
@@ -416,7 +509,7 @@ class ScannerVC: UIViewController {
 			request.minimumConfidence   = 1.0
 			request.maximumObservations = 1
 			
-			let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: image, options: [:])
+			let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: cvBuffer, options: [:])
 			
 			do {
 				try imageRequestHandler.perform([request])
@@ -456,19 +549,15 @@ class ScannerVC: UIViewController {
 		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
 		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
 		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
-//
-		image =
-		
-		image.applyingFilter("CIPerspectiveCorrection", parameters: [
+
+		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
 			"inputTopLeft"      : CIVector(cgPoint: topLeft),
 			"inputTopRight"     : CIVector(cgPoint: topRight),
 			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
 			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
-		])
-			.applyingFilter("CIDocumentEnhancer", parameters: [
+		]).applyingFilter("CIDocumentEnhancer", parameters: [
 			"inputAmount" : 1
-		])
-			.applyingFilter("CIColorControls", parameters: [
+		]).applyingFilter("CIColorControls", parameters: [
 			"inputBrightness" : -0.35,
 			"inputContrast"   : 1.2
 		]).applyingFilter("CISharpenLuminance", parameters: [
@@ -491,7 +580,7 @@ class ScannerVC: UIViewController {
 		outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
 		outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
 		
-		let bottomTopTransform = CGAffineTransform(scaleX: 1.5, y: -1).translatedBy(x: 0, y: -previewLayer.frame.height)
+		let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -previewLayer.frame.height)
 		
 		let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
 		let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
@@ -519,7 +608,6 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
 		
 		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
 		detectRectangle(in: frame)
-		
 	}
 }
 
@@ -528,9 +616,10 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 		var ciImage = CIImage(cgImage: photo.cgImageRepresentation()!)
 		
 		ciImage = ciImage.oriented(.right)
-		
-		presentCaptureDetailVC(with: ciImage)
-		turnOffFlash()
+	}
+	
+	func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
+		detectRectangle(in: ciImage!)
 	}
 }
 
