@@ -13,9 +13,10 @@ class ScannerVC: UIViewController {
 	
 	//MARK: Class Properties
 	
-	private let captureSession              		= AVCaptureSession()
+	let captureSession              				= AVCaptureMultiCamSession()
 	private let videoDataOutput             		= AVCaptureVideoDataOutput()
-	private let previewView							= UIView()
+	private let wideAnglePreviewView				= PreviewView()
+	private let ultraWideAnglePreviewView			= PreviewView()
 	private let outlineLayer                		= CAShapeLayer()
 	private let captureButton               		= CaptureButton()
 	private let flashActivationButton       		= FlashToggleButton()
@@ -25,14 +26,28 @@ class ScannerVC: UIViewController {
 	
 	private let photoOutput 						= AVCapturePhotoOutput()
 	
+	private var wideAngleDeviceInput: AVCaptureDeviceInput?
+	private var ultraWideCameraDeviceInput: AVCaptureDeviceInput?
+	
+	private var wideAnglePhotoOutputConnection: AVCaptureConnection?
+	
+	private let wideAnglePhotoOutput				= AVCapturePhotoOutput()
+	private let wideAngleVideoDataOutput			= AVCaptureVideoDataOutput()
+	private let ultraWideAngleVideoDataOutput		= AVCaptureVideoDataOutput()
+	
+	private lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
+	private lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
+	
 	private var detectedRectangle	: VNRectangleObservation?
-
+	
 	private var ciImage				: CIImage?
 	private var uiImage                     		= UIImage()
 	private var framesWithoutRecognitionCounter   	= 0
 	
-	private lazy var device                 		= AVCaptureDevice(uniqueID: "")
-	private lazy var previewLayer           		= AVCaptureVideoPreviewLayer(session: captureSession)
+	private lazy var wideAngleCameraDevice          = AVCaptureDevice(uniqueID: "")
+//	private lazy var previewLayer           		= AVCaptureVideoPreviewLayer(session: captureSession)
+	
+	//MARK: View Controller Life Cycle
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -40,15 +55,23 @@ class ScannerVC: UIViewController {
 	
 	//Start configuration of preview capture session to ensure cases where the the user returns to a state where the view had already been loaded.
 	override func viewWillAppear(_ animated: Bool) {
+		configureSubViews()
+	}
+
+	
+	override func viewDidAppear(_ animated: Bool) {
+		captureSession.startRunning()
 		verifyAndConfigureCaptureSession()
 	}
+	
+	//MARK: Class Methods
 	
 	private func verifyAndConfigureCaptureSession() {
 		
 		//Start of verification of camera devices support.
 		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera],
 																	  mediaType: .video, position: .back)
-	
+		
 		guard !deviceDiscoverySession.devices.isEmpty else {
 			DispatchQueue.main.async {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
@@ -115,18 +138,28 @@ class ScannerVC: UIViewController {
 		}
 	}
 	
-	private func configureCaptureSession() {
-		view.backgroundColor = .systemBackground
-		configureCameraInput()
-		configureCameraOutput()
-		configureCameraPreview()
-		configureUpOutlineLayer()
+	private func configureSubViews() {
+		configureUltraWideAnglePreviewView()
+		configureOverlayView()
 		configureCaptureButton()
 		configureFlashActivationButton()
+		configureWideAnglePreviewView()
 	}
 	
-	private func configureCameraInput() {
-		guard let device = AVCaptureDevice.DiscoverySession(
+	private func configureCaptureSession() {
+		configureWideAngleCameraCapture()
+		configureUltraWideAngleCameraCapture()
+		configureUpOutlineLayer()
+
+		configureUltraWideAngleCameraPreviewLayer()
+		configureWideAngleCameraPreviewLayer()
+
+	}
+	
+	private func configureWideAngleCameraCapture() {
+		
+		//Find the wide angle camera.
+		guard let wideAngleCameraDevice = AVCaptureDevice.DiscoverySession(
 			deviceTypes : [.builtInWideAngleCamera],
 			mediaType   : .video,
 			position    : .back
@@ -145,15 +178,31 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
+		self.wideAngleCameraDevice = wideAngleCameraDevice
 		
-		self.device = device
-		
+		//Add the wide angle camera input to the capture session.
 		do {
-			try device.lockForConfiguration()
-			device.focusMode = .continuousAutoFocus
-			let cameraInput = try AVCaptureDeviceInput(device: device)
-			captureSession.addInput(cameraInput)
-			device.unlockForConfiguration()
+			try wideAngleCameraDevice.lockForConfiguration()
+			
+			wideAngleCameraDevice.activeFormat = wideAngleCameraDevice.formats[38]
+			wideAngleCameraDevice.exposureMode = .continuousAutoExposure
+			wideAngleCameraDevice.whiteBalanceMode = .continuousAutoWhiteBalance
+			
+			print(wideAngleCameraDevice.activeFormat)
+			
+			wideAngleCameraDevice.focusMode = .continuousAutoFocus
+			wideAngleDeviceInput = try AVCaptureDeviceInput(device: wideAngleCameraDevice)
+			
+			guard let wideAngleDeviceInput = wideAngleDeviceInput,
+				  captureSession.canAddInput(wideAngleDeviceInput) else {
+					  debugPrint("Could not add camera input.")
+					  return
+				  }
+			
+			captureSession.addInputWithNoConnections(wideAngleDeviceInput)
+			wideAngleCameraDevice.unlockForConfiguration()
+			
+			
 		} catch {
 			DispatchQueue.main.async {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
@@ -166,66 +215,265 @@ class ScannerVC: UIViewController {
 				self.present(alert, animated: true)
 			}
 		}
+		
+		//Find the wide angle camera device input's video port
+		
+		guard let wideAngleDeviceInput = wideAngleDeviceInput,
+			  let wideAngleVideoPort = wideAngleDeviceInput.ports(for: .video,
+																	 sourceDeviceType: wideAngleCameraDevice.deviceType,
+																	 sourceDevicePosition: .back).first
+		else {
+			debugPrint("Cloud not find the back camera device input's video port.")
+			return
+		}
+		
+		//Add the wide angle camera photo and output.
+		guard captureSession.canAddOutput(wideAnglePhotoOutput),
+			  captureSession.canAddOutput(wideAngleVideoDataOutput)
+		else {
+			debugPrint("Could not add the wide angle camera photo and/or video data output.")
+			return
+		}
+		
+		
+		wideAnglePhotoOutput.isHighResolutionCaptureEnabled = true
+		wideAnglePhotoOutput.maxPhotoQualityPrioritization = .quality
+		
+		captureSession.addOutputWithNoConnections(wideAnglePhotoOutput)
+
+		
+		captureSession.addOutputWithNoConnections(wideAngleVideoDataOutput)
+		wideAngleVideoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
+		wideAngleVideoDataOutput.videoSettings = [
+			(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA),
+		] as [String : Any]
+		
+		
+		//Connect the wide angle camera device input to the wide angle camera video data output.
+		let wideAngleCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [wideAngleVideoPort], output: wideAngleVideoDataOutput)
+		
+		guard captureSession.canAddConnection(wideAngleCameraVideoDataOutputConnection) else {
+			debugPrint("Could not add a connection to the wide angle camera video data output.")
+			return
+		}
+		
+		wideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
+		wideAngleCameraVideoDataOutputConnection.preferredVideoStabilizationMode = .standard
+
+		
+		captureSession.addConnection(wideAngleCameraVideoDataOutputConnection)
+
+
+		//Connect the wide angle camera device input to the wide angle camera photo output.
+		let wideAngleCameraPhotoOutputConnection = AVCaptureConnection(inputPorts: [wideAngleVideoPort], output: wideAnglePhotoOutput)
+		
+		guard captureSession.canAddConnection(wideAngleCameraPhotoOutputConnection) else {
+			debugPrint("Could not add a connection to the wide angle camera video data output.")
+			return
+		}
+		
+		captureSession.addConnection(wideAngleCameraPhotoOutputConnection)
+		
+		//Connect the wide angle camera device input to the wide angle camera video preview layer
+		
+		let wideAngleCameraPreviewLayerConnection = AVCaptureConnection(inputPort: wideAngleVideoPort, videoPreviewLayer: wideAngleCameraPreviewLayer)
+		
+		guard captureSession.canAddConnection(wideAngleCameraPreviewLayerConnection) else {
+			debugPrint("Could not add a connection to the wide angle camera video preview layer.")
+			return
+		}
+		
+		captureSession.addConnection(wideAngleCameraPreviewLayerConnection)
+
+		return
 	}
 	
-	
-	private func configureCameraOutput() {
+	private func configureUltraWideAngleCameraCapture() {
 		
-		captureSession.beginConfiguration()
+		//Find the ultraWide angle camera.
 		
-		videoDataOutput.videoSettings = [
-			(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)
-		] as [String : Any]
-
-		videoDataOutput.alwaysDiscardsLateVideoFrames = true
-		videoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
-		captureSession.addOutput(videoDataOutput)
-
-		guard let connection = videoDataOutput.connection(with: .video) else {
+		guard let ultraWideAngleCameraDevice = AVCaptureDevice.DiscoverySession(
+			deviceTypes : [.builtInUltraWideCamera],
+			mediaType   : .video,
+			position    : .back
+			
+		).devices.first else {
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Camera Not Found",
+					message: "An error was encountered while trying to access the device built in camera.",
+					preferredStyle: .alert)
+				
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+			return
+		}
+		
+		//Add the ultra wide angle camera input to the capture session.
+		do {
+			try ultraWideAngleCameraDevice.lockForConfiguration()
+			
+			ultraWideAngleCameraDevice.activeFormat = ultraWideAngleCameraDevice.formats[25]
+			
+			print(ultraWideAngleCameraDevice.activeFormat)
+			
+						
+			ultraWideCameraDeviceInput = try AVCaptureDeviceInput(device: ultraWideAngleCameraDevice)
+			
+			guard let ultraWideCameraDeviceInput = ultraWideCameraDeviceInput,
+				  captureSession.canAddInput(ultraWideCameraDeviceInput) else {
+					  debugPrint("Could not add ultra wide camera input.")
+					  return
+				  }
+			
+			captureSession.addInputWithNoConnections(ultraWideCameraDeviceInput)
+			ultraWideAngleCameraDevice.unlockForConfiguration()
+			
+			
+		} catch {
 			DispatchQueue.main.async {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 				let alert = UIAlertController(
 					title: "Camera Configuration Error",
 					message: "An error was encountered while trying to configure the device built in camera.",
 					preferredStyle: .alert)
-
+				
 				alert.addAction(okayAlertAction)
 				self.present(alert, animated: true)
 			}
+		}
+		
+		//Find the ultra wide angle camera device input's video port
+		
+		guard let ultraWideCameraDeviceInput = ultraWideCameraDeviceInput,
+			  let ultraWideCameraVideoPort = ultraWideCameraDeviceInput.ports(for: .video,
+																				 sourceDeviceType: ultraWideAngleCameraDevice.deviceType,
+																				 sourceDevicePosition: .back).first
+		else {
+			debugPrint("Cloud not find the ultra wide camera device input's video port.")
 			return
 		}
-
-		connection.videoOrientation = .portrait
-
-		//Stabilization added to smooth out the movement of the bounding box on screen.
-		connection.preferredVideoStabilizationMode = .cinematic
 		
-		photoOutput.maxPhotoQualityPrioritization 	= .quality
-		photoOutput.isHighResolutionCaptureEnabled	= true
+		//Add the wide angle camera photo and output.
+		guard captureSession.canAddOutput(ultraWideAngleVideoDataOutput)
+		else {
+			debugPrint("Could not add the ultra wide angle camera photo and/or video data output.")
+			return
+		}
 		
-		guard captureSession.canAddOutput(photoOutput) else {return}
+		captureSession.addOutputWithNoConnections(ultraWideAngleVideoDataOutput)
 		
-		captureSession.sessionPreset = .photo
-		captureSession.addOutput(photoOutput)
+		wideAngleVideoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
+		wideAngleVideoDataOutput.videoSettings = [
+			(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)
+		] as [String : Any]
 		
-		captureSession.commitConfiguration()
+		//Connect the wide angle camera device input to the wide angle camera video data output.
+		let ultraWideAngleCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [ultraWideCameraVideoPort], output: ultraWideAngleVideoDataOutput)
 		
+		guard captureSession.canAddConnection(ultraWideAngleCameraVideoDataOutputConnection) else {
+			debugPrint("Could not add a connection to the wide angle camera video data output.")
+			return
+		}
+		
+		captureSession.addConnection(ultraWideAngleCameraVideoDataOutputConnection)
+		ultraWideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
+		ultraWideAngleCameraVideoDataOutputConnection.preferredVideoStabilizationMode = .cinematicExtended
+		
+		//Connect the wide angle camera device input to the wide angle camera video preview layer
+		
+		let ultraWideAngleCameraPreviewLayerConnection = AVCaptureConnection(inputPort: ultraWideCameraVideoPort, videoPreviewLayer: ultraWideAngleCameraPreviewLayer)
+		
+		guard captureSession.canAddConnection(ultraWideAngleCameraVideoDataOutputConnection) else {
+			debugPrint("Could not add a connection to the wide angle camera video preview layer.")
+			return
+		}
+		
+		captureSession.addConnection(ultraWideAngleCameraPreviewLayerConnection)
+		
+		return
 	}
 	
 	
-	private func configureCameraPreview() {
+	private func configureUltraWideAnglePreviewView() {
+		view.addSubview(ultraWideAnglePreviewView)
 		
-		let previewFrame = view.frame
+		ultraWideAnglePreviewView.translatesAutoresizingMaskIntoConstraints = false
 		
-//		CGRect(x: 0, y: 0, width: view.frame.height, height: view.frame.height)
+		NSLayoutConstraint.activate([
+			ultraWideAnglePreviewView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 1.7),
+			ultraWideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1.7),
+			ultraWideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+			ultraWideAnglePreviewView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0)
+		])
+	}
+	
+	
+	private func configureWideAnglePreviewView() {
 		
-		previewLayer.frame          = previewFrame
-		previewLayer.videoGravity   = .resizeAspect
+		view.addSubview(wideAnglePreviewView)
 		
+		wideAnglePreviewView.layer.borderColor = UIColor.white.cgColor
 		
-		view.layer.addSublayer(previewLayer)
+		wideAnglePreviewView.layer.borderWidth = 1
 		
-		captureSession.startRunning()
+		wideAnglePreviewView.layer.cornerRadius = 10
+		
+		wideAnglePreviewView.clipsToBounds = true
+		
+		wideAnglePreviewView.translatesAutoresizingMaskIntoConstraints = false
+		
+		NSLayoutConstraint.activate([
+			wideAnglePreviewView.bottomAnchor.constraint(equalTo: captureButton.topAnchor, constant: -80),
+			wideAnglePreviewView.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: (4/3)*0.98),
+			wideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.98),
+			wideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+		])
+	}
+	
+	
+	let overlayView = UIView()
+	
+	private func configureOverlayView() {
+		view.addSubview(overlayView)
+		
+		overlayView.backgroundColor = .systemBackground.withAlphaComponent(0.1)
+		
+		overlayView.translatesAutoresizingMaskIntoConstraints = false
+		
+		NSLayoutConstraint.activate([
+			overlayView.heightAnchor.constraint(equalTo: view.heightAnchor),
+			overlayView.widthAnchor.constraint(equalTo: view.widthAnchor),
+			overlayView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+			overlayView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+		])
+	}
+	
+	
+	private func configureWideAngleCameraPreviewLayer() {
+		
+		let previewFrame = wideAnglePreviewView.bounds
+		
+		wideAngleCameraPreviewLayer.frame          = previewFrame
+		wideAngleCameraPreviewLayer.videoGravity   = .resizeAspect
+		
+		wideAnglePreviewView.layer.addSublayer(wideAngleCameraPreviewLayer)
+
+	}
+	
+	
+
+	private func configureUltraWideAngleCameraPreviewLayer() {
+		
+		let previewFrame = ultraWideAnglePreviewView.bounds
+		
+		ultraWideAngleCameraPreviewLayer.frame          = previewFrame
+		ultraWideAngleCameraPreviewLayer.videoGravity   = .resizeAspect
+		
+		ultraWideAnglePreviewView.layer.addSublayer(ultraWideAngleCameraPreviewLayer)
+
 	}
 	
 	
@@ -248,7 +496,7 @@ class ScannerVC: UIViewController {
 	}
 	
 	func toggleFlash() {
-		guard let device = device else {return}
+		guard let device = wideAngleCameraDevice else {return}
 		
 		guard device.hasTorch else { return }
 		
@@ -303,29 +551,19 @@ class ScannerVC: UIViewController {
 	
 	
 	@objc private func captureButtonTapped() {
-		
 		guard verifyCameraAccessOrNotDetermined() else {
 			return
 		}
 		
-		guard let photoOutputConnection = photoOutput.connection(with: .video) else {fatalError("Unable to establish photo capture connection")}
-		
-		photoOutputConnection.videoOrientation = .portrait
-		
 		let currentPhotoCaptureSettings = AVCapturePhotoSettings(from: photoSettings)
 		
-		currentPhotoCaptureSettings.isAutoVirtualDeviceFusionEnabled = false
+		currentPhotoCaptureSettings.isHighResolutionPhotoEnabled = true
 		
-		photoOutput.capturePhoto(with: currentPhotoCaptureSettings, delegate: self)
-	
-		
-//		presentCaptureDetailVC(with: ciImage)
-		
-		//Turn off flash light if it is on when transitioning to detail view.
+		wideAnglePhotoOutput.capturePhoto(with: currentPhotoCaptureSettings, delegate: self)
 	}
 	
 	func turnOffFlash() {
-		guard let device = device else {return}
+		guard let device = wideAngleCameraDevice else {return}
 		guard device.hasTorch else { return }
 		
 		do {
@@ -355,8 +593,8 @@ class ScannerVC: UIViewController {
 	
 	
 	private func configureUpOutlineLayer() {
-		outlineLayer.frame = previewLayer.bounds
-		previewLayer.insertSublayer(outlineLayer, at: 1)
+		outlineLayer.frame = wideAngleCameraPreviewLayer.bounds
+		wideAngleCameraPreviewLayer.insertSublayer(outlineLayer, at: 1)
 	}
 	
 	
@@ -485,7 +723,7 @@ class ScannerVC: UIViewController {
 						} else {
 							framesWithoutRecognitionCounter += 1
 						}
-					
+						
 						return
 					}
 					
@@ -496,7 +734,7 @@ class ScannerVC: UIViewController {
 					guard let detectedRectangle = self.detectedRectangle else {
 						return
 					}
-
+					
 					
 					self.drawBoundingBox(rect: detectedRectangle)
 					
@@ -549,7 +787,7 @@ class ScannerVC: UIViewController {
 		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
 		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
 		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
-
+		
 		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
 			"inputTopLeft"      : CIVector(cgPoint: topLeft),
 			"inputTopRight"     : CIVector(cgPoint: topRight),
@@ -558,8 +796,8 @@ class ScannerVC: UIViewController {
 		]).applyingFilter("CIDocumentEnhancer", parameters: [
 			"inputAmount" : 1
 		]).applyingFilter("CIColorControls", parameters: [
-			"inputBrightness" : -0.35,
-			"inputContrast"   : 1.2
+			"inputBrightness" : -0.2,
+			"inputContrast"   : 1.5
 		]).applyingFilter("CISharpenLuminance", parameters: [
 			"inputSharpness" : 1.0
 		])
@@ -580,12 +818,16 @@ class ScannerVC: UIViewController {
 		outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
 		outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
 		
-		let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -previewLayer.frame.height)
+		let widthScaleFactor = (view.frame.height * (3/4)) / view.frame.width
 		
-		let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
-		let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
-		let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
-		let bottomLeft  = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(previewLayer.frame.width), Int(previewLayer.frame.height)).applying(bottomTopTransform)
+		let xTranslation = (view.frame.height * (3/4)/2) - view.frame.width / 1.25
+		
+		let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -wideAngleCameraPreviewLayer.frame.height)
+		
+		let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
+		let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
+		let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
+		let bottomLeft  = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
 		
 		outlinePath.move(to: topLeft)
 		outlinePath.addLine(to: topRight)
@@ -607,12 +849,14 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
 	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
 		
 		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
+		
 		detectRectangle(in: frame)
 	}
 }
 
 extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+		
 		var ciImage = CIImage(cgImage: photo.cgImageRepresentation()!)
 		
 		ciImage = ciImage.oriented(.right)
@@ -621,6 +865,7 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
 		detectRectangle(in: ciImage!)
 	}
+	
 }
 
 
