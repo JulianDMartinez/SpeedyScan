@@ -15,6 +15,7 @@ class ScannerVC: UIViewController {
 	
 	let captureSession              				= AVCaptureMultiCamSession()
 	private let videoDataOutput             		= AVCaptureVideoDataOutput()
+	private let visualEffectView                	= UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
 	private let wideAnglePreviewView				= PreviewView()
 	private let ultraWideAnglePreviewView			= PreviewView()
 	private let outlineLayer                		= CAShapeLayer()
@@ -140,10 +141,10 @@ class ScannerVC: UIViewController {
 	
 	private func configureSubViews() {
 		configureUltraWideAnglePreviewView()
-		configureOverlayView()
 		configureCaptureButton()
 		configureFlashActivationButton()
 		configureWideAnglePreviewView()
+		configureVisualEffectView()
 	}
 	
 	private func configureCaptureSession() {
@@ -315,7 +316,7 @@ class ScannerVC: UIViewController {
 		do {
 			try ultraWideAngleCameraDevice.lockForConfiguration()
 			
-			ultraWideAngleCameraDevice.activeFormat = ultraWideAngleCameraDevice.formats[25]
+			ultraWideAngleCameraDevice.activeFormat = ultraWideAngleCameraDevice.formats[9]
 			
 			print(ultraWideAngleCameraDevice.activeFormat)
 			
@@ -410,12 +411,25 @@ class ScannerVC: UIViewController {
 		])
 	}
 	
+	private func configureVisualEffectView() {
+	 	view.insertSubview(visualEffectView, aboveSubview: ultraWideAnglePreviewView)
+		visualEffectView.translatesAutoresizingMaskIntoConstraints = false
+		
+		NSLayoutConstraint.activate([
+			visualEffectView.topAnchor.constraint(equalTo:view.topAnchor),
+			visualEffectView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+			visualEffectView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+			visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+		])
+	}
+	
 	
 	private func configureWideAnglePreviewView() {
 		
 		view.addSubview(wideAnglePreviewView)
 		
 		wideAnglePreviewView.layer.borderColor = UIColor.white.cgColor
+		wideAnglePreviewView.backgroundColor = .black
 		
 		wideAnglePreviewView.layer.borderWidth = 1
 		
@@ -432,25 +446,6 @@ class ScannerVC: UIViewController {
 			wideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
 		])
 	}
-	
-	
-	let overlayView = UIView()
-	
-	private func configureOverlayView() {
-		view.addSubview(overlayView)
-		
-		overlayView.backgroundColor = .systemBackground.withAlphaComponent(0.1)
-		
-		overlayView.translatesAutoresizingMaskIntoConstraints = false
-		
-		NSLayoutConstraint.activate([
-			overlayView.heightAnchor.constraint(equalTo: view.heightAnchor),
-			overlayView.widthAnchor.constraint(equalTo: view.widthAnchor),
-			overlayView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-			overlayView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-		])
-	}
-	
 	
 	private func configureWideAngleCameraPreviewLayer() {
 		
