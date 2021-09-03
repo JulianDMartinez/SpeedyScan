@@ -21,6 +21,7 @@ class CaptureDetailVC: UIViewController {
 	private let selectionButton                 = SelectionButton()
 	private let buttonsStackView                = UIStackView()
 	private let verticalStackView               = UIStackView()
+
 		
 	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.SpeedyScan")
 	
@@ -47,6 +48,7 @@ class CaptureDetailVC: UIViewController {
 		configureButtonsStackView()
 		configureVerticalStackView()
 		configureVisualEffectView()
+//		image = compressImage(image: image)
 	}
 	
 	
@@ -380,6 +382,22 @@ class CaptureDetailVC: UIViewController {
 		}
 		
 		present(activitySheet, animated: true, completion: nil)
+	}
+	
+	private func compressImage(image: UIImage) -> UIImage {
+		//Downsampling of image.
+		
+		let imageReductionFactor = 1.0
+		
+		let reducedImageSize = CGSize(width: image.size.width * imageReductionFactor, height: image.size.height * imageReductionFactor)
+		
+		let renderer = UIGraphicsImageRenderer(size: reducedImageSize)
+		
+		let compressedImage = renderer.image(actions: { context in
+			image.draw(in: CGRect(origin: .zero, size: reducedImageSize))
+		})
+		
+		return compressedImage
 	}
 	
 	

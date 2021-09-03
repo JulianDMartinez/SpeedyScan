@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D58C82D265AB5F10022584B /* ScannerVC.swift */; };
-		1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D58C82F265AB6B10022584B /* StringUtilities.swift */; };
 		1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98CF265990110024A63A /* AppDelegate.swift */; };
 		1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98D1265990110024A63A /* SceneDelegate.swift */; };
 		1DFC98D9265990130024A63A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98D8265990130024A63A /* Assets.xcassets */; };
@@ -17,13 +16,13 @@
 		B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC29269370C200DDC437 /* CaptureDetailVC.swift */; };
 		B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */; };
 		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
+		B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B991B7B526DBC63C0046FA87 /* PreviewView.swift */; };
 		B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */; };
 		B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1D58C82D265AB5F10022584B /* ScannerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerVC.swift; sourceTree = "<group>"; };
-		1D58C82F265AB6B10022584B /* StringUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringUtilities.swift; sourceTree = "<group>"; };
 		1DFC98CC265990110024A63A /* SpeedyScan - Document Scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SpeedyScan - Document Scanner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DFC98CF265990110024A63A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1DFC98D1265990110024A63A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -34,6 +33,7 @@
 		B908CC29269370C200DDC437 /* CaptureDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailVC.swift; sourceTree = "<group>"; };
 		B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashToggleButton.swift; sourceTree = "<group>"; };
 		B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionButton.swift; sourceTree = "<group>"; };
+		B991B7B526DBC63C0046FA87 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		B9B299AF26C96CC4001C3946 /* SpeedyScan - Document Scanner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SpeedyScan - Document Scanner.entitlements"; sourceTree = "<group>"; };
 		B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMetadataManager.swift; sourceTree = "<group>"; };
 		B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
@@ -53,7 +53,6 @@
 		1D58C82C265AB5580022584B /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				1D58C82F265AB6B10022584B /* StringUtilities.swift */,
 				B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */,
 			);
 			path = Utility;
@@ -83,7 +82,6 @@
 				B9F6D40D26BEBB7400DFAE86 /* Managers */,
 				1DFC98E4265990440024A63A /* Views */,
 				1D58C82C265AB5580022584B /* Utility */,
-				B908CC282691472600DDC437 /* Extensions */,
 				1DFC98E3265990400024A63A /* Support */,
 			);
 			path = "SpeedyScan - Document Scanner";
@@ -107,6 +105,7 @@
 				B908CC262691438700DDC437 /* CaptureButton.swift */,
 				B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */,
 				B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */,
+				B991B7B526DBC63C0046FA87 /* PreviewView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -118,13 +117,6 @@
 				B908CC29269370C200DDC437 /* CaptureDetailVC.swift */,
 			);
 			path = Controller;
-			sourceTree = "<group>";
-		};
-		B908CC282691472600DDC437 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Extensions;
 			sourceTree = "<group>";
 		};
 		B9F6D40D26BEBB7400DFAE86 /* Managers */ = {
@@ -207,9 +199,9 @@
 				B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */,
 				B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
-				1D58C830265AB6B10022584B /* StringUtilities.swift in Sources */,
 				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,
+				B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */,
 				B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */,
 				B908CC272691438700DDC437 /* CaptureButton.swift in Sources */,
 				B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */,
