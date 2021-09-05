@@ -61,8 +61,8 @@ class ScannerVC: UIViewController {
 
 	
 	override func viewDidAppear(_ animated: Bool) {
-		captureSession.startRunning()
 		verifyAndConfigureCaptureSession()
+		captureSession.startRunning()
 	}
 	
 	//MARK: Class Methods
@@ -259,7 +259,7 @@ class ScannerVC: UIViewController {
 		}
 		
 		wideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
-		wideAngleCameraVideoDataOutputConnection.preferredVideoStabilizationMode = .standard
+		wideAngleCameraVideoDataOutputConnection.preferredVideoStabilizationMode = .off
 
 		
 		captureSession.addConnection(wideAngleCameraVideoDataOutputConnection)
@@ -402,6 +402,7 @@ class ScannerVC: UIViewController {
 		view.addSubview(ultraWideAnglePreviewView)
 		
 		ultraWideAnglePreviewView.translatesAutoresizingMaskIntoConstraints = false
+		ultraWideAnglePreviewView.backgroundColor = .systemBackground
 		
 		NSLayoutConstraint.activate([
 			ultraWideAnglePreviewView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 1.7),
@@ -429,7 +430,7 @@ class ScannerVC: UIViewController {
 		view.addSubview(wideAnglePreviewView)
 		
 		wideAnglePreviewView.layer.borderColor = UIColor.white.cgColor
-		wideAnglePreviewView.backgroundColor = .black
+		wideAnglePreviewView.backgroundColor = .systemGray4
 		
 		wideAnglePreviewView.layer.borderWidth = 1
 		
@@ -553,6 +554,8 @@ class ScannerVC: UIViewController {
 		let currentPhotoCaptureSettings = AVCapturePhotoSettings(from: photoSettings)
 		
 		currentPhotoCaptureSettings.isHighResolutionPhotoEnabled = true
+		currentPhotoCaptureSettings.photoQualityPrioritization = .quality
+		currentPhotoCaptureSettings.isAutoVirtualDeviceFusionEnabled = true
 		
 		wideAnglePhotoOutput.capturePhoto(with: currentPhotoCaptureSettings, delegate: self)
 	}
@@ -789,12 +792,9 @@ class ScannerVC: UIViewController {
 			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
 			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
 		]).applyingFilter("CIDocumentEnhancer", parameters: [
-			"inputAmount" : 1
+			"inputAmount" : 0.5
 		]).applyingFilter("CIColorControls", parameters: [
-			"inputBrightness" : -0.2,
-			"inputContrast"   : 1.5
-		]).applyingFilter("CISharpenLuminance", parameters: [
-			"inputSharpness" : 1.0
+			"inputBrightness" : -0.0
 		])
 		
 		let context = CIContext()
@@ -853,6 +853,8 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
 		var ciImage = CIImage(cgImage: photo.cgImageRepresentation()!)
+		
+		print(photo.metadata)
 		
 		ciImage = ciImage.oriented(.right)
 	}
