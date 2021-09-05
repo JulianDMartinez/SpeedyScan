@@ -16,6 +16,7 @@
 		B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC29269370C200DDC437 /* CaptureDetailVC.swift */; };
 		B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */; };
 		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
+		B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B915244D26E562C400112555 /* CGPoint+Ext.swift */; };
 		B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B991B7B526DBC63C0046FA87 /* PreviewView.swift */; };
 		B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */; };
 		B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */; };
@@ -33,6 +34,7 @@
 		B908CC29269370C200DDC437 /* CaptureDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailVC.swift; sourceTree = "<group>"; };
 		B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashToggleButton.swift; sourceTree = "<group>"; };
 		B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionButton.swift; sourceTree = "<group>"; };
+		B915244D26E562C400112555 /* CGPoint+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+Ext.swift"; sourceTree = "<group>"; };
 		B991B7B526DBC63C0046FA87 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		B9B299AF26C96CC4001C3946 /* SpeedyScan - Document Scanner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SpeedyScan - Document Scanner.entitlements"; sourceTree = "<group>"; };
 		B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMetadataManager.swift; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 				B9F6D40D26BEBB7400DFAE86 /* Managers */,
 				1DFC98E4265990440024A63A /* Views */,
 				1D58C82C265AB5580022584B /* Utility */,
+				B915244C26E5626E00112555 /* Extensions */,
 				1DFC98E3265990400024A63A /* Support */,
 			);
 			path = "SpeedyScan - Document Scanner";
@@ -117,6 +120,14 @@
 				B908CC29269370C200DDC437 /* CaptureDetailVC.swift */,
 			);
 			path = Controller;
+			sourceTree = "<group>";
+		};
+		B915244C26E5626E00112555 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				B915244D26E562C400112555 /* CGPoint+Ext.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		B9F6D40D26BEBB7400DFAE86 /* Managers */ = {
@@ -198,6 +209,7 @@
 			files = (
 				B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */,
 				B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */,
+				B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
 				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,

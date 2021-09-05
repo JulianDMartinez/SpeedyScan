@@ -11,43 +11,42 @@ import Vision
 
 class ScannerVC: UIViewController {
 	
-	//MARK: Class Properties
+	//MARK: UIKit Properties
 	
-	let captureSession              				= AVCaptureMultiCamSession()
-	private let videoDataOutput             		= AVCaptureVideoDataOutput()
 	private let visualEffectView                	= UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
 	private let wideAnglePreviewView				= PreviewView()
 	private let ultraWideAnglePreviewView			= PreviewView()
 	private let outlineLayer                		= CAShapeLayer()
 	private let captureButton               		= CaptureButton()
 	private let flashActivationButton       		= FlashToggleButton()
+	private var uiImage                     		= UIImage()
+	private var framesWithoutRecognitionCounter   	= 0
+	
+	private var ciImage : CIImage?
+	
+	//MARK: AVFoundation Properties
+	
+	private let captureSession              		= AVCaptureMultiCamSession()
+	private let videoDataOutput             		= AVCaptureVideoDataOutput()
+	private let photoOutput 						= AVCapturePhotoOutput()
+	private let wideAnglePhotoOutput				= AVCapturePhotoOutput()
+	private let wideAngleVideoDataOutput			= AVCaptureVideoDataOutput()
+	private let ultraWideAngleVideoDataOutput		= AVCaptureVideoDataOutput()
 	private let photoSettings 						= AVCapturePhotoSettings(format: [
 		AVVideoCodecKey 	: AVVideoCodecType.hevc
 	])
 	
-	private let photoOutput 						= AVCapturePhotoOutput()
-	
 	private var wideAngleDeviceInput: AVCaptureDeviceInput?
 	private var ultraWideCameraDeviceInput: AVCaptureDeviceInput?
-	
 	private var wideAnglePhotoOutputConnection: AVCaptureConnection?
-	
-	private let wideAnglePhotoOutput				= AVCapturePhotoOutput()
-	private let wideAngleVideoDataOutput			= AVCaptureVideoDataOutput()
-	private let ultraWideAngleVideoDataOutput		= AVCaptureVideoDataOutput()
-	
+
 	private lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
 	private lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
-	
-	private var detectedRectangle	: VNRectangleObservation?
-	
-	private var ciImage				: CIImage?
-	private var uiImage                     		= UIImage()
-	private var framesWithoutRecognitionCounter   	= 0
-	
 	private lazy var wideAngleCameraDevice          = AVCaptureDevice(uniqueID: "")
-//	private lazy var previewLayer           		= AVCaptureVideoPreviewLayer(session: captureSession)
-	
+
+	//MARK: Vision Properties
+	private var detectedRectangle	: VNRectangleObservation?
+
 	//MARK: View Controller Life Cycle
 	
 	override func viewDidLoad() {
@@ -87,7 +86,7 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
-		// Verify if camera access authorization is provided and configure preview layer if it is or is not determined yet.
+		// Verify if camera access authorization is provided and start capture session configuration if it is or is not determined yet.
 		guard verifyCameraAccessOrNotDetermined() else {
 			return
 		}
@@ -189,8 +188,6 @@ class ScannerVC: UIViewController {
 			wideAngleCameraDevice.exposureMode = .continuousAutoExposure
 			wideAngleCameraDevice.whiteBalanceMode = .continuousAutoWhiteBalance
 			
-			print(wideAngleCameraDevice.activeFormat)
-			
 			wideAngleCameraDevice.focusMode = .continuousAutoFocus
 			wideAngleDeviceInput = try AVCaptureDeviceInput(device: wideAngleCameraDevice)
 			
@@ -277,14 +274,7 @@ class ScannerVC: UIViewController {
 		
 		//Connect the wide angle camera device input to the wide angle camera video preview layer
 		
-		let wideAngleCameraPreviewLayerConnection = AVCaptureConnection(inputPort: wideAngleVideoPort, videoPreviewLayer: wideAngleCameraPreviewLayer)
-		
-		guard captureSession.canAddConnection(wideAngleCameraPreviewLayerConnection) else {
-			debugPrint("Could not add a connection to the wide angle camera video preview layer.")
-			return
-		}
-		
-		captureSession.addConnection(wideAngleCameraPreviewLayerConnection)
+		_ = AVCaptureConnection(inputPort: wideAngleVideoPort, videoPreviewLayer: wideAngleCameraPreviewLayer)
 
 		return
 	}
@@ -317,9 +307,6 @@ class ScannerVC: UIViewController {
 			try ultraWideAngleCameraDevice.lockForConfiguration()
 			
 			ultraWideAngleCameraDevice.activeFormat = ultraWideAngleCameraDevice.formats[9]
-			
-			print(ultraWideAngleCameraDevice.activeFormat)
-			
 						
 			ultraWideCameraDeviceInput = try AVCaptureDeviceInput(device: ultraWideAngleCameraDevice)
 			
@@ -381,18 +368,10 @@ class ScannerVC: UIViewController {
 		
 		captureSession.addConnection(ultraWideAngleCameraVideoDataOutputConnection)
 		ultraWideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
-		ultraWideAngleCameraVideoDataOutputConnection.preferredVideoStabilizationMode = .cinematicExtended
 		
 		//Connect the wide angle camera device input to the wide angle camera video preview layer
 		
-		let ultraWideAngleCameraPreviewLayerConnection = AVCaptureConnection(inputPort: ultraWideCameraVideoPort, videoPreviewLayer: ultraWideAngleCameraPreviewLayer)
-		
-		guard captureSession.canAddConnection(ultraWideAngleCameraVideoDataOutputConnection) else {
-			debugPrint("Could not add a connection to the wide angle camera video preview layer.")
-			return
-		}
-		
-		captureSession.addConnection(ultraWideAngleCameraPreviewLayerConnection)
+		_ = AVCaptureConnection(inputPort: ultraWideCameraVideoPort, videoPreviewLayer: ultraWideAngleCameraPreviewLayer)
 		
 		return
 	}
@@ -767,7 +746,7 @@ class ScannerVC: UIViewController {
 	
 	private func doPerspectiveCorrection(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
 		
-		guard let unwrappedCIImage = ciImage, let unwrappedObservation = observation else {
+		guard let ciImage = ciImage, let unwrappedObservation = observation else {
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
 				title: "No Object Detected",
@@ -779,12 +758,12 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
-		var image = unwrappedCIImage
+		var image = ciImage
 		
-		let topLeft     = unwrappedObservation.topLeft.scaled(to: unwrappedCIImage.extent.size)
-		let topRight    = unwrappedObservation.topRight.scaled(to: unwrappedCIImage.extent.size)
-		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: unwrappedCIImage.extent.size)
-		let bottomRight = unwrappedObservation.bottomRight.scaled(to: unwrappedCIImage.extent.size)
+		let topLeft     = unwrappedObservation.topLeft.scaled(to: ciImage.extent.size)
+		let topRight    = unwrappedObservation.topRight.scaled(to: ciImage.extent.size)
+		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: ciImage.extent.size)
+		let bottomRight = unwrappedObservation.bottomRight.scaled(to: ciImage.extent.size)
 		
 		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
 			"inputTopLeft"      : CIVector(cgPoint: topLeft),
@@ -792,9 +771,10 @@ class ScannerVC: UIViewController {
 			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
 			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
 		]).applyingFilter("CIDocumentEnhancer", parameters: [
-			"inputAmount" : 0.5
+			"inputAmount" : 1
 		]).applyingFilter("CIColorControls", parameters: [
-			"inputBrightness" : -0.0
+			"inputBrightness" : -0.2,
+			"inputContrast"	  : 1.5
 		])
 		
 		let context = CIContext()
@@ -812,10 +792,6 @@ class ScannerVC: UIViewController {
 		outlineLayer.lineWidth      = 2
 		outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
 		outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
-		
-		let widthScaleFactor = (view.frame.height * (3/4)) / view.frame.width
-		
-		let xTranslation = (view.frame.height * (3/4)/2) - view.frame.width / 1.25
 		
 		let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -wideAngleCameraPreviewLayer.frame.height)
 		
@@ -838,37 +814,70 @@ class ScannerVC: UIViewController {
 	}
 }
 
+//MARK: AVCaptureVideoDataOutputSampleBufferDelegate
 
 extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
 	
+	//This function provides each frame used in the preview layer. Detect rectangle is called out to detect and draw detected rectangles in the preview layer frame.
 	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-		
 		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
-		
 		detectRectangle(in: frame)
 	}
 }
 
+//MARK: AVCapturePhotoCaptureDelegate
+
 extension ScannerVC: AVCapturePhotoCaptureDelegate {
+	
+	//This function is called out when a picture is captured in capturePhoto
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
-		var ciImage = CIImage(cgImage: photo.cgImageRepresentation()!)
+		guard let cgImage = photo.cgImageRepresentation() else {
+			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+			let alert = UIAlertController(
+				title: "No Object Detected",
+				message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
+				preferredStyle: .alert)
+			
+			alert.addAction(okayAlertAction)
+			self.present(alert, animated: true)
+			return
+		}
 		
-		print(photo.metadata)
+		ciImage = CIImage(cgImage: cgImage)
 		
-		ciImage = ciImage.oriented(.right)
+		guard let ciImage = ciImage else {
+			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+			let alert = UIAlertController(
+				title: "No Object Detected",
+				message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
+				preferredStyle: .alert)
+			
+			alert.addAction(okayAlertAction)
+			self.present(alert, animated: true)
+			return
+		}
+		
+		self.ciImage = ciImage.oriented(.right)
+		
 	}
+	
 	
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
-		detectRectangle(in: ciImage!)
+		
+		guard let ciImage = ciImage else {
+			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+			let alert = UIAlertController(
+				title: "No Object Detected",
+				message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
+				preferredStyle: .alert)
+			
+			alert.addAction(okayAlertAction)
+			self.present(alert, animated: true)
+			return
+		}
+		
+		detectRectangle(in: ciImage)
 	}
 	
-}
-
-
-extension CGPoint {
-	func scaled(to size: CGSize) -> CGPoint {
-		return CGPoint(x: self.x * size.width,
-					   y: self.y * size.height)
-	}
 }
