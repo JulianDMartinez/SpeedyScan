@@ -12,13 +12,14 @@ import Vision
 class ScannerVC: UIViewController {
 	
 	//MARK: UIKit Properties
-
+	
 	private let wideAnglePreviewView					= PreviewView()
 	private let ultraWideAnglePreviewView				= PreviewView()
 	private let outlineLayer                			= CAShapeLayer()
 	private var uiImage                     			= UIImage()
 	private var framesWithoutRecognitionCounter   		= 0
 	private var ciImage : CIImage?
+	
 	
 	//MARK: AVFoundation Properties
 	
@@ -27,28 +28,17 @@ class ScannerVC: UIViewController {
 	private lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
 	private lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
 	private lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
+	
 
 	//MARK: Vision Properties
-	private var detectedRectangle	: VNRectangleObservation?
-
-	//MARK: View Controller Life Cycle
 	
-	override func viewDidLoad() {
-		super.viewDidLoad()
-	}
+	private var detectedRectangle	: VNRectangleObservation?
+	
+
+	//MARK: View Controller Life Cycle Methods
 	
 	override func viewWillAppear(_ animated: Bool) {
-		configureSubViews()
-	}
-	
-	override func viewDidAppear(_ animated: Bool) {
-		guard verifyDeviceSupportAndCameraAccess() else {return}
-		configureCaptureSession()
-	}
-	
-	//MARK: Class Methods
-	
-	private func configureSubViews() {
+		//Configure Subviews
 		configureUltraWideAnglePreviewView()
 		configureCaptureButton()
 		configureFlashActivationButton()
@@ -56,6 +46,113 @@ class ScannerVC: UIViewController {
 		configureVisualEffectView()
 	}
 	
+	override func viewDidAppear(_ animated: Bool) {
+		guard verifyDeviceSupportAndCameraAccess() else {return}
+		
+		//Configure Capture Session
+		configureWideAngleCameraCapture()
+		configureUltraWideAngleCameraCapture()
+		configureUpOutlineLayer()
+		configureWideAngleCameraPreviewLayer()
+		configureUltraWideAngleCameraPreviewLayer()
+		captureSession.startRunning()
+	}
+	
+	
+	//MARK: Subview Configuration
+	
+	private func configureUltraWideAnglePreviewView() {
+		view.addSubview(ultraWideAnglePreviewView)
+		
+		ultraWideAnglePreviewView.backgroundColor = .black
+		ultraWideAnglePreviewView.translatesAutoresizingMaskIntoConstraints = false
+		
+		NSLayoutConstraint.activate([
+			ultraWideAnglePreviewView.heightAnchor.constraint(equalTo: view.heightAnchor),
+			ultraWideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor),
+			ultraWideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
+			ultraWideAnglePreviewView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0)
+		])
+	}
+	
+	
+	private func configureVisualEffectView() {
+		
+		let visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+		
+		view.insertSubview(visualEffectView, aboveSubview: ultraWideAnglePreviewView)
+		
+		visualEffectView.translatesAutoresizingMaskIntoConstraints = false
+		
+		NSLayoutConstraint.activate([
+			visualEffectView.topAnchor.constraint(equalTo:view.topAnchor),
+			visualEffectView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+			visualEffectView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+			visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+		])
+	}
+	
+	
+	private func configureWideAnglePreviewView() {
+		view.addSubview(wideAnglePreviewView)
+		
+		wideAnglePreviewView.layer.borderColor 	= UIColor.white.cgColor
+		wideAnglePreviewView.backgroundColor 	= .black.withAlphaComponent(0.8)
+		wideAnglePreviewView.clipsToBounds 		= true
+		wideAnglePreviewView.layer.borderWidth 	= 1
+		wideAnglePreviewView.layer.cornerRadius = 10
+		wideAnglePreviewView.translatesAutoresizingMaskIntoConstraints = false
+		
+		let viewOffsetMultiplier = 0.98
+		
+		NSLayoutConstraint.activate([
+			wideAnglePreviewView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -50),
+			wideAnglePreviewView.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: (4/3)*viewOffsetMultiplier),
+			wideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: viewOffsetMultiplier),
+			wideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+		])
+	}
+	
+	
+	private func configureCaptureButton() {
+		
+		let buttonHeight: CGFloat 	= 70
+		let symbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: buttonHeight - 5, weight: .ultraLight)
+		let captureButton   = SSCircularButton(buttonHeight: buttonHeight, symbolConfiguration: symbolConfiguration, symbolName: "camera.circle")
+		
+		view.addSubview(captureButton)
+		
+		captureButton.addTarget(self, action: #selector(captureButtonTapped), for: .touchUpInside)
+		
+		NSLayoutConstraint.activate([
+			captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+			captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
+			captureButton.heightAnchor.constraint(equalToConstant: captureButton.buttonHeight),
+			captureButton.widthAnchor.constraint(equalToConstant: captureButton.buttonHeight)
+		])
+	}
+	
+	
+	private func configureFlashActivationButton() {
+		
+		let buttonHeight: CGFloat 	= 50
+		let symbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: buttonHeight - 10, weight: .ultraLight)
+		let flashActivationButton   = SSCircularButton(buttonHeight: 50, symbolConfiguration: symbolConfiguration, symbolName: "flashlight.off.fill")
+		
+		view.addSubview(flashActivationButton)
+		
+		flashActivationButton.addTarget(self, action: #selector(flashActivationButtonTapped), for: .touchUpInside)
+		
+		NSLayoutConstraint.activate([
+			flashActivationButton.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 80),
+			flashActivationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
+			flashActivationButton.heightAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight),
+			flashActivationButton.widthAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight)
+		])
+	}
+	
+	
+	//MARK: AVFoundation Capture Session Configuration
 	
 	private func verifyDeviceSupportAndCameraAccess() -> Bool {
 		//Verify primary camera device support.
@@ -125,16 +222,6 @@ class ScannerVC: UIViewController {
 			}
 			return false
 		}
-	}
-	
-	
-	private func configureCaptureSession() {
-		configureWideAngleCameraCapture()
-		configureUltraWideAngleCameraCapture()
-		configureUpOutlineLayer()
-		configureWideAngleCameraPreviewLayer()
-		configureUltraWideAngleCameraPreviewLayer()
-		captureSession.startRunning()
 	}
 	
 	
@@ -341,59 +428,6 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	private func configureUltraWideAnglePreviewView() {
-		view.addSubview(ultraWideAnglePreviewView)
-		
-		ultraWideAnglePreviewView.backgroundColor = .black
-		ultraWideAnglePreviewView.translatesAutoresizingMaskIntoConstraints = false
-		
-		NSLayoutConstraint.activate([
-			ultraWideAnglePreviewView.heightAnchor.constraint(equalTo: view.heightAnchor),
-			ultraWideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor),
-			ultraWideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
-			ultraWideAnglePreviewView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0)
-		])
-	}
-	
-	
-	private func configureVisualEffectView() {
-		
-		let visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
-		
-	 	view.insertSubview(visualEffectView, aboveSubview: ultraWideAnglePreviewView)
-		
-		visualEffectView.translatesAutoresizingMaskIntoConstraints = false
-		
-		NSLayoutConstraint.activate([
-			visualEffectView.topAnchor.constraint(equalTo:view.topAnchor),
-			visualEffectView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-			visualEffectView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-			visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-		])
-	}
-	
-	
-	private func configureWideAnglePreviewView() {
-		view.addSubview(wideAnglePreviewView)
-		
-		wideAnglePreviewView.layer.borderColor 	= UIColor.white.cgColor
-		wideAnglePreviewView.backgroundColor 	= .black.withAlphaComponent(0.8)
-		wideAnglePreviewView.clipsToBounds 		= true
-		wideAnglePreviewView.layer.borderWidth 	= 1
-		wideAnglePreviewView.layer.cornerRadius = 10
-		wideAnglePreviewView.translatesAutoresizingMaskIntoConstraints = false
-		
-		let viewOffsetMultiplier = 0.98
-		
-		NSLayoutConstraint.activate([
-			wideAnglePreviewView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -50),
-			wideAnglePreviewView.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: (4/3)*viewOffsetMultiplier),
-			wideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: viewOffsetMultiplier),
-			wideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-		])
-	}
-	
-	
 	private func configureWideAngleCameraPreviewLayer() {
 		let previewFrame = wideAnglePreviewView.bounds
 		
@@ -414,31 +448,20 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	private func configureFlashActivationButton() {
-		
-		let buttonHeight: CGFloat 	= 50
-		let symbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: buttonHeight - 10, weight: .ultraLight)
-		let flashActivationButton   = SSCircularButton(buttonHeight: 50, symbolConfiguration: symbolConfiguration, symbolName: "flashlight.off.fill")
-		
-		view.addSubview(flashActivationButton)
-		
-		flashActivationButton.addTarget(self, action: #selector(flashActivationButtonTapped), for: .touchUpInside)
-		
-		NSLayoutConstraint.activate([
-			flashActivationButton.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 80),
-			flashActivationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-			flashActivationButton.heightAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight),
-			flashActivationButton.widthAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight)
-		])
+	private func configureUpOutlineLayer() {
+		outlineLayer.frame = wideAngleCameraPreviewLayer.bounds
+		wideAngleCameraPreviewLayer.insertSublayer(outlineLayer, at: 1)
 	}
 	
+	
+	//MARK: Button Action Configuration
 	
 	@objc private func flashActivationButtonTapped() {
 		toggleFlash()
 	}
 	
 	
-	func toggleFlash() {
+	private func toggleFlash() {
 		guard let device = wideAngleCameraDevice else {return}
 		
 		guard device.hasTorch else { return }
@@ -478,25 +501,6 @@ class ScannerVC: UIViewController {
 		}
 	}
 	
-	
-	private func configureCaptureButton() {
-		
-		let buttonHeight: CGFloat 	= 70
-		let symbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: buttonHeight - 5, weight: .ultraLight)
-		let captureButton   = SSCircularButton(buttonHeight: buttonHeight, symbolConfiguration: symbolConfiguration, symbolName: "camera.circle")
-		
-		view.addSubview(captureButton)
-		
-		captureButton.addTarget(self, action: #selector(captureButtonTapped), for: .touchUpInside)
-		
-		NSLayoutConstraint.activate([
-			captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-			captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-			captureButton.heightAnchor.constraint(equalToConstant: captureButton.buttonHeight),
-			captureButton.widthAnchor.constraint(equalToConstant: captureButton.buttonHeight)
-		])
-	}
-	
 		
 	@objc private func captureButtonTapped() {
 		
@@ -515,7 +519,7 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	func turnOffFlash() {
+	private func turnOffFlash() {
 		guard let device = wideAngleCameraDevice else {return}
 		guard device.hasTorch else { return }
 		
@@ -531,9 +535,9 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	func presentCaptureDetailVC(with image: CIImage?) {
+	private func presentCaptureDetailVC(with image: CIImage?) {
 		
-		doPerspectiveCorrection(detectedRectangle, from: image)
+		processPhotoCapture(detectedRectangle, from: image)
 		
 		let captureDetailVC = CaptureDetailVC(image: uiImage)
 		
@@ -544,86 +548,9 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	private func configureUpOutlineLayer() {
-		outlineLayer.frame = wideAngleCameraPreviewLayer.bounds
-		wideAngleCameraPreviewLayer.insertSublayer(outlineLayer, at: 1)
-	}
+	//MARK: Rectangle Recognition Configuration
 	
-	
-	private func resetRecognition() {
-		self.detectedRectangle = nil
-		self.drawBoundingBox(rect: VNRectangleObservation())
-		self.ciImage = nil
-		self.uiImage = UIImage()
-	}
-	
-	
-	private func detectRectangle(in image: CIImage) {
-		
-		DispatchQueue.main.async {
-			
-			let request = VNDetectRectanglesRequest { request, error in
-				DispatchQueue.main.async { [self] in
-					guard let results = request.results as? [VNRectangleObservation] else {
-						DispatchQueue.main.async {
-							let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-							let alert = UIAlertController(
-								title: "Document Recognition Error",
-								message: "An error was encountered while configuring recognition.",
-								preferredStyle: .alert)
-							
-							alert.addAction(okayAlertAction)
-							self.present(alert, animated: true)
-						}
-						return
-					}
-					
-					guard let rect = results.first else {
-						let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-						let alert = UIAlertController(
-							title: "No Object Detected",
-							message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
-						preferredStyle: .alert)
-						
-						alert.addAction(okayAlertAction)
-						self.present(alert, animated: true)
-						return
-					}
-					
-					self.detectedRectangle = rect
-					
-					self.presentCaptureDetailVC(with: self.ciImage)
-					self.turnOffFlash()
-				}
-			}
-			
-			request.minimumAspectRatio  = VNAspectRatio(0.1)
-			request.maximumAspectRatio  = VNAspectRatio(4)
-			request.minimumSize         = Float(0.15)
-			request.minimumConfidence   = 1.0
-			request.maximumObservations = 1
-			
-			let imageRequestHandler = VNImageRequestHandler(ciImage: image, options: [:])
-			
-			do {
-				try imageRequestHandler.perform([request])
-			} catch {
-				DispatchQueue.main.async {
-					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-					let alert = UIAlertController(
-						title: "Document Recognition Error",
-						message: "An error was encountered while performing recognition.",
-						preferredStyle: .alert)
-					
-					alert.addAction(okayAlertAction)
-					self.present(alert, animated: true)
-				}
-			}
-		}
-	}
-	
-	
-	private func detectRectangle(in cvBuffer: CVPixelBuffer) {
+	private func detectPreviewRectangle(in cvBuffer: CVPixelBuffer) {
 		
 		DispatchQueue.main.async {
 			
@@ -701,7 +628,113 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	private func doPerspectiveCorrection(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
+	private func detectPhotoCaptureRectangle(in image: CIImage) {
+		
+		DispatchQueue.main.async {
+			
+			let request = VNDetectRectanglesRequest { request, error in
+				DispatchQueue.main.async { [self] in
+					guard let results = request.results as? [VNRectangleObservation] else {
+						DispatchQueue.main.async {
+							let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+							let alert = UIAlertController(
+								title: "Document Recognition Error",
+								message: "An error was encountered while configuring recognition.",
+								preferredStyle: .alert)
+							
+							alert.addAction(okayAlertAction)
+							self.present(alert, animated: true)
+						}
+						return
+					}
+					
+					guard let rect = results.first else {
+						let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+						let alert = UIAlertController(
+							title: "No Object Detected",
+							message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
+						preferredStyle: .alert)
+						
+						alert.addAction(okayAlertAction)
+						self.present(alert, animated: true)
+						return
+					}
+					
+					self.detectedRectangle = rect
+					
+					self.presentCaptureDetailVC(with: self.ciImage)
+					self.turnOffFlash()
+				}
+			}
+			
+			request.minimumAspectRatio  = VNAspectRatio(0.1)
+			request.maximumAspectRatio  = VNAspectRatio(4)
+			request.minimumSize         = Float(0.15)
+			request.minimumConfidence   = 1.0
+			request.maximumObservations = 1
+			
+			let imageRequestHandler = VNImageRequestHandler(ciImage: image, options: [:])
+			
+			do {
+				try imageRequestHandler.perform([request])
+			} catch {
+				DispatchQueue.main.async {
+					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+					let alert = UIAlertController(
+						title: "Document Recognition Error",
+						message: "An error was encountered while performing recognition.",
+						preferredStyle: .alert)
+					
+					alert.addAction(okayAlertAction)
+					self.present(alert, animated: true)
+				}
+			}
+		}
+	}
+	
+	
+	private func drawBoundingBox(rect: VNRectangleObservation) {
+		
+		let outlinePath = UIBezierPath()
+		
+		outlineLayer.lineCap        = .butt
+		outlineLayer.lineJoin       = .round
+		outlineLayer.lineWidth      = 2
+		outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
+		outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
+		
+		let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -wideAngleCameraPreviewLayer.frame.height)
+		
+		let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
+		let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
+		let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
+		let bottomLeft  = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
+		
+		outlinePath.move(to: topLeft)
+		outlinePath.addLine(to: topRight)
+		outlinePath.addLine(to: bottomRight)
+		outlinePath.addLine(to: bottomLeft)
+		outlinePath.addLine(to: topLeft)
+		outlinePath.addLine(to: topRight)
+		outlinePath.addLine(to: bottomLeft)
+		outlinePath.move(to: bottomRight)
+		outlinePath.addLine(to: topLeft)
+		
+		outlineLayer.path = outlinePath.cgPath
+	}
+	
+	
+	private func resetRecognition() {
+		self.detectedRectangle = nil
+		self.drawBoundingBox(rect: VNRectangleObservation())
+		self.ciImage = nil
+		self.uiImage = UIImage()
+	}
+
+	
+	//MARK: Photo Capture Processing Configuration
+	
+	private func processPhotoCapture(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
 		
 		guard let ciImage = ciImage, let unwrappedObservation = observation else {
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
@@ -738,57 +771,19 @@ class ScannerVC: UIViewController {
 		let cgImage = context.createCGImage(image, from: image.extent)
 		uiImage  = UIImage(cgImage: cgImage!, scale: 1, orientation: .up)
 	}
-	
-	
-	private func drawBoundingBox(rect: VNRectangleObservation) {
-		
-		let outlinePath = UIBezierPath()
-		
-		outlineLayer.lineCap        = .butt
-		outlineLayer.lineJoin       = .round
-		outlineLayer.lineWidth      = 2
-		outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
-		outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
-		
-		let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -wideAngleCameraPreviewLayer.frame.height)
-		
-		let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		let bottomLeft  = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		
-		outlinePath.move(to: topLeft)
-		outlinePath.addLine(to: topRight)
-		outlinePath.addLine(to: bottomRight)
-		outlinePath.addLine(to: bottomLeft)
-		outlinePath.addLine(to: topLeft)
-		outlinePath.addLine(to: topRight)
-		outlinePath.addLine(to: bottomLeft)
-		outlinePath.move(to: bottomRight)
-		outlinePath.addLine(to: topLeft)
-		
-		outlineLayer.path = outlinePath.cgPath
-	}
 }
 
 
-//MARK: AVCaptureVideoDataOutputSampleBufferDelegate
+//MARK: AVFoundation Delegate Extensions
 
 extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
-	
-	//This function provides each frame used in the preview layer. Detect rectangle is called out to detect and draw detected rectangles in the preview layer frame.
 	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
 		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
-		detectRectangle(in: frame)
+		detectPreviewRectangle(in: frame)
 	}
 }
 
-
-//MARK: AVCapturePhotoCaptureDelegate
-
 extension ScannerVC: AVCapturePhotoCaptureDelegate {
-	
-	//This function is called out when a picture is captured in capturePhoto
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
 		guard let cgImage = photo.cgImageRepresentation() else {
@@ -821,6 +816,7 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 		
 	}
 	
+	
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
 		guard let ciImage = ciImage else {
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
@@ -834,7 +830,6 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 			return
 		}
 		
-		detectRectangle(in: ciImage)
+		detectPhotoCaptureRectangle(in: ciImage)
 	}
-	
 }
