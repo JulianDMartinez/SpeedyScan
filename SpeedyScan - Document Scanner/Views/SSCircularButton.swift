@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CaptureButton: UIButton {
+class SSCircularButton: UIButton {
 
     let buttonHeight: CGFloat
     private let symbolConfiguration: UIImage.SymbolConfiguration
@@ -33,16 +33,26 @@ class CaptureButton: UIButton {
         
         configureSelf()
     }
+	
+	init(buttonHeight: CGFloat, symbolConfiguration: UIImage.SymbolConfiguration, symbolName: String) {
+		self.buttonHeight = buttonHeight
+		self.symbolConfiguration = symbolConfiguration
+		super.init(frame: .zero)
+		setImage(UIImage(systemName: symbolName)?.applyingSymbolConfiguration(symbolConfiguration), for: .normal)
+		configureSelf()
+	}
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     private func configureSelf() {
-        setImage(UIImage(systemName: "camera.circle")?.applyingSymbolConfiguration(symbolConfiguration), for: .normal)
+        
         imageView?.tintColor    = .label.withAlphaComponent(0.9)
         backgroundColor         = normalBackgroundColor
 		layer.cornerRadius      = buttonHeight / 2
+		layer.borderWidth 		= 0.1
+		layer.borderColor		= UIColor.label.cgColor
         clipsToBounds           = true
         
         translatesAutoresizingMaskIntoConstraints = false

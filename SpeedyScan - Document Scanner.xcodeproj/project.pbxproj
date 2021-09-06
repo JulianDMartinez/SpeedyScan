@@ -12,9 +12,8 @@
 		1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFC98D1265990110024A63A /* SceneDelegate.swift */; };
 		1DFC98D9265990130024A63A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98D8265990130024A63A /* Assets.xcassets */; };
 		1DFC98DC265990130024A63A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98DA265990130024A63A /* LaunchScreen.storyboard */; };
-		B908CC272691438700DDC437 /* CaptureButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC262691438700DDC437 /* CaptureButton.swift */; };
+		B908CC272691438700DDC437 /* SSCircularButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC262691438700DDC437 /* SSCircularButton.swift */; };
 		B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC29269370C200DDC437 /* CaptureDetailVC.swift */; };
-		B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */; };
 		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
 		B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B915244D26E562C400112555 /* CGPoint+Ext.swift */; };
 		B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B991B7B526DBC63C0046FA87 /* PreviewView.swift */; };
@@ -30,9 +29,8 @@
 		1DFC98D8265990130024A63A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "SpeedyScan - Document Scanner/Support/Assets.xcassets"; sourceTree = SOURCE_ROOT; };
 		1DFC98DB265990130024A63A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1DFC98DD265990130024A63A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B908CC262691438700DDC437 /* CaptureButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureButton.swift; sourceTree = "<group>"; };
+		B908CC262691438700DDC437 /* SSCircularButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSCircularButton.swift; sourceTree = "<group>"; };
 		B908CC29269370C200DDC437 /* CaptureDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailVC.swift; sourceTree = "<group>"; };
-		B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashToggleButton.swift; sourceTree = "<group>"; };
 		B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionButton.swift; sourceTree = "<group>"; };
 		B915244D26E562C400112555 /* CGPoint+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+Ext.swift"; sourceTree = "<group>"; };
 		B991B7B526DBC63C0046FA87 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
@@ -105,8 +103,7 @@
 		1DFC98E4265990440024A63A /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				B908CC262691438700DDC437 /* CaptureButton.swift */,
-				B908CC2B26938E4200DDC437 /* FlashToggleButton.swift */,
+				B908CC262691438700DDC437 /* SSCircularButton.swift */,
 				B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */,
 				B991B7B526DBC63C0046FA87 /* PreviewView.swift */,
 			);
@@ -208,14 +205,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */,
-				B908CC2C26938E4200DDC437 /* FlashToggleButton.swift in Sources */,
 				B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
 				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,
 				B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */,
 				B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */,
-				B908CC272691438700DDC437 /* CaptureButton.swift in Sources */,
+				B908CC272691438700DDC437 /* SSCircularButton.swift in Sources */,
 				B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */,
 				1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */,
 			);

@@ -21,7 +21,6 @@ class CaptureDetailVC: UIViewController {
 	private let selectionButton                 = SelectionButton()
 	private let buttonsStackView                = UIStackView()
 	private let verticalStackView               = UIStackView()
-
 		
 	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.SpeedyScan")
 	
@@ -48,7 +47,6 @@ class CaptureDetailVC: UIViewController {
 		configureButtonsStackView()
 		configureVerticalStackView()
 		configureVisualEffectView()
-//		image = compressImage(image: image)
 	}
 	
 	
@@ -182,6 +180,7 @@ class CaptureDetailVC: UIViewController {
 			self.showLocalSaveTextEntryAlert(forDocumentType: action.title)
 		}
 	}
+	
 	
 	func showCloudSaveTextEntryAlert(forDocumentType documentType: String) {
 		let title               	= "File Name"
@@ -328,6 +327,7 @@ class CaptureDetailVC: UIViewController {
 		
 	}
 	
+	
 	private func configureSaveToCameraRollAction() -> UIAction {
 		
 		let saveImage       = UIImage(systemName: "photo.on.rectangle.angled")
@@ -383,6 +383,7 @@ class CaptureDetailVC: UIViewController {
 		
 		present(activitySheet, animated: true, completion: nil)
 	}
+	
 	
 	private func compressImage(image: UIImage) -> UIImage {
 		//Downsampling of image.
