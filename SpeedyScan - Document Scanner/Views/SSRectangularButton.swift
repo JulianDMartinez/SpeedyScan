@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SelectionButton: UIButton {
+class SSRectangularButton: UIButton {
 
     let buttonHeight: CGFloat
 	

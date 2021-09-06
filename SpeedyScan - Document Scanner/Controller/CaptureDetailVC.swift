@@ -17,8 +17,8 @@ class CaptureDetailVC: UIViewController {
 	private let imageView                       = UIImageView()
 	private let imageViewContainerView          = UIView()
 	private let visualEffectView                = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
-	private let cancelButton                    = SelectionButton()
-	private let selectionButton                 = SelectionButton()
+	private let cancelButton                    = SSRectangularButton()
+	private let selectionButton                 = SSRectangularButton()
 	private let buttonsStackView                = UIStackView()
 	private let verticalStackView               = UIStackView()
 		

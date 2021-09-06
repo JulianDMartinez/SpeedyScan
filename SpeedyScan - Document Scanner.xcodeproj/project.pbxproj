@@ -14,11 +14,10 @@
 		1DFC98DC265990130024A63A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1DFC98DA265990130024A63A /* LaunchScreen.storyboard */; };
 		B908CC272691438700DDC437 /* SSCircularButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC262691438700DDC437 /* SSCircularButton.swift */; };
 		B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC29269370C200DDC437 /* CaptureDetailVC.swift */; };
-		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
+		B908CC302693AAFB00DDC437 /* SSRectangularButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SSRectangularButton.swift */; };
 		B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B915244D26E562C400112555 /* CGPoint+Ext.swift */; };
-		B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B991B7B526DBC63C0046FA87 /* PreviewView.swift */; };
+		B991B7B626DBC63C0046FA87 /* SSPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B991B7B526DBC63C0046FA87 /* SSPreviewView.swift */; };
 		B9F6D40F26BEBC6500DFAE86 /* CloudDriveContainerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D40E26BEBC6500DFAE86 /* CloudDriveContainerManager.swift */; };
-		B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,12 +30,11 @@
 		1DFC98DD265990130024A63A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B908CC262691438700DDC437 /* SSCircularButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSCircularButton.swift; sourceTree = "<group>"; };
 		B908CC29269370C200DDC437 /* CaptureDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailVC.swift; sourceTree = "<group>"; };
-		B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionButton.swift; sourceTree = "<group>"; };
+		B908CC2F2693AAFB00DDC437 /* SSRectangularButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSRectangularButton.swift; sourceTree = "<group>"; };
 		B915244D26E562C400112555 /* CGPoint+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+Ext.swift"; sourceTree = "<group>"; };
-		B991B7B526DBC63C0046FA87 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
+		B991B7B526DBC63C0046FA87 /* SSPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSPreviewView.swift; sourceTree = "<group>"; };
 		B9B299AF26C96CC4001C3946 /* SpeedyScan - Document Scanner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SpeedyScan - Document Scanner.entitlements"; sourceTree = "<group>"; };
 		B9F6D40E26BEBC6500DFAE86 /* CloudDriveContainerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveContainerManager.swift; sourceTree = "<group>"; };
-		B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,14 +48,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1D58C82C265AB5580022584B /* Utility */ = {
-			isa = PBXGroup;
-			children = (
-				B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */,
-			);
-			path = Utility;
-			sourceTree = "<group>";
-		};
 		1DFC98C3265990110024A63A = {
 			isa = PBXGroup;
 			children = (
@@ -81,7 +71,6 @@
 				1DFC98E52659904A0024A63A /* Controller */,
 				B9F6D40D26BEBB7400DFAE86 /* Managers */,
 				1DFC98E4265990440024A63A /* Views */,
-				1D58C82C265AB5580022584B /* Utility */,
 				B915244C26E5626E00112555 /* Extensions */,
 				1DFC98E3265990400024A63A /* Support */,
 			);
@@ -104,8 +93,8 @@
 			isa = PBXGroup;
 			children = (
 				B908CC262691438700DDC437 /* SSCircularButton.swift */,
-				B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */,
-				B991B7B526DBC63C0046FA87 /* PreviewView.swift */,
+				B908CC2F2693AAFB00DDC437 /* SSRectangularButton.swift */,
+				B991B7B526DBC63C0046FA87 /* SSPreviewView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -207,12 +196,11 @@
 				B9F6D40F26BEBC6500DFAE86 /* CloudDriveContainerManager.swift in Sources */,
 				B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
-				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,
+				B908CC302693AAFB00DDC437 /* SSRectangularButton.swift in Sources */,
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,
-				B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */,
+				B991B7B626DBC63C0046FA87 /* SSPreviewView.swift in Sources */,
 				B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */,
 				B908CC272691438700DDC437 /* SSCircularButton.swift in Sources */,
-				B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */,
 				1DFC98D2265990110024A63A /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

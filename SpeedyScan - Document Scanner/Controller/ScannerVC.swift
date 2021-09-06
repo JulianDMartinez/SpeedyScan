@@ -13,8 +13,8 @@ class ScannerVC: UIViewController {
 	
 	//MARK: UIKit Properties
 	
-	private let wideAnglePreviewView					= PreviewView()
-	private let ultraWideAnglePreviewView				= PreviewView()
+	private let wideAnglePreviewView					= SSPreviewView()
+	private let ultraWideAnglePreviewView				= SSPreviewView()
 	private let outlineLayer                			= CAShapeLayer()
 	private var uiImage                     			= UIImage()
 	private var framesWithoutRecognitionCounter   		= 0
@@ -25,9 +25,9 @@ class ScannerVC: UIViewController {
 	
 	private let captureSession              			= AVCaptureMultiCamSession()
 	private let wideAnglePhotoOutput					= AVCapturePhotoOutput()
+	private lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
 	private lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
 	private lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
-	private lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
 	
 
 	//MARK: Vision Properties
@@ -35,7 +35,7 @@ class ScannerVC: UIViewController {
 	private var detectedRectangle	: VNRectangleObservation?
 	
 
-	//MARK: View Controller Life Cycle Methods
+	//MARK: ScannerVC Life Cycle Methods
 	
 	//Subviews are configured in viewWillAppear
 	override func viewWillAppear(_ animated: Bool) {
@@ -453,7 +453,7 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	//MARK: Rectangle Recognition Configuration
+	//MARK: Vision Rectangle Recognition Configuration
 	
 	private func detectPreviewRectangle(in cvBuffer: CVPixelBuffer) {
 		
@@ -568,7 +568,7 @@ class ScannerVC: UIViewController {
 					self.detectedRectangle = rect
 					
 					self.presentCaptureDetailVC(with: self.ciImage)
-					self.turnOffFlash()
+					self.toggleFlash()
 				}
 			}
 			
@@ -693,7 +693,7 @@ class ScannerVC: UIViewController {
 		do {
 			try device.lockForConfiguration()
 			
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
+			if (device.torchMode == AVCaptureDevice.TorchMode.on) || self.presentedViewController != nil {
 				device.torchMode = AVCaptureDevice.TorchMode.off
 			} else {
 				do {
@@ -741,23 +741,6 @@ class ScannerVC: UIViewController {
 		
 		wideAnglePhotoOutput.capturePhoto(with: photoSettings, delegate: self)
 	}
-	
-	
-	private func turnOffFlash() {
-		guard let device = wideAngleCameraDevice else {return}
-		guard device.hasTorch else { return }
-		
-		do {
-			try device.lockForConfiguration()
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
-				device.torchMode = AVCaptureDevice.TorchMode.off
-			}
-			device.unlockForConfiguration()
-		} catch {
-			print(error)
-		}
-	}
-	
 	
 	private func presentCaptureDetailVC(with image: CIImage?) {
 		
