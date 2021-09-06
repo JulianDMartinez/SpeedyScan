@@ -13,32 +13,20 @@ class ScannerVC: UIViewController {
 	
 	//MARK: UIKit Properties
 
-	private let wideAnglePreviewView				= PreviewView()
-	private let ultraWideAnglePreviewView			= PreviewView()
-	private let outlineLayer                		= CAShapeLayer()
-	private var uiImage                     		= UIImage()
-	private var framesWithoutRecognitionCounter   	= 0
+	private let wideAnglePreviewView					= PreviewView()
+	private let ultraWideAnglePreviewView				= PreviewView()
+	private let outlineLayer                			= CAShapeLayer()
+	private var uiImage                     			= UIImage()
+	private var framesWithoutRecognitionCounter   		= 0
 	private var ciImage : CIImage?
 	
 	//MARK: AVFoundation Properties
 	
-	private let captureSession              		= AVCaptureMultiCamSession()
-	private let videoDataOutput             		= AVCaptureVideoDataOutput()
-	private let photoOutput 						= AVCapturePhotoOutput()
-	private let wideAnglePhotoOutput				= AVCapturePhotoOutput()
-	private let wideAngleVideoDataOutput			= AVCaptureVideoDataOutput()
-	private let ultraWideAngleVideoDataOutput		= AVCaptureVideoDataOutput()
-	private let photoSettings 						= AVCapturePhotoSettings(format: [
-		AVVideoCodecKey 	: AVVideoCodecType.hevc
-	])
-	
-	private var wideAngleDeviceInput: AVCaptureDeviceInput?
-	private var ultraWideCameraDeviceInput: AVCaptureDeviceInput?
-	private var wideAnglePhotoOutputConnection: AVCaptureConnection?
-
+	private let captureSession              			= AVCaptureMultiCamSession()
+	private let wideAnglePhotoOutput					= AVCapturePhotoOutput()
 	private lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
 	private lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
-	private lazy var wideAngleCameraDevice          = AVCaptureDevice(uniqueID: "")
+	private lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
 
 	//MARK: Vision Properties
 	private var detectedRectangle	: VNRectangleObservation?
@@ -54,9 +42,7 @@ class ScannerVC: UIViewController {
 	}
 	
 	override func viewDidAppear(_ animated: Bool) {
-		
 		guard verifyDeviceSupportAndCameraAccess() else {return}
-		
 		configureCaptureSession()
 	}
 	
@@ -176,6 +162,8 @@ class ScannerVC: UIViewController {
 		self.wideAngleCameraDevice = wideAngleCameraDevice
 		
 		//Add the wide angle camera input to the capture session.
+		var wideAngleDeviceInput: AVCaptureDeviceInput? = nil
+		
 		do {
 			try wideAngleCameraDevice.lockForConfiguration()
 			
@@ -217,6 +205,8 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
+		
+		let wideAngleVideoDataOutput			= AVCaptureVideoDataOutput()
 		//Add the wide angle camera photo and and video data outputs.
 		guard captureSession.canAddOutput(wideAnglePhotoOutput),
 			  captureSession.canAddOutput(wideAngleVideoDataOutput)
@@ -281,6 +271,8 @@ class ScannerVC: UIViewController {
 		guard let ultraWideAngleCameraDevice = deviceDiscoverySession.devices.first else {return}
 		
 		//Add the ultra wide angle camera input to the capture session.
+		var ultraWideCameraDeviceInput: AVCaptureDeviceInput? = nil
+		
 		do {
 			try ultraWideAngleCameraDevice.lockForConfiguration()
 			
@@ -320,6 +312,7 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
+		let ultraWideAngleVideoDataOutput		= AVCaptureVideoDataOutput()
 		//Add the wide angle camera photo and output.
 		guard captureSession.canAddOutput(ultraWideAngleVideoDataOutput)
 		else {
@@ -328,11 +321,6 @@ class ScannerVC: UIViewController {
 		}
 		
 		captureSession.addOutputWithNoConnections(ultraWideAngleVideoDataOutput)
-		
-		wideAngleVideoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
-		wideAngleVideoDataOutput.videoSettings = [
-			(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)
-		] as [String : Any]
 		
 		//Connect the wide angle camera device input to the wide angle camera video data output.
 		let ultraWideAngleCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [ultraWideCameraVideoPort], output: ultraWideAngleVideoDataOutput)
@@ -516,12 +504,14 @@ class ScannerVC: UIViewController {
 			return
 		}
 		
-		let currentPhotoCaptureSettings = AVCapturePhotoSettings(from: photoSettings)
+		let photoSettings = AVCapturePhotoSettings(format: [
+			AVVideoCodecKey 	: AVVideoCodecType.hevc
+		])
 		
-		currentPhotoCaptureSettings.isHighResolutionPhotoEnabled = true
-		currentPhotoCaptureSettings.photoQualityPrioritization = .balanced
+		photoSettings.isHighResolutionPhotoEnabled = true
+		photoSettings.photoQualityPrioritization = .balanced
 		
-		wideAnglePhotoOutput.capturePhoto(with: currentPhotoCaptureSettings, delegate: self)
+		wideAnglePhotoOutput.capturePhoto(with: photoSettings, delegate: self)
 	}
 	
 	
