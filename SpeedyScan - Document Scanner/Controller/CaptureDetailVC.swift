@@ -22,7 +22,7 @@ class CaptureDetailVC: UIViewController {
 	private let buttonsStackView                = UIStackView()
 	private let verticalStackView               = UIStackView()
 		
-	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.SpeedyScan")
+	private var cloudMetadataManager 			=  CloudDriveContainerManager(containerIdentifier: "iCloud.SpeedyScan")
 	
 	//MARK: Initializers
 	init(image: UIImage) {
@@ -182,7 +182,7 @@ class CaptureDetailVC: UIViewController {
 	}
 	
 	
-	func showCloudSaveTextEntryAlert(forDocumentType documentType: String) {
+	private func showCloudSaveTextEntryAlert(forDocumentType documentType: String) {
 		let title               	= "File Name"
 		let message             	= ""
 		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -256,7 +256,7 @@ class CaptureDetailVC: UIViewController {
 	}
 	
 	
-	func showLocalSaveTextEntryAlert(forDocumentType documentType: String) {
+	private func showLocalSaveTextEntryAlert(forDocumentType documentType: String) {
 		let title               	= "File Name"
 		let message             	= ""
 		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)

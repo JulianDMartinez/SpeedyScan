@@ -17,7 +17,7 @@
 		B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B908CC2F2693AAFB00DDC437 /* SelectionButton.swift */; };
 		B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B915244D26E562C400112555 /* CGPoint+Ext.swift */; };
 		B991B7B626DBC63C0046FA87 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B991B7B526DBC63C0046FA87 /* PreviewView.swift */; };
-		B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */; };
+		B9F6D40F26BEBC6500DFAE86 /* CloudDriveContainerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D40E26BEBC6500DFAE86 /* CloudDriveContainerManager.swift */; };
 		B9F6D41126BEBEB200DFAE86 /* MetadataItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */; };
 /* End PBXBuildFile section */
 
@@ -35,7 +35,7 @@
 		B915244D26E562C400112555 /* CGPoint+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+Ext.swift"; sourceTree = "<group>"; };
 		B991B7B526DBC63C0046FA87 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		B9B299AF26C96CC4001C3946 /* SpeedyScan - Document Scanner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SpeedyScan - Document Scanner.entitlements"; sourceTree = "<group>"; };
-		B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMetadataManager.swift; sourceTree = "<group>"; };
+		B9F6D40E26BEBC6500DFAE86 /* CloudDriveContainerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveContainerManager.swift; sourceTree = "<group>"; };
 		B9F6D41026BEBEB200DFAE86 /* MetadataItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -130,7 +130,7 @@
 		B9F6D40D26BEBB7400DFAE86 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				B9F6D40E26BEBC6500DFAE86 /* CloudMetadataManager.swift */,
+				B9F6D40E26BEBC6500DFAE86 /* CloudDriveContainerManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -204,7 +204,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B9F6D40F26BEBC6500DFAE86 /* CloudMetadataManager.swift in Sources */,
+				B9F6D40F26BEBC6500DFAE86 /* CloudDriveContainerManager.swift in Sources */,
 				B915244E26E562C400112555 /* CGPoint+Ext.swift in Sources */,
 				1DFC98D0265990110024A63A /* AppDelegate.swift in Sources */,
 				B908CC302693AAFB00DDC437 /* SelectionButton.swift in Sources */,

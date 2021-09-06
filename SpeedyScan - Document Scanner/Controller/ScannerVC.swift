@@ -37,8 +37,8 @@ class ScannerVC: UIViewController {
 
 	//MARK: View Controller Life Cycle Methods
 	
+	//Subviews are configured in viewWillAppear
 	override func viewWillAppear(_ animated: Bool) {
-		//Configure Subviews
 		configureUltraWideAnglePreviewView()
 		configureCaptureButton()
 		configureFlashActivationButton()
@@ -46,10 +46,9 @@ class ScannerVC: UIViewController {
 		configureVisualEffectView()
 	}
 	
+	//The capture session is configured in viewDidAppear in order to show the subviews while the capture session is being configured.
 	override func viewDidAppear(_ animated: Bool) {
 		guard verifyDeviceSupportAndCameraAccess() else {return}
-		
-		//Configure Capture Session
 		configureWideAngleCameraCapture()
 		configureUltraWideAngleCameraCapture()
 		configureUpOutlineLayer()
@@ -454,100 +453,6 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	//MARK: Button Action Configuration
-	
-	@objc private func flashActivationButtonTapped() {
-		toggleFlash()
-	}
-	
-	
-	private func toggleFlash() {
-		guard let device = wideAngleCameraDevice else {return}
-		
-		guard device.hasTorch else { return }
-		
-		do {
-			try device.lockForConfiguration()
-			
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
-				device.torchMode = AVCaptureDevice.TorchMode.off
-			} else {
-				do {
-					try device.setTorchModeOn(level: 0.1)
-				} catch {
-					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-					let alert = UIAlertController(
-						title: "Flash Toggle",
-						message: "An error was encountered while toggling flash light.",
-						preferredStyle: .alert)
-					
-					alert.addAction(okayAlertAction)
-					self.present(alert, animated: true)
-				}
-			}
-			
-			device.unlockForConfiguration()
-		} catch {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Flash Toggle",
-					message: "An error was encountered while toggling flash light.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		}
-	}
-	
-		
-	@objc private func captureButtonTapped() {
-		
-		guard verifyCameraAccessOrNotDetermined() else {
-			return
-		}
-		
-		let photoSettings = AVCapturePhotoSettings(format: [
-			AVVideoCodecKey 	: AVVideoCodecType.hevc
-		])
-		
-		photoSettings.isHighResolutionPhotoEnabled = true
-		photoSettings.photoQualityPrioritization = .balanced
-		
-		wideAnglePhotoOutput.capturePhoto(with: photoSettings, delegate: self)
-	}
-	
-	
-	private func turnOffFlash() {
-		guard let device = wideAngleCameraDevice else {return}
-		guard device.hasTorch else { return }
-		
-		do {
-			try device.lockForConfiguration()
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
-				device.torchMode = AVCaptureDevice.TorchMode.off
-			}
-			device.unlockForConfiguration()
-		} catch {
-			print(error)
-		}
-	}
-	
-	
-	private func presentCaptureDetailVC(with image: CIImage?) {
-		
-		processPhotoCapture(detectedRectangle, from: image)
-		
-		let captureDetailVC = CaptureDetailVC(image: uiImage)
-		
-		captureDetailVC.modalPresentationStyle = .overCurrentContext
-		
-		present(captureDetailVC, animated: true, completion: nil)
-		
-	}
-	
-	
 	//MARK: Rectangle Recognition Configuration
 	
 	private func detectPreviewRectangle(in cvBuffer: CVPixelBuffer) {
@@ -770,6 +675,100 @@ class ScannerVC: UIViewController {
 		let context = CIContext()
 		let cgImage = context.createCGImage(image, from: image.extent)
 		uiImage  = UIImage(cgImage: cgImage!, scale: 1, orientation: .up)
+	}
+	
+	
+	//MARK: Button Action Configuration
+	
+	@objc private func flashActivationButtonTapped() {
+		toggleFlash()
+	}
+	
+	
+	private func toggleFlash() {
+		guard let device = wideAngleCameraDevice else {return}
+		
+		guard device.hasTorch else { return }
+		
+		do {
+			try device.lockForConfiguration()
+			
+			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
+				device.torchMode = AVCaptureDevice.TorchMode.off
+			} else {
+				do {
+					try device.setTorchModeOn(level: 0.1)
+				} catch {
+					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+					let alert = UIAlertController(
+						title: "Flash Toggle",
+						message: "An error was encountered while toggling flash light.",
+						preferredStyle: .alert)
+					
+					alert.addAction(okayAlertAction)
+					self.present(alert, animated: true)
+				}
+			}
+			
+			device.unlockForConfiguration()
+		} catch {
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Flash Toggle",
+					message: "An error was encountered while toggling flash light.",
+					preferredStyle: .alert)
+				
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+		}
+	}
+	
+	
+	@objc private func captureButtonTapped() {
+		
+		guard verifyCameraAccessOrNotDetermined() else {
+			return
+		}
+		
+		let photoSettings = AVCapturePhotoSettings(format: [
+			AVVideoCodecKey 	: AVVideoCodecType.hevc
+		])
+		
+		photoSettings.isHighResolutionPhotoEnabled = true
+		photoSettings.photoQualityPrioritization = .balanced
+		
+		wideAnglePhotoOutput.capturePhoto(with: photoSettings, delegate: self)
+	}
+	
+	
+	private func turnOffFlash() {
+		guard let device = wideAngleCameraDevice else {return}
+		guard device.hasTorch else { return }
+		
+		do {
+			try device.lockForConfiguration()
+			if (device.torchMode == AVCaptureDevice.TorchMode.on) {
+				device.torchMode = AVCaptureDevice.TorchMode.off
+			}
+			device.unlockForConfiguration()
+		} catch {
+			print(error)
+		}
+	}
+	
+	
+	private func presentCaptureDetailVC(with image: CIImage?) {
+		
+		processPhotoCapture(detectedRectangle, from: image)
+		
+		let captureDetailVC = CaptureDetailVC(image: uiImage)
+		
+		captureDetailVC.modalPresentationStyle = .overCurrentContext
+		
+		present(captureDetailVC, animated: true, completion: nil)
+		
 	}
 }
 
