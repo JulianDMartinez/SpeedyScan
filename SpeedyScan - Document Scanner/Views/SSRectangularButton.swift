@@ -1,16 +1,16 @@
 //
-//  CaptureButton.swift
+//  SaveButton.swift
 //  SpeedyScan
 //
-//  Created by Julian Martinez on 7/3/21.
+//  Created by Julian Martinez on 7/5/21.
 //
 
 import UIKit
 
-class CaptureButton: UIButton {
+class SSRectangularButton: UIButton {
 
     let buttonHeight: CGFloat
-    private let symbolConfiguration: UIImage.SymbolConfiguration
+	
 	private let normalBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.7)
 	private let highlightedBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.2)
 	private let highlightDuration: TimeInterval = 0.25
@@ -27,8 +27,7 @@ class CaptureButton: UIButton {
     
     override init(frame: CGRect) {
         
-        buttonHeight = 70
-        symbolConfiguration = UIImage.SymbolConfiguration(pointSize: buttonHeight - 5, weight: .ultraLight)
+        buttonHeight = 50
         super.init(frame: frame)
         
         configureSelf()
@@ -39,19 +38,22 @@ class CaptureButton: UIButton {
     }
     
     private func configureSelf() {
-        setImage(UIImage(systemName: "camera.circle")?.applyingSymbolConfiguration(symbolConfiguration), for: .normal)
-        imageView?.tintColor    = .label.withAlphaComponent(0.9)
+
+        setTitleColor(.label, for: .normal)
+        
+        titleLabel?.font = UIFont.systemFont(ofSize: 23)
+        contentEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         backgroundColor         = normalBackgroundColor
-		layer.cornerRadius      = buttonHeight / 2
+        layer.cornerRadius      = buttonHeight / 4
+
         clipsToBounds           = true
         
-        translatesAutoresizingMaskIntoConstraints = false
     }
 	
 	private func highlight() {
 		animateBackground(to: highlightedBackgroundColor, duration: highlightDuration)
 	}
-
+	
 	private func unhighlight() {
 		animateBackground(to: normalBackgroundColor, duration: highlightDuration)
 	}

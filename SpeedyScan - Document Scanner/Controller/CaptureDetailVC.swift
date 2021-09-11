@@ -17,13 +17,12 @@ class CaptureDetailVC: UIViewController {
 	private let imageView                       = UIImageView()
 	private let imageViewContainerView          = UIView()
 	private let visualEffectView                = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
-	private let cancelButton                    = SelectionButton()
-	private let selectionButton                 = SelectionButton()
+	private let cancelButton                    = SSRectangularButton()
+	private let selectionButton                 = SSRectangularButton()
 	private let buttonsStackView                = UIStackView()
 	private let verticalStackView               = UIStackView()
-
 		
-	private var cloudMetadataManager 			=  CloudMetadataManager(containerIdentifier: "iCloud.SpeedyScan")
+	private var cloudMetadataManager 			=  CloudDriveContainerManager(containerIdentifier: "iCloud.SpeedyScan")
 	
 	//MARK: Initializers
 	init(image: UIImage) {
@@ -48,7 +47,6 @@ class CaptureDetailVC: UIViewController {
 		configureButtonsStackView()
 		configureVerticalStackView()
 		configureVisualEffectView()
-//		image = compressImage(image: image)
 	}
 	
 	
@@ -183,7 +181,8 @@ class CaptureDetailVC: UIViewController {
 		}
 	}
 	
-	func showCloudSaveTextEntryAlert(forDocumentType documentType: String) {
+	
+	private func showCloudSaveTextEntryAlert(forDocumentType documentType: String) {
 		let title               	= "File Name"
 		let message             	= ""
 		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -257,7 +256,7 @@ class CaptureDetailVC: UIViewController {
 	}
 	
 	
-	func showLocalSaveTextEntryAlert(forDocumentType documentType: String) {
+	private func showLocalSaveTextEntryAlert(forDocumentType documentType: String) {
 		let title               	= "File Name"
 		let message             	= ""
 		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -328,6 +327,7 @@ class CaptureDetailVC: UIViewController {
 		
 	}
 	
+	
 	private func configureSaveToCameraRollAction() -> UIAction {
 		
 		let saveImage       = UIImage(systemName: "photo.on.rectangle.angled")
@@ -383,6 +383,7 @@ class CaptureDetailVC: UIViewController {
 		
 		present(activitySheet, animated: true, completion: nil)
 	}
+	
 	
 	private func compressImage(image: UIImage) -> UIImage {
 		//Downsampling of image.
