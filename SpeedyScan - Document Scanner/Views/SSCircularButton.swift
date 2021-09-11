@@ -11,8 +11,8 @@ class SSCircularButton: UIButton {
 
     let buttonHeight: CGFloat
     private let symbolConfiguration: UIImage.SymbolConfiguration
-	private let normalBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.7)
-	private let highlightedBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.2)
+	var normalBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.7)
+	var highlightedBackgroundColor: UIColor = .systemBackground.withAlphaComponent(0.2)
 	private let highlightDuration: TimeInterval = 0.25
 	
 	override var isHighlighted: Bool {
@@ -51,8 +51,6 @@ class SSCircularButton: UIButton {
         imageView?.tintColor    = .label.withAlphaComponent(0.9)
         backgroundColor         = normalBackgroundColor
 		layer.cornerRadius      = buttonHeight / 2
-		layer.borderWidth 		= 0.1
-		layer.borderColor		= UIColor.label.cgColor
         clipsToBounds           = true
         
         translatesAutoresizingMaskIntoConstraints = false

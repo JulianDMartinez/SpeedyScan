@@ -40,10 +40,9 @@ class ScannerVC: UIViewController {
 	//Subviews are configured in viewWillAppear
 	override func viewWillAppear(_ animated: Bool) {
 		configureUltraWideAnglePreviewView()
-		configureCaptureButton()
-		configureFlashActivationButton()
 		configureWideAnglePreviewView()
 		configureVisualEffectView()
+		configureButtons()
 	}
 	
 	//The capture session is configured in viewDidAppear in order to show the subviews while the capture session is being configured.
@@ -113,11 +112,12 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	private func configureCaptureButton() {
+	private func configureButtons() {
 		
-		let buttonHeight: CGFloat 	= 70
-		let symbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: buttonHeight - 5, weight: .ultraLight)
-		let captureButton   = SSCircularButton(buttonHeight: buttonHeight, symbolConfiguration: symbolConfiguration, symbolName: "camera.circle")
+		//Capture Button Configuration
+		let captureButtonHeight: CGFloat 		= 70
+		let captureButtonSymbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: captureButtonHeight - 5, weight: .ultraLight)
+		let captureButton   					= SSCircularButton(buttonHeight: captureButtonHeight, symbolConfiguration: captureButtonSymbolConfiguration, symbolName: "camera.circle")
 		
 		view.addSubview(captureButton)
 		
@@ -129,25 +129,48 @@ class ScannerVC: UIViewController {
 			captureButton.heightAnchor.constraint(equalToConstant: captureButton.buttonHeight),
 			captureButton.widthAnchor.constraint(equalToConstant: captureButton.buttonHeight)
 		])
-	}
-	
-	
-	private func configureFlashActivationButton() {
 		
-		let buttonHeight: CGFloat 	= 50
-		let symbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: buttonHeight - 10, weight: .ultraLight)
-		let flashActivationButton   = SSCircularButton(buttonHeight: 50, symbolConfiguration: symbolConfiguration, symbolName: "flashlight.off.fill")
+		//Flash Button Configuration
 		
-		view.addSubview(flashActivationButton)
+		let flashButtonHeight: CGFloat 	= 50
+		let flashButtonSymbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: flashButtonHeight - 15, weight: .ultraLight)
+		let flashButton   = SSCircularButton(buttonHeight: flashButtonHeight, symbolConfiguration: flashButtonSymbolConfiguration, symbolName: "flashlight.off.fill")
 		
-		flashActivationButton.addTarget(self, action: #selector(flashActivationButtonTapped), for: .touchUpInside)
+		view.addSubview(flashButton)
+		
+		flashButton.addTarget(self, action: #selector(flashButtonTapped), for: .touchUpInside)
 		
 		NSLayoutConstraint.activate([
-			flashActivationButton.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 80),
-			flashActivationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-			flashActivationButton.heightAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight),
-			flashActivationButton.widthAnchor.constraint(equalToConstant: flashActivationButton.buttonHeight)
+			flashButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 20),
+			flashButton.centerYAnchor.constraint(equalTo: captureButton.centerYAnchor),
+			flashButton.heightAnchor.constraint(equalToConstant: flashButton.buttonHeight),
+			flashButton.widthAnchor.constraint(equalToConstant: flashButton.buttonHeight)
 		])
+		
+		//TipsButtonConfiguration
+		let tipsButtonHeight: CGFloat 	= 30
+		let tipsButtonSymbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: tipsButtonHeight-10, weight: .bold)
+		let tipsButton   			= SSCircularButton(buttonHeight: tipsButtonHeight, symbolConfiguration: tipsButtonSymbolConfiguration, symbolName: "questionmark")
+		let tipsButtonNormalBackgroundColor = UIColor.gray.withAlphaComponent(0.2)
+		let tipsButtonHighlightedBackgroundColor = UIColor.gray.withAlphaComponent(0.6)
+		view.addSubview(tipsButton)
+		
+		tipsButton.addTarget(self, action: #selector(tipsButtonTapped), for: .touchUpInside)
+		
+		tipsButton.layer.borderWidth = 1
+		tipsButton.layer.borderColor = UIColor.white.cgColor
+		tipsButton.backgroundColor = tipsButtonNormalBackgroundColor
+		tipsButton.normalBackgroundColor = tipsButtonNormalBackgroundColor
+		tipsButton.highlightedBackgroundColor = tipsButtonHighlightedBackgroundColor
+		tipsButton.imageView?.tintColor = .white
+		
+		NSLayoutConstraint.activate([
+			tipsButton.trailingAnchor.constraint(equalTo: wideAnglePreviewView.trailingAnchor, constant: -10),
+			tipsButton.bottomAnchor.constraint(equalTo: wideAnglePreviewView.bottomAnchor, constant: -10),
+			tipsButton.heightAnchor.constraint(equalToConstant: tipsButton.buttonHeight),
+			tipsButton.widthAnchor.constraint(equalToConstant: tipsButton.buttonHeight)
+		])
+		
 	}
 	
 	
@@ -554,11 +577,20 @@ class ScannerVC: UIViewController {
 					}
 					
 					guard let rect = results.first else {
+						let imageAttachment = NSTextAttachment()
+						imageAttachment.image = UIImage(systemName: "questionmark.circle")
+						
+						
+						let fullString = NSMutableAttributedString(string: "\nPress ")
+						fullString.append(NSAttributedString(attachment: imageAttachment))
+						fullString.append(NSAttributedString(string: " to see tips for best results."))
+						
 						let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 						let alert = UIAlertController(
 							title: "No Object Detected",
-							message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
-						preferredStyle: .alert)
+							message: "",
+							preferredStyle: .alert)
+						alert.setValue(fullString, forKey: "attributedMessage")
 						
 						alert.addAction(okayAlertAction)
 						self.present(alert, animated: true)
@@ -642,11 +674,20 @@ class ScannerVC: UIViewController {
 	private func processPhotoCapture(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
 		
 		guard let ciImage = ciImage, let unwrappedObservation = observation else {
+			let imageAttachment = NSTextAttachment()
+			imageAttachment.image = UIImage(systemName: "questionmark.circle")
+			
+			
+			let fullString = NSMutableAttributedString(string: "\nPress ")
+			fullString.append(NSAttributedString(attachment: imageAttachment))
+			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
 				title: "No Object Detected",
-				message: "Move the camera closer to the object until the recognition box is shown, or place object on a contrasting background.",
+				message: "",
 				preferredStyle: .alert)
+			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
 			self.present(alert, animated: true)
@@ -680,52 +721,6 @@ class ScannerVC: UIViewController {
 	
 	//MARK: Button Action Configuration
 	
-	@objc private func flashActivationButtonTapped() {
-		toggleFlash()
-	}
-	
-	
-	private func toggleFlash() {
-		guard let device = wideAngleCameraDevice else {return}
-		
-		guard device.hasTorch else { return }
-		
-		do {
-			try device.lockForConfiguration()
-			
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) || self.presentedViewController != nil {
-				device.torchMode = AVCaptureDevice.TorchMode.off
-			} else {
-				do {
-					try device.setTorchModeOn(level: 0.1)
-				} catch {
-					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-					let alert = UIAlertController(
-						title: "Flash Toggle",
-						message: "An error was encountered while toggling flash light.",
-						preferredStyle: .alert)
-					
-					alert.addAction(okayAlertAction)
-					self.present(alert, animated: true)
-				}
-			}
-			
-			device.unlockForConfiguration()
-		} catch {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Flash Toggle",
-					message: "An error was encountered while toggling flash light.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		}
-	}
-	
-	
 	@objc private func captureButtonTapped() {
 		
 		guard verifyCameraAccessOrNotDetermined() else {
@@ -739,8 +734,10 @@ class ScannerVC: UIViewController {
 		photoSettings.isHighResolutionPhotoEnabled = true
 		photoSettings.photoQualityPrioritization = .balanced
 		
+		
 		wideAnglePhotoOutput.capturePhoto(with: photoSettings, delegate: self)
 	}
+	
 	
 	private func presentCaptureDetailVC(with image: CIImage?) {
 		
@@ -752,6 +749,60 @@ class ScannerVC: UIViewController {
 		
 		present(captureDetailVC, animated: true, completion: nil)
 		
+	}
+	
+	
+	@objc private func flashButtonTapped() {
+		toggleFlash()
+	}
+	
+	
+	private func toggleFlash() {
+		guard let device = wideAngleCameraDevice else {return}
+		
+		guard device.hasTorch else { return }
+		
+		do {
+			try device.lockForConfiguration()
+			
+			if (device.torchMode == AVCaptureDevice.TorchMode.on) || (self.presentedViewController != nil) {
+				device.torchMode = AVCaptureDevice.TorchMode.off
+			} else {
+				do {
+					try device.setTorchModeOn(level: 0.1)
+				} catch {
+					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+					let alert = UIAlertController(
+						title: "Flash Toggle Error",
+						message: "An error was encountered while accessing the flash light. Restarting the device may solve this error.",
+						preferredStyle: .alert)
+					
+					alert.addAction(okayAlertAction)
+					self.present(alert, animated: true)
+				}
+			}
+			
+			device.unlockForConfiguration()
+		} catch {
+			DispatchQueue.main.async {
+				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
+				let alert = UIAlertController(
+					title: "Flash Toggle Error",
+					message: "The system may have locked the flash light. Restarting the device may solve this error.",
+					preferredStyle: .alert)
+				
+				alert.addAction(okayAlertAction)
+				self.present(alert, animated: true)
+			}
+		}
+	}
+	
+	@objc private func tipsButtonTapped() {
+		let tipsVC = TipsVC()
+		
+		tipsVC.modalPresentationStyle = .overCurrentContext
+		
+		present(tipsVC, animated: true)
 	}
 }
 
@@ -769,11 +820,20 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
 		guard let cgImage = photo.cgImageRepresentation() else {
+			let imageAttachment = NSTextAttachment()
+			imageAttachment.image = UIImage(systemName: "questionmark.circle")
+			
+			
+			let fullString = NSMutableAttributedString(string: "\nPress ")
+			fullString.append(NSAttributedString(attachment: imageAttachment))
+			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
 				title: "No Object Detected",
-				message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
+				message: "",
 				preferredStyle: .alert)
+			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
 			self.present(alert, animated: true)
@@ -783,11 +843,20 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 		ciImage = CIImage(cgImage: cgImage)
 		
 		guard let ciImage = ciImage else {
+			let imageAttachment = NSTextAttachment()
+			imageAttachment.image = UIImage(systemName: "questionmark.circle")
+			
+			
+			let fullString = NSMutableAttributedString(string: "\nPress ")
+			fullString.append(NSAttributedString(attachment: imageAttachment))
+			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
 				title: "No Object Detected",
-				message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
+				message: "",
 				preferredStyle: .alert)
+			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
 			self.present(alert, animated: true)
@@ -801,11 +870,20 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
 		guard let ciImage = ciImage else {
+			let imageAttachment = NSTextAttachment()
+			imageAttachment.image = UIImage(systemName: "questionmark.circle")
+			
+			
+			let fullString = NSMutableAttributedString(string: "\nPress ")
+			fullString.append(NSAttributedString(attachment: imageAttachment))
+			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
 				title: "No Object Detected",
-				message: "Move the camera closer to the object until the recognition box is shown, or place object on a background with different color.",
+				message: "",
 				preferredStyle: .alert)
+			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
 			self.present(alert, animated: true)
