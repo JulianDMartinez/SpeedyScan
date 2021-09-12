@@ -276,11 +276,33 @@ class ScannerVC: UIViewController {
 		do {
 			try wideAngleCameraDevice.lockForConfiguration()
 			
-			wideAngleCameraDevice.activeFormat = wideAngleCameraDevice.formats[38]
+			let formats = wideAngleCameraDevice.formats
+			
+			for format in formats {
+				
+				if format.isMultiCamSupported {
+					
+					let photoDimensions = format.highResolutionStillImageDimensions
+					let maxFrameRate 	= format.videoSupportedFrameRateRanges.first!.maxFrameRate
+					let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+					
+					if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && photoDimensions.width == 4032 &&  photoDimensions.height == 3024 && maxFrameRate == 60 && format.isVideoHDRSupported {
+						wideAngleCameraDevice.activeFormat = format
+						break
+					} else if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && format.isVideoHDRSupported {
+						wideAngleCameraDevice.activeFormat = format
+						break
+					} else if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) {
+						wideAngleCameraDevice.activeFormat = format
+						break
+					}
+				}
+			}
+			
 			wideAngleCameraDevice.exposureMode = .continuousAutoExposure
 			wideAngleCameraDevice.whiteBalanceMode = .continuousAutoWhiteBalance
-			
 			wideAngleCameraDevice.focusMode = .continuousAutoFocus
+			
 			wideAngleDeviceInput = try AVCaptureDeviceInput(device: wideAngleCameraDevice)
 			
 			guard let wideAngleDeviceInput = wideAngleDeviceInput,
@@ -325,7 +347,7 @@ class ScannerVC: UIViewController {
 		}
 		
 		wideAnglePhotoOutput.isHighResolutionCaptureEnabled = true
-		wideAnglePhotoOutput.maxPhotoQualityPrioritization = .quality
+		wideAnglePhotoOutput.maxPhotoQualityPrioritization = .balanced
 		captureSession.addOutputWithNoConnections(wideAnglePhotoOutput)
 
 		wideAngleVideoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
@@ -385,7 +407,16 @@ class ScannerVC: UIViewController {
 		do {
 			try ultraWideAngleCameraDevice.lockForConfiguration()
 			
-			ultraWideAngleCameraDevice.activeFormat = ultraWideAngleCameraDevice.formats[8]
+			let formats = ultraWideAngleCameraDevice.formats
+			
+			for format in formats {
+				if format.isMultiCamSupported {
+					let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+					if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && format.isVideoBinned {
+						ultraWideAngleCameraDevice.activeFormat = format
+					}
+				}
+			}
 						
 			ultraWideCameraDeviceInput = try AVCaptureDeviceInput(device: ultraWideAngleCameraDevice)
 			
@@ -417,7 +448,7 @@ class ScannerVC: UIViewController {
 																				 sourceDeviceType: ultraWideAngleCameraDevice.deviceType,
 																				 sourceDevicePosition: .back).first
 		else {
-			debugPrint("Clould not find the ultra wide camera device input's video port.")
+			debugPrint("Could not find the ultra wide camera device input's video port.")
 			return
 		}
 		
@@ -453,8 +484,8 @@ class ScannerVC: UIViewController {
 	private func configureWideAngleCameraPreviewLayer() {
 		let previewFrame = wideAnglePreviewView.bounds
 		
-		wideAngleCameraPreviewLayer.frame          = previewFrame
-		wideAngleCameraPreviewLayer.videoGravity   = .resizeAspect
+		wideAngleCameraPreviewLayer.frame          	= previewFrame
+		wideAngleCameraPreviewLayer.videoGravity   	= .resizeAspect
 		
 		wideAnglePreviewView.layer.addSublayer(wideAngleCameraPreviewLayer)
 	}
