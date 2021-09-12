@@ -279,22 +279,51 @@ class ScannerVC: UIViewController {
 			let formats = wideAngleCameraDevice.formats
 			
 			for format in formats {
-				
 				if format.isMultiCamSupported {
-					
 					let photoDimensions = format.highResolutionStillImageDimensions
 					let maxFrameRate 	= format.videoSupportedFrameRateRanges.first!.maxFrameRate
 					let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
-					
+
 					if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && photoDimensions.width == 4032 &&  photoDimensions.height == 3024 && maxFrameRate == 60 && format.isVideoHDRSupported {
 						wideAngleCameraDevice.activeFormat = format
 						break
-					} else if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && format.isVideoHDRSupported {
-						wideAngleCameraDevice.activeFormat = format
-						break
-					} else if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) {
-						wideAngleCameraDevice.activeFormat = format
-						break
+					}
+				}
+			}
+			
+			var activeFormatPhotoDimensions = wideAngleCameraDevice.activeFormat.highResolutionStillImageDimensions
+			var activeFormatMaxFrameRate 	= wideAngleCameraDevice.activeFormat.videoSupportedFrameRateRanges.first!.maxFrameRate
+			var activeFormatVideoDimensions = CMVideoFormatDescriptionGetDimensions(wideAngleCameraDevice.activeFormat.formatDescription)
+			
+			if !(Float(activeFormatVideoDimensions.width) / Float(activeFormatVideoDimensions.height) == 1.3333334) || activeFormatPhotoDimensions.width != 4032 ||  activeFormatPhotoDimensions.height != 3024 || activeFormatMaxFrameRate != 60 || !wideAngleCameraDevice.activeFormat.isVideoHDRSupported {
+				for format in formats {
+					if format.isMultiCamSupported {
+
+						let photoDimensions = format.highResolutionStillImageDimensions
+
+						let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+
+						if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && photoDimensions.width == 4032 &&  photoDimensions.height == 3024 && format.isVideoHDRSupported {
+							wideAngleCameraDevice.activeFormat = format
+							activeFormatPhotoDimensions = wideAngleCameraDevice.activeFormat.highResolutionStillImageDimensions
+							activeFormatMaxFrameRate 	= wideAngleCameraDevice.activeFormat.videoSupportedFrameRateRanges.first!.maxFrameRate
+							activeFormatVideoDimensions = CMVideoFormatDescriptionGetDimensions(wideAngleCameraDevice.activeFormat.formatDescription)
+							break
+						}
+					}
+				}
+			}
+			
+			
+			if !wideAngleCameraDevice.activeFormat.isVideoHDRSupported || !(activeFormatPhotoDimensions.width == 4032 && activeFormatPhotoDimensions.height == 3024) {
+				for format in formats {
+					if format.isMultiCamSupported {
+						let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+						
+						if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) {
+							wideAngleCameraDevice.activeFormat = format
+							break
+						}
 					}
 				}
 			}
