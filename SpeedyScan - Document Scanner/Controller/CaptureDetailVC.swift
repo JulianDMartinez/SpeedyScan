@@ -274,7 +274,7 @@ class CaptureDetailVC: UIViewController {
 		let defaultFileNameTime		= dateFormatter.string(from: Date())
 		
 		alertController.addTextField { textField in
-			textField.text				= "\(defaultFileNameTime)"
+			textField.placeholder		= "\(defaultFileNameTime)"
 			textField.clearButtonMode	= .always
 		}
 		
