@@ -196,7 +196,7 @@ class CaptureDetailVC: UIViewController {
 		let defaultFileNameTime		= dateFormatter.string(from: Date())
 		
 		alertController.addTextField { textField in
-			textField.text				= "\(defaultFileNameTime)"
+			textField.placeholder		= "\(defaultFileNameTime)"
 			textField.clearButtonMode 	= .always
 		}
 		
@@ -213,7 +213,11 @@ class CaptureDetailVC: UIViewController {
 				return
 			}
 			
-			fileName = textFieldValue
+			if !textFieldValue.isEmpty {
+				fileName = textFieldValue
+			} else {
+				fileName = defaultFileNameTime
+			}
 			
 			guard let cloudRootURL 			= self.cloudMetadataManager?.containerRootURL else {
 				print("An error was encountered while accessing the iCloud root URL")
@@ -287,7 +291,11 @@ class CaptureDetailVC: UIViewController {
 				return
 			}
 			
-			fileName = textFieldValue
+			if !textFieldValue.isEmpty {
+				fileName = textFieldValue
+			} else {
+				fileName = defaultFileNameTime
+			}
 			
 			let fileManager             = FileManager.default
 			let documentDirectoryURL    = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
