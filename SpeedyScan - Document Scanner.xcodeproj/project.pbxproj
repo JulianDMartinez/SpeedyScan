@@ -414,14 +414,14 @@
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.5;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.5;
+				MARKETING_VERSION = 0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.julianmartinezdev.SpeedyScan---Document-Scanner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -438,14 +438,14 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.5;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.5;
+				MARKETING_VERSION = 0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.julianmartinezdev.SpeedyScan---Document-Scanner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
