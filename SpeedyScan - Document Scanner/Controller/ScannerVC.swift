@@ -105,8 +105,8 @@ class ScannerVC: UIViewController {
 		
 		NSLayoutConstraint.activate([
 			wideAnglePreviewView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -50),
-			wideAnglePreviewView.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: (4/3)*viewOffsetMultiplier),
-			wideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: viewOffsetMultiplier),
+			wideAnglePreviewView.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: CGFloat((4/3)*viewOffsetMultiplier)),
+			wideAnglePreviewView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: CGFloat(viewOffsetMultiplier)),
 			wideAnglePreviewView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
 		])
 	}
@@ -879,7 +879,7 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
 extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
-		guard let cgImage = photo.cgImageRepresentation() else {
+		guard let cgImage = photo.cgImageRepresentation()?.takeUnretainedValue() else {
 			let imageAttachment = NSTextAttachment()
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
