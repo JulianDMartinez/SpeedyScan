@@ -414,7 +414,7 @@
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -438,7 +438,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
