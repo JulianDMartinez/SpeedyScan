@@ -638,12 +638,12 @@ class ScannerVC: UIViewController {
 					
 					guard let rect = results.first else {
 						let imageAttachment = NSTextAttachment()
-						imageAttachment.image = UIImage(systemName: "questionmark.circle")
+						imageAttachment.image = UIImage(systemName: "questionmark.circle")?.withTintColor(.label)
 						
 						
-						let fullString = NSMutableAttributedString(string: "\nPress ")
+						let fullString = NSMutableAttributedString(string: "Make sure all of the object edges are within view. \nPress ")
 						fullString.append(NSAttributedString(attachment: imageAttachment))
-						fullString.append(NSAttributedString(string: " to see tips for best results."))
+						fullString.append(NSAttributedString(string: " to see more tips for best results."))
 						
 						let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 						let alert = UIAlertController(
@@ -738,9 +738,9 @@ class ScannerVC: UIViewController {
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nPress ")
+			let fullString = NSMutableAttributedString(string: "Make sure all of the object edges are within view. \nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
@@ -879,14 +879,14 @@ extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
 extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
-		guard let cgImage = photo.cgImageRepresentation()?.takeUnretainedValue() else {
+		guard let cgImage = photo.cgImageRepresentation() else {
 			let imageAttachment = NSTextAttachment()
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nPress ")
+			let fullString = NSMutableAttributedString(string: "Make sure all of the object edges are within view. \nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
@@ -907,9 +907,9 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nPress ")
+			let fullString = NSMutableAttributedString(string: "Make sure all of the object edges are within view. \nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
@@ -934,9 +934,9 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nPress ")
+			let fullString = NSMutableAttributedString(string: "Make sure all of the object edges are within view. \nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see tips for best results."))
+			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			
 			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
 			let alert = UIAlertController(
