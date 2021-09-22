@@ -475,7 +475,9 @@ class ScannerVC: UIViewController {
 						}
 					}
 				}
-			} else {
+			}
+			
+			if !wideAngleCameraDevice.activeFormat.isVideoHDRSupported || !(activeFormatPhotoDimensions.width == 4032 && activeFormatPhotoDimensions.height == 3024) {
 				for format in formats {
 					if format.isMultiCamSupported {
 						let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
@@ -537,6 +539,7 @@ class ScannerVC: UIViewController {
 		
 		wideAnglePhotoOutput.isHighResolutionCaptureEnabled = true
 		wideAnglePhotoOutput.maxPhotoQualityPrioritization = .balanced
+		
 		captureSession.addOutputWithNoConnections(wideAnglePhotoOutput)
 
 		wideAngleVideoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
