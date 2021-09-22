@@ -248,12 +248,13 @@ class ScannerVC: UIViewController {
 	
 	
 	private func configureWideAngleCameraCapture() {
+		
 		//Find the wide angle camera.
+		
 		guard let wideAngleCameraDevice = AVCaptureDevice.DiscoverySession(
 			deviceTypes : [.builtInWideAngleCamera],
 			mediaType   : .video,
 			position    : .back
-			
 		).devices.first else {
 			DispatchQueue.main.async {
 				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
@@ -312,10 +313,7 @@ class ScannerVC: UIViewController {
 						}
 					}
 				}
-			}
-			
-			
-			if !wideAngleCameraDevice.activeFormat.isVideoHDRSupported || !(activeFormatPhotoDimensions.width == 4032 && activeFormatPhotoDimensions.height == 3024) {
+			} else {
 				for format in formats {
 					if format.isMultiCamSupported {
 						let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
@@ -416,28 +414,28 @@ class ScannerVC: UIViewController {
 	
 	
 	private func configureUltraWideAngleCameraCapture() {
-		
+
 		//Find the ultra wide angle camera.
-		
+
 		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(
 			deviceTypes : [.builtInUltraWideCamera],
 			mediaType   : .video,
 			position    : .back
-			
+
 		)
-		
+
 		guard !deviceDiscoverySession.devices.isEmpty else {return}
-		
+
 		guard let ultraWideAngleCameraDevice = deviceDiscoverySession.devices.first else {return}
-		
+
 		//Add the ultra wide angle camera input to the capture session.
 		var ultraWideCameraDeviceInput: AVCaptureDeviceInput? = nil
-		
+
 		do {
 			try ultraWideAngleCameraDevice.lockForConfiguration()
-			
+
 			let formats = ultraWideAngleCameraDevice.formats
-			
+
 			for format in formats {
 				if format.isMultiCamSupported {
 					let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
@@ -446,15 +444,15 @@ class ScannerVC: UIViewController {
 					}
 				}
 			}
-						
+
 			ultraWideCameraDeviceInput = try AVCaptureDeviceInput(device: ultraWideAngleCameraDevice)
-			
+
 			guard let ultraWideCameraDeviceInput = ultraWideCameraDeviceInput,
 				  captureSession.canAddInput(ultraWideCameraDeviceInput) else {
 					  debugPrint("Could not add ultra wide camera input.")
 					  return
 				  }
-			
+
 			captureSession.addInputWithNoConnections(ultraWideCameraDeviceInput)
 			ultraWideAngleCameraDevice.unlockForConfiguration()
 		} catch {
@@ -464,14 +462,14 @@ class ScannerVC: UIViewController {
 					title: "Camera Configuration Error",
 					message: "An error was encountered while trying to configure the device built in camera.",
 					preferredStyle: .alert)
-				
+
 				alert.addAction(okayAlertAction)
 				self.present(alert, animated: true)
 			}
 		}
-		
+
 		//Find the ultra wide angle camera device input's video port
-		
+
 		guard let ultraWideCameraDeviceInput = ultraWideCameraDeviceInput,
 			  let ultraWideCameraVideoPort = ultraWideCameraDeviceInput.ports(for: .video,
 																				 sourceDeviceType: ultraWideAngleCameraDevice.deviceType,
@@ -480,7 +478,7 @@ class ScannerVC: UIViewController {
 			debugPrint("Could not find the ultra wide camera device input's video port.")
 			return
 		}
-		
+
 		let ultraWideAngleVideoDataOutput		= AVCaptureVideoDataOutput()
 		//Add the wide angle camera photo and output.
 		guard captureSession.canAddOutput(ultraWideAngleVideoDataOutput)
@@ -488,24 +486,24 @@ class ScannerVC: UIViewController {
 			debugPrint("Could not add the ultra wide angle camera photo and/or video data output.")
 			return
 		}
-		
+
 		captureSession.addOutputWithNoConnections(ultraWideAngleVideoDataOutput)
-		
+
 		//Connect the wide angle camera device input to the wide angle camera video data output.
 		let ultraWideAngleCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [ultraWideCameraVideoPort], output: ultraWideAngleVideoDataOutput)
-		
+
 		guard captureSession.canAddConnection(ultraWideAngleCameraVideoDataOutputConnection) else {
 			debugPrint("Could not add a connection to the wide angle camera video data output.")
 			return
 		}
-		
+
 		captureSession.addConnection(ultraWideAngleCameraVideoDataOutputConnection)
 		ultraWideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
-		
+
 		//Connect the wide angle camera device input to the wide angle camera video preview layer
-		
+
 		_ = AVCaptureConnection(inputPort: ultraWideCameraVideoPort, videoPreviewLayer: ultraWideAngleCameraPreviewLayer)
-		
+
 		return
 	}
 	
@@ -514,7 +512,7 @@ class ScannerVC: UIViewController {
 		let previewFrame = wideAnglePreviewView.bounds
 		
 		wideAngleCameraPreviewLayer.frame          	= previewFrame
-		wideAngleCameraPreviewLayer.videoGravity   	= .resizeAspect
+		wideAngleCameraPreviewLayer.videoGravity   	= .resizeAspectFill
 		
 		wideAnglePreviewView.layer.addSublayer(wideAngleCameraPreviewLayer)
 	}
@@ -522,10 +520,10 @@ class ScannerVC: UIViewController {
 	
 	private func configureUltraWideAngleCameraPreviewLayer() {
 		let previewFrame = ultraWideAnglePreviewView.bounds
-		
+
 		ultraWideAngleCameraPreviewLayer.frame          = previewFrame
 		ultraWideAngleCameraPreviewLayer.videoGravity   = .resizeAspectFill
-		
+
 		ultraWideAnglePreviewView.layer.addSublayer(ultraWideAngleCameraPreviewLayer)
 	}
 	
