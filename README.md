@@ -3,7 +3,5 @@ This is an app that provides quick point and shoot scans which can be shared or 
 
 Currently available in test flight at: https://testflight.apple.com/join/WnbgdXIZ
 
-
-
-![Speedy Scan Preivew Final](https://user-images.githubusercontent.com/65503160/134286417-7a138808-a01b-4de6-b39b-9b97912ab57a.gif)
+![Speedy Scan Preivew Final](https://user-images.githubusercontent.com/65503160/134286633-361adf0e-0f0d-4d4b-bc4f-472e76ee348b.gif)
 
