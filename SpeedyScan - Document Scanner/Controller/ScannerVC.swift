@@ -804,7 +804,7 @@ class ScannerVC: UIViewController {
 						imageAttachment.image = UIImage(systemName: "questionmark.circle")?.withTintColor(.label)
 						
 						
-						let fullString = NSMutableAttributedString(string: "\nMove the device further away from the object until all the edges of the object are within the view and a bounding box is shown. \n\nPress ")
+						let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
 						fullString.append(NSAttributedString(attachment: imageAttachment))
 						fullString.append(NSAttributedString(string: " to see more tips for best results."))
 						
@@ -901,7 +901,7 @@ class ScannerVC: UIViewController {
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nMove the device further away from the object until all the edges of the object are within the view and a bounding box is shown. \n\nPress ")
+			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
 			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			
@@ -1053,7 +1053,7 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nMove the device further away from the object until all the edges of the object are within the view and a bounding box is shown. \n\nPress ")
+			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
 			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			
@@ -1076,7 +1076,7 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nMove the device further away from the object until all the edges of the object are within the view and a bounding box is shown. \n\nPress ")
+			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
 			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			
@@ -1103,7 +1103,7 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 			imageAttachment.image = UIImage(systemName: "questionmark.circle")
 			
 			
-			let fullString = NSMutableAttributedString(string: "\nMove the device further away from the object until all the edges of the object are within the view and a bounding box is shown. \n\nPress ")
+			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
 			fullString.append(NSAttributedString(attachment: imageAttachment))
 			fullString.append(NSAttributedString(string: " to see more tips for best results."))
 			

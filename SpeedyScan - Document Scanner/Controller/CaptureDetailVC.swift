@@ -324,7 +324,6 @@ class CaptureDetailVC: UIViewController {
 		present(alertController, animated: true, completion: nil)
 	}
 	
-	
 	private func configureShareImageAction() -> UIAction {
 		
 		let shareImage          = UIImage(systemName: "square.and.arrow.up")
@@ -335,6 +334,154 @@ class CaptureDetailVC: UIViewController {
 		
 	}
 	
+	private func shareAsPDF() {
+		let title               	= "File Name"
+		let message             	= ""
+		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
+		let cancelButtonTitle   	= "Cancel"
+		let cancelAction        	= UIAlertAction(title: cancelButtonTitle, style: .cancel) { _ in }
+		let rightButtonTitle    	= "Ok"
+		let dateFormatter 			= DateFormatter()
+		
+		dateFormatter.dateFormat = "YYYY-MM-dd hhmmss a"
+		
+		let fileManager             = FileManager.default
+		let defaultFileNameTime		= dateFormatter.string(from: Date())
+		
+		var temporaryFileURL		= URL(string: "")
+		
+		alertController.addTextField { textField in
+			textField.placeholder		= "\(defaultFileNameTime)"
+			textField.clearButtonMode	= .always
+		}
+		
+		let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
+			var fileName                = ""
+			
+			guard let textFields = alertController.textFields else {
+				debugPrint("An error was encountered while trying to access the text fields array.")
+				return
+			}
+			
+			guard let textFieldValue = textFields[0].text else {
+				debugPrint("An error was encountered while trying to access the text field value.")
+				return
+			}
+			
+			if !textFieldValue.isEmpty {
+				fileName = textFieldValue
+			} else {
+				fileName = defaultFileNameTime
+			}
+			
+			let temporaryDirectoryURL    = fileManager.temporaryDirectory
+			
+			let pdfDocument 		= PDFDocument()
+			let pdfPage     		= PDFPage(image: self.image)
+			temporaryFileURL	= temporaryDirectoryURL.appendingPathComponent("\(fileName).pdf")
+			
+			guard let temporaryFileURL = temporaryFileURL else {
+				print("An error was encountered while trying to access the temporary file for sharing.")
+				return
+			}
+			
+			pdfDocument.insert(pdfPage!, at: 0)
+			pdfDocument.write(to: temporaryFileURL)
+			
+			let activitySheet = UIActivityViewController(activityItems: [temporaryFileURL as Any], applicationActivities: nil)
+			
+			activitySheet.completionWithItemsHandler = { activity, success, items, error in
+				do {
+					try fileManager.removeItem(at: temporaryFileURL)
+				} catch {
+					print("There was an error while attempting to delete temporary file.")
+				}
+				self.dismiss(animated: true, completion: nil)
+			}
+			
+			self.present(activitySheet, animated: true, completion: nil)
+		}
+		
+		alertController.addAction(cancelAction)
+		alertController.addAction(rightButtonAction)
+		present(alertController, animated: true, completion: nil)
+	}
+	
+	private func shareAsImage() {
+		let title               	= "File Name"
+		let message             	= ""
+		let alertController     	= UIAlertController(title: title, message: message, preferredStyle: .alert)
+		let cancelButtonTitle   	= "Cancel"
+		let cancelAction        	= UIAlertAction(title: cancelButtonTitle, style: .cancel) { _ in }
+		let rightButtonTitle    	= "Ok"
+		let dateFormatter 			= DateFormatter()
+		
+		dateFormatter.dateFormat = "YYYY-MM-dd hhmmss a"
+		
+		let fileManager             = FileManager.default
+		let defaultFileNameTime		= dateFormatter.string(from: Date())
+		
+		var temporaryFileURL		= URL(string: "")
+		
+		alertController.addTextField { textField in
+			textField.placeholder		= "\(defaultFileNameTime)"
+			textField.clearButtonMode	= .always
+		}
+		
+		let rightButtonAction = UIAlertAction(title: rightButtonTitle, style: .default) { _ in
+			var fileName                = ""
+			
+			guard let textFields = alertController.textFields else {
+				debugPrint("An error was encountered while trying to access the text fields array.")
+				return
+			}
+			
+			guard let textFieldValue = textFields[0].text else {
+				debugPrint("An error was encountered while trying to access the text field value.")
+				return
+			}
+			
+			if !textFieldValue.isEmpty {
+				fileName = textFieldValue
+			} else {
+				fileName = defaultFileNameTime
+			}
+			
+			let temporaryDirectoryURL    = fileManager.temporaryDirectory
+			
+			let jpgImage        = self.image.jpegData(compressionQuality: 1.0)
+			
+			temporaryFileURL	= temporaryDirectoryURL.appendingPathComponent("\(fileName).jpg")
+			
+			guard let temporaryFileURL = temporaryFileURL else {
+				print("An error was encountered while trying to access the temporary file for sharing.")
+				return
+			}
+			
+			do{
+				try jpgImage?.write(to: temporaryFileURL)
+			} catch {
+				print(error.localizedDescription)
+			}
+			
+			let activitySheet = UIActivityViewController(activityItems: [temporaryFileURL as Any], applicationActivities: nil)
+			
+			activitySheet.completionWithItemsHandler = { activity, success, items, error in
+				do {
+					try fileManager.removeItem(at: temporaryFileURL)
+				} catch {
+					print("There was an error while attempting to delete temporary file.")
+				}
+				self.dismiss(animated: true, completion: nil)
+			}
+			
+			self.present(activitySheet, animated: true, completion: nil)
+		}
+		
+		alertController.addAction(cancelAction)
+		alertController.addAction(rightButtonAction)
+		present(alertController, animated: true, completion: nil)
+	}
 	
 	private func configureSaveToCameraRollAction() -> UIAction {
 		
@@ -360,36 +507,6 @@ class CaptureDetailVC: UIViewController {
 				}
 			}
 		}
-	}
-	
-	
-	private func shareAsPDF() {
-		let pdfDocument = PDFDocument()
-		let pdfPage     = PDFPage(image: image)
-		
-		pdfDocument.insert(pdfPage!, at: 0)
-		
-		let data = pdfDocument.dataRepresentation()
-		
-		let activitySheet = UIActivityViewController(activityItems: [data as Any], applicationActivities: nil)
-		
-		activitySheet.completionWithItemsHandler = { activity, success, items, error in
-			self.dismiss(animated: true, completion: nil)
-		}
-		
-		present(activitySheet, animated: true, completion: nil)
-	}
-	
-	
-	private func shareAsImage() {
-		let jpgImage        = image.jpegData(compressionQuality: 1.0)
-		let activitySheet   = UIActivityViewController(activityItems: [jpgImage as Any], applicationActivities: nil)
-		
-		activitySheet.completionWithItemsHandler = { activity, success, items, error in
-			self.dismiss(animated: true, completion: nil)
-		}
-		
-		present(activitySheet, animated: true, completion: nil)
 	}
 	
 	
