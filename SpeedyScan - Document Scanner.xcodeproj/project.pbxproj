@@ -25,6 +25,7 @@
 		B92045CF26ED18B900FE05D9 /* gif3.gif in Resources */ = {isa = PBXBuildFile; fileRef = B92045CC26ED18B900FE05D9 /* gif3.gif */; };
 		B92045D026ED18B900FE05D9 /* gif7.gif in Resources */ = {isa = PBXBuildFile; fileRef = B92045CD26ED18B900FE05D9 /* gif7.gif */; };
 		B92045D126ED18B900FE05D9 /* gif4.gif in Resources */ = {isa = PBXBuildFile; fileRef = B92045CE26ED18B900FE05D9 /* gif4.gif */; };
+		B92BE61A2708E63E00C8C71A /* CaptureSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92BE6192708E63E00C8C71A /* CaptureSessionManager.swift */; };
 		B990393F26EBB94500914A2D /* TipsDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B990393E26EBB94500914A2D /* TipsDataModel.swift */; };
 		B990394526EBF30E00914A2D /* UIImageView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B990394426EBF30E00914A2D /* UIImageView+Ext.swift */; };
 		B990394F26EC159300914A2D /* SSTipTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B990394E26EC159300914A2D /* SSTipTextView.swift */; };
@@ -54,6 +55,7 @@
 		B92045CC26ED18B900FE05D9 /* gif3.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = gif3.gif; sourceTree = "<group>"; };
 		B92045CD26ED18B900FE05D9 /* gif7.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = gif7.gif; sourceTree = "<group>"; };
 		B92045CE26ED18B900FE05D9 /* gif4.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = gif4.gif; sourceTree = "<group>"; };
+		B92BE6192708E63E00C8C71A /* CaptureSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSessionManager.swift; sourceTree = "<group>"; };
 		B990393E26EBB94500914A2D /* TipsDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipsDataModel.swift; sourceTree = "<group>"; };
 		B990394426EBF30E00914A2D /* UIImageView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Ext.swift"; sourceTree = "<group>"; };
 		B990394E26EC159300914A2D /* SSTipTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSTipTextView.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 			isa = PBXGroup;
 			children = (
 				B9F6D40E26BEBC6500DFAE86 /* CloudDriveContainerManager.swift */,
+				B92BE6192708E63E00C8C71A /* CaptureSessionManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -264,6 +267,7 @@
 				1D58C82E265AB5F10022584B /* ScannerVC.swift in Sources */,
 				B990394526EBF30E00914A2D /* UIImageView+Ext.swift in Sources */,
 				B991B7B626DBC63C0046FA87 /* SSPreviewView.swift in Sources */,
+				B92BE61A2708E63E00C8C71A /* CaptureSessionManager.swift in Sources */,
 				B908CC2A269370C200DDC437 /* CaptureDetailVC.swift in Sources */,
 				B990393F26EBB94500914A2D /* TipsDataModel.swift in Sources */,
 				B908CC272691438700DDC437 /* SSCircularButton.swift in Sources */,
@@ -414,14 +418,14 @@
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.julianmartinezdev.SpeedyScan---Document-Scanner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -438,14 +442,14 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = "SpeedyScan - Document Scanner/SpeedyScan - Document Scanner.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J658BJ7LAB;
 				INFOPLIST_FILE = "SpeedyScan - Document Scanner/Support/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.julianmartinezdev.SpeedyScan---Document-Scanner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
