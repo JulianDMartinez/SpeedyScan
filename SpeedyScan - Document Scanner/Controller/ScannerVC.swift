@@ -23,6 +23,7 @@ class ScannerVC: UIViewController {
 	
 	//MARK: AVFoundation Properties
 	
+	private let captureSessionManager 					= CaptureSessionManager()
 	private let wideAnglePhotoOutput					= AVCapturePhotoOutput()
 	private lazy var captureSession              		= AVCaptureSession()
 	private lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
@@ -47,56 +48,10 @@ class ScannerVC: UIViewController {
 	
 	//The capture session is configured in viewDidAppear in order to show the subviews while the capture session is being configured.
 	override func viewDidAppear(_ animated: Bool) {
-		configureCaptureSession()
-	}
-	
-	
-	private func configureCaptureSession() {
-		
-		let availableDevices = AVCaptureDevice.DiscoverySession(
-			deviceTypes : [.builtInDualCamera, .builtInWideAngleCamera],
-			mediaType   : .video,
-			position    : .back
-		).devices
-		
-		guard !availableDevices.isEmpty else {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Device Not Supported",
-					message: "Please submit a request to julian.martinez.s@outlook.com for added support.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return
-		}
-		
-		var availableDevicesRawValues = [String]()
-		
-		for device in availableDevices {
-			availableDevicesRawValues.append(device.deviceType.rawValue)
-		}
-		
-		guard verifyDeviceSupportAndCameraAccess() else {return}
-		
-		if availableDevicesRawValues.contains("AVCaptureDeviceTypeBuiltInDualCamera") {
-			captureSession = AVCaptureMultiCamSession()
-			
-			configureMulticamWideAngleCameraCapture()
-			configureMulticamUltraWideAngleCameraCapture()
-			configureUpOutlineLayer()
-			configureWideAngleCameraPreviewLayer()
-			configureUltraWideAngleCameraPreviewLayer()
-		} else if availableDevicesRawValues.contains("AVCaptureDeviceTypeBuiltInWideAngleCamera") {
-			captureSession = AVCaptureSession()
-			configureWideAngleCameraCapture()
-			configureUpOutlineLayer()
-			configureWideAngleCameraPreviewLayer()
-		}
-
-		captureSession.startRunning()
+		captureSessionManager.delegate = self
+		captureSessionManager.configureCaptureSession()
+		configureUltraWideAngleCameraPreviewLayer()
+		configureWideAngleCameraPreviewLayer()
 	}
 	
 	
@@ -290,412 +245,23 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	private func configureWideAngleCameraCapture() {
-		
-		//Find the wide angle camera.
-		
-		guard let wideAngleCameraDevice = AVCaptureDevice.DiscoverySession(
-			deviceTypes : [.builtInWideAngleCamera],
-			mediaType   : .video,
-			position    : .back
-		).devices.first else {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Camera Not Found",
-					message: "An error was encountered while trying to access the device built in camera.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return
-		}
-		
-		self.wideAngleCameraDevice = wideAngleCameraDevice
-		
-		//Add the wide angle camera input to the capture session.
-		var wideAngleDeviceInput: AVCaptureDeviceInput? = nil
-		
-		do {
-			try wideAngleCameraDevice.lockForConfiguration()
-			
-			captureSession.sessionPreset = .photo
-			
-			wideAngleCameraDevice.exposureMode = .continuousAutoExposure
-			wideAngleCameraDevice.whiteBalanceMode = .continuousAutoWhiteBalance
-			wideAngleCameraDevice.focusMode = .continuousAutoFocus
-			
-			wideAngleDeviceInput = try AVCaptureDeviceInput(device: wideAngleCameraDevice)
-			
-			guard let wideAngleDeviceInput = wideAngleDeviceInput,
-				  captureSession.canAddInput(wideAngleDeviceInput) else {
-					  debugPrint("Could not add camera input.")
-					  return
-				  }
-			
-			captureSession.addInputWithNoConnections(wideAngleDeviceInput)
-			wideAngleCameraDevice.unlockForConfiguration()
-		} catch {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Camera Configuration Error",
-					message: "An error was encountered while trying to configure the device built in camera.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		}
-		
-		//Find the wide angle camera device input's video port
-		guard let wideAngleDeviceInput = wideAngleDeviceInput,
-			  let wideAngleVideoPort = wideAngleDeviceInput.ports(for: .video,
-																	 sourceDeviceType: wideAngleCameraDevice.deviceType,
-																	 sourceDevicePosition: .back).first
-		else {
-			debugPrint("Cloud not find the back camera device input's video port.")
-			return
-		}
-		
-		
-		let wideAngleVideoDataOutput			= AVCaptureVideoDataOutput()
-		//Add the wide angle camera photo and and video data outputs.
-		guard captureSession.canAddOutput(wideAnglePhotoOutput),
-			  captureSession.canAddOutput(wideAngleVideoDataOutput)
-		else {
-			debugPrint("Could not add the wide angle camera photo and/or video data output.")
-			return
-		}
-		
-		wideAnglePhotoOutput.isHighResolutionCaptureEnabled = true
-		wideAnglePhotoOutput.maxPhotoQualityPrioritization = .balanced
-		captureSession.addOutputWithNoConnections(wideAnglePhotoOutput)
-		
-		wideAngleVideoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
-		wideAngleVideoDataOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)] as [String : Any]
-		captureSession.addOutputWithNoConnections(wideAngleVideoDataOutput)
-		
-		//Connect the wide angle camera device input to the wide angle camera video data output.
-		let wideAngleCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [wideAngleVideoPort], output: wideAngleVideoDataOutput)
-		
-		guard captureSession.canAddConnection(wideAngleCameraVideoDataOutputConnection) else {
-			debugPrint("Could not add a connection to the wide angle camera video data output.")
-			return
-		}
-		
-		wideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
-		//Stabilization is turned off to allow for maximum still image resolution capture.
-		wideAngleCameraVideoDataOutputConnection.preferredVideoStabilizationMode = .off
-		
-		captureSession.addConnection(wideAngleCameraVideoDataOutputConnection)
-		
-		//Connect the wide angle camera device input to the wide angle camera photo output.
-		let wideAngleCameraPhotoOutputConnection = AVCaptureConnection(inputPorts: [wideAngleVideoPort], output: wideAnglePhotoOutput)
-		
-		guard captureSession.canAddConnection(wideAngleCameraPhotoOutputConnection) else {
-			debugPrint("Could not add a connection to the wide angle camera video data output.")
-			return
-		}
-		
-		captureSession.addConnection(wideAngleCameraPhotoOutputConnection)
-		
-		//Connect the wide angle camera device input to the wide angle camera video preview layer
-		
-		_ = AVCaptureConnection(inputPort: wideAngleVideoPort, videoPreviewLayer: wideAngleCameraPreviewLayer)
-		
-		return
-	}
-	
-	
-	private func configureMulticamWideAngleCameraCapture() {
-		
-		//Find the wide angle camera.
-		
-		guard let wideAngleCameraDevice = AVCaptureDevice.DiscoverySession(
-			deviceTypes : [.builtInWideAngleCamera],
-			mediaType   : .video,
-			position    : .back
-		).devices.first else {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Camera Not Found",
-					message: "An error was encountered while trying to access the device built in camera.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return
-		}
-		
-		self.wideAngleCameraDevice = wideAngleCameraDevice
-		
-		//Add the wide angle camera input to the capture session.
-		var wideAngleDeviceInput: AVCaptureDeviceInput? = nil
-		
-		do {
-			try wideAngleCameraDevice.lockForConfiguration()
-			
-			let formats = wideAngleCameraDevice.formats
-			
-			for format in formats {
-				if format.isMultiCamSupported {
-					let photoDimensions = format.highResolutionStillImageDimensions
-					let maxFrameRate 	= format.videoSupportedFrameRateRanges.first!.maxFrameRate
-					let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
-
-					if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && photoDimensions.width == 4032 &&  photoDimensions.height == 3024 && maxFrameRate == 60 && format.isVideoHDRSupported {
-						wideAngleCameraDevice.activeFormat = format
-						break
-					}
-				}
-			}
-			
-			var activeFormatPhotoDimensions = wideAngleCameraDevice.activeFormat.highResolutionStillImageDimensions
-			var activeFormatMaxFrameRate 	= wideAngleCameraDevice.activeFormat.videoSupportedFrameRateRanges.first!.maxFrameRate
-			var activeFormatVideoDimensions = CMVideoFormatDescriptionGetDimensions(wideAngleCameraDevice.activeFormat.formatDescription)
-			
-			if !(Float(activeFormatVideoDimensions.width) / Float(activeFormatVideoDimensions.height) == 1.3333334) || activeFormatPhotoDimensions.width != 4032 ||  activeFormatPhotoDimensions.height != 3024 || activeFormatMaxFrameRate != 60 || !wideAngleCameraDevice.activeFormat.isVideoHDRSupported {
-				for format in formats {
-					if format.isMultiCamSupported {
-
-						let photoDimensions = format.highResolutionStillImageDimensions
-
-						let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
-
-						if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && photoDimensions.width == 4032 &&  photoDimensions.height == 3024 && format.isVideoHDRSupported {
-							wideAngleCameraDevice.activeFormat = format
-							activeFormatPhotoDimensions = wideAngleCameraDevice.activeFormat.highResolutionStillImageDimensions
-							activeFormatMaxFrameRate 	= wideAngleCameraDevice.activeFormat.videoSupportedFrameRateRanges.first!.maxFrameRate
-							activeFormatVideoDimensions = CMVideoFormatDescriptionGetDimensions(wideAngleCameraDevice.activeFormat.formatDescription)
-							break
-						}
-					}
-				}
-			}
-			
-			if !wideAngleCameraDevice.activeFormat.isVideoHDRSupported || !(activeFormatPhotoDimensions.width == 4032 && activeFormatPhotoDimensions.height == 3024) {
-				for format in formats {
-					if format.isMultiCamSupported {
-						let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
-						
-						if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) {
-							wideAngleCameraDevice.activeFormat = format
-							break
-						}
-					}
-				}
-			}
-			
-			wideAngleCameraDevice.exposureMode = .continuousAutoExposure
-			wideAngleCameraDevice.whiteBalanceMode = .continuousAutoWhiteBalance
-			wideAngleCameraDevice.focusMode = .continuousAutoFocus
-			
-			wideAngleDeviceInput = try AVCaptureDeviceInput(device: wideAngleCameraDevice)
-			
-			guard let wideAngleDeviceInput = wideAngleDeviceInput,
-				  captureSession.canAddInput(wideAngleDeviceInput) else {
-					  debugPrint("Could not add camera input.")
-					  return
-				  }
-			
-			captureSession.addInputWithNoConnections(wideAngleDeviceInput)
-			wideAngleCameraDevice.unlockForConfiguration()
-		} catch {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Camera Configuration Error",
-					message: "An error was encountered while trying to configure the device built in camera.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		}
-		
-		//Find the wide angle camera device input's video port
-		guard let wideAngleDeviceInput = wideAngleDeviceInput,
-			  let wideAngleVideoPort = wideAngleDeviceInput.ports(for: .video,
-																	 sourceDeviceType: wideAngleCameraDevice.deviceType,
-																	 sourceDevicePosition: .back).first
-		else {
-			debugPrint("Cloud not find the back camera device input's video port.")
-			return
-		}
-		
-		
-		let wideAngleVideoDataOutput			= AVCaptureVideoDataOutput()
-		//Add the wide angle camera photo and and video data outputs.
-		guard captureSession.canAddOutput(wideAnglePhotoOutput),
-			  captureSession.canAddOutput(wideAngleVideoDataOutput)
-		else {
-			debugPrint("Could not add the wide angle camera photo and/or video data output.")
-			return
-		}
-		
-		wideAnglePhotoOutput.isHighResolutionCaptureEnabled = true
-		wideAnglePhotoOutput.maxPhotoQualityPrioritization = .balanced
-		
-		captureSession.addOutputWithNoConnections(wideAnglePhotoOutput)
-
-		wideAngleVideoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
-		wideAngleVideoDataOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)] as [String : Any]
-		captureSession.addOutputWithNoConnections(wideAngleVideoDataOutput)
-
-		//Connect the wide angle camera device input to the wide angle camera video data output.
-		let wideAngleCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [wideAngleVideoPort], output: wideAngleVideoDataOutput)
-		
-		guard captureSession.canAddConnection(wideAngleCameraVideoDataOutputConnection) else {
-			debugPrint("Could not add a connection to the wide angle camera video data output.")
-			return
-		}
-		
-		wideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
-		//Stabilization is turned off to allow for maximum still image resolution capture.
-		wideAngleCameraVideoDataOutputConnection.preferredVideoStabilizationMode = .off
-
-		captureSession.addConnection(wideAngleCameraVideoDataOutputConnection)
-
-		//Connect the wide angle camera device input to the wide angle camera photo output.
-		let wideAngleCameraPhotoOutputConnection = AVCaptureConnection(inputPorts: [wideAngleVideoPort], output: wideAnglePhotoOutput)
-		
-		guard captureSession.canAddConnection(wideAngleCameraPhotoOutputConnection) else {
-			debugPrint("Could not add a connection to the wide angle camera video data output.")
-			return
-		}
-		
-		captureSession.addConnection(wideAngleCameraPhotoOutputConnection)
-		
-		//Connect the wide angle camera device input to the wide angle camera video preview layer
-		
-		_ = AVCaptureConnection(inputPort: wideAngleVideoPort, videoPreviewLayer: wideAngleCameraPreviewLayer)
-
-		return
-	}
-	
-	
-	private func configureMulticamUltraWideAngleCameraCapture() {
-
-		//Find the ultra wide angle camera.
-
-		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(
-			deviceTypes : [.builtInUltraWideCamera],
-			mediaType   : .video,
-			position    : .back
-
-		)
-
-		guard !deviceDiscoverySession.devices.isEmpty else {return}
-
-		guard let ultraWideAngleCameraDevice = deviceDiscoverySession.devices.first else {return}
-
-		//Add the ultra wide angle camera input to the capture session.
-		var ultraWideCameraDeviceInput: AVCaptureDeviceInput? = nil
-
-		do {
-			try ultraWideAngleCameraDevice.lockForConfiguration()
-
-			let formats = ultraWideAngleCameraDevice.formats
-
-			for format in formats {
-				if format.isMultiCamSupported {
-					let videoDimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
-					if (Float(videoDimensions.width) / Float(videoDimensions.height) == 1.3333334) && format.isVideoBinned {
-						ultraWideAngleCameraDevice.activeFormat = format
-					}
-				}
-			}
-
-			ultraWideCameraDeviceInput = try AVCaptureDeviceInput(device: ultraWideAngleCameraDevice)
-
-			guard let ultraWideCameraDeviceInput = ultraWideCameraDeviceInput,
-				  captureSession.canAddInput(ultraWideCameraDeviceInput) else {
-					  debugPrint("Could not add ultra wide camera input.")
-					  return
-				  }
-
-			captureSession.addInputWithNoConnections(ultraWideCameraDeviceInput)
-			ultraWideAngleCameraDevice.unlockForConfiguration()
-		} catch {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Camera Configuration Error",
-					message: "An error was encountered while trying to configure the device built in camera.",
-					preferredStyle: .alert)
-
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		}
-
-		//Find the ultra wide angle camera device input's video port
-
-		guard let ultraWideCameraDeviceInput = ultraWideCameraDeviceInput,
-			  let ultraWideCameraVideoPort = ultraWideCameraDeviceInput.ports(for: .video,
-																				 sourceDeviceType: ultraWideAngleCameraDevice.deviceType,
-																				 sourceDevicePosition: .back).first
-		else {
-			debugPrint("Could not find the ultra wide camera device input's video port.")
-			return
-		}
-
-		let ultraWideAngleVideoDataOutput		= AVCaptureVideoDataOutput()
-		//Add the wide angle camera photo and output.
-		guard captureSession.canAddOutput(ultraWideAngleVideoDataOutput)
-		else {
-			debugPrint("Could not add the ultra wide angle camera photo and/or video data output.")
-			return
-		}
-
-		captureSession.addOutputWithNoConnections(ultraWideAngleVideoDataOutput)
-
-		//Connect the wide angle camera device input to the wide angle camera video data output.
-		let ultraWideAngleCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [ultraWideCameraVideoPort], output: ultraWideAngleVideoDataOutput)
-
-		guard captureSession.canAddConnection(ultraWideAngleCameraVideoDataOutputConnection) else {
-			debugPrint("Could not add a connection to the wide angle camera video data output.")
-			return
-		}
-
-		captureSession.addConnection(ultraWideAngleCameraVideoDataOutputConnection)
-		ultraWideAngleCameraVideoDataOutputConnection.videoOrientation = .portrait
-
-		//Connect the wide angle camera device input to the wide angle camera video preview layer
-
-		_ = AVCaptureConnection(inputPort: ultraWideCameraVideoPort, videoPreviewLayer: ultraWideAngleCameraPreviewLayer)
-
-		return
-	}
-	
-	
 	private func configureWideAngleCameraPreviewLayer() {
 		let previewFrame = wideAnglePreviewView.bounds
 		
-		wideAngleCameraPreviewLayer.frame          	= previewFrame
-		wideAngleCameraPreviewLayer.videoGravity   	= .resizeAspectFill
+		captureSessionManager.wideAngleCameraPreviewLayer.frame          	= previewFrame
+		captureSessionManager.wideAngleCameraPreviewLayer.videoGravity   	= .resizeAspectFill
 		
-		wideAnglePreviewView.layer.addSublayer(wideAngleCameraPreviewLayer)
+		wideAnglePreviewView.layer.addSublayer(captureSessionManager.wideAngleCameraPreviewLayer)
 	}
 	
 	
 	private func configureUltraWideAngleCameraPreviewLayer() {
 		let previewFrame = ultraWideAnglePreviewView.bounds
 
-		ultraWideAngleCameraPreviewLayer.frame          = previewFrame
-		ultraWideAngleCameraPreviewLayer.videoGravity   = .resizeAspectFill
+		captureSessionManager.ultraWideAngleCameraPreviewLayer.frame          = previewFrame
+		captureSessionManager.ultraWideAngleCameraPreviewLayer.videoGravity   = .resizeAspectFill
 
-		ultraWideAnglePreviewView.layer.addSublayer(ultraWideAngleCameraPreviewLayer)
-	}
-	
-	
-	private func configureUpOutlineLayer() {
-		outlineLayer.frame = wideAngleCameraPreviewLayer.bounds
-		wideAngleCameraPreviewLayer.insertSublayer(outlineLayer, at: 1)
+		ultraWideAnglePreviewView.layer.addSublayer(captureSessionManager.ultraWideAngleCameraPreviewLayer)
 	}
 	
 	
@@ -1038,12 +604,12 @@ class ScannerVC: UIViewController {
 
 //MARK: AVFoundation Delegate Extensions
 
-extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
-	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
-		detectPreviewRectangle(in: frame)
-	}
-}
+//extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
+//	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+//		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
+//		detectPreviewRectangle(in: frame)
+//	}
+//}
 
 extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
@@ -1121,4 +687,8 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 		
 		detectPhotoCaptureRectangle(in: ciImage)
 	}
+}
+
+extension ScannerVC: CaptureSessionManagerDelegate {
+	
 }

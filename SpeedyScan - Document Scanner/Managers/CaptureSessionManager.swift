@@ -11,32 +11,34 @@ import Vision
 
 class CaptureSessionManager: NSObject {
 	
-	public var delegate: CaptureSessionManagerDelegate?
+	var delegate: CaptureSessionManagerDelegate?
 	
 	//MARK: UIKit Properties
 	
-	private let wideAnglePreviewView					= SSPreviewView()
-	private let ultraWideAnglePreviewView				= SSPreviewView()
-	private let outlineLayer                			= CAShapeLayer()
-	private var uiImage                     			= UIImage()
-	private var framesWithoutRecognitionCounter   		= 0
-	private var ciImage : CIImage?
+	let wideAnglePreviewView					= SSPreviewView()
+	let ultraWideAnglePreviewView				= SSPreviewView()
+	let outlineLayer                			= CAShapeLayer()
+	var uiImage                     			= UIImage()
+	var framesWithoutRecognitionCounter   		= 0
+	var ciImage : CIImage?
 	
 	
 	//MARK: AVFoundation Properties
 	
-	private let wideAnglePhotoOutput					= AVCapturePhotoOutput()
-	private lazy var captureSession              		= AVCaptureSession()
-	private lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
-	private lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
-	private lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
+	let wideAnglePhotoOutput					= AVCapturePhotoOutput()
+	lazy var captureSession              		= AVCaptureSession()
+	lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
+	lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
+	lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
 	
 	
 	//MARK: Vision Properties
 	
-	private var detectedRectangle	: VNRectangleObservation?
+	var detectedRectangle	: VNRectangleObservation?
 	
-	private func configureCaptureSession() {
+	//MARK: Class Methods
+	
+	func configureCaptureSession() {
 		
 		guard let delegate = delegate else {return}
 		
@@ -88,7 +90,7 @@ class CaptureSessionManager: NSObject {
 
 	//MARK: AVFoundation Capture Session Configuration
 	
-	private func verifyDeviceSupportAndCameraAccess() -> Bool {
+	func verifyDeviceSupportAndCameraAccess() -> Bool {
 		
 		guard let delegate = delegate else {return false}
 		
@@ -117,7 +119,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func verifyCameraAccessOrNotDetermined() -> Bool {
+	func verifyCameraAccessOrNotDetermined() -> Bool {
 		
 		guard let delegate = delegate else {return false}
 		
@@ -165,7 +167,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func configureWideAngleCameraCapture() {
+	func configureWideAngleCameraCapture() {
 		
 		guard let delegate = delegate else {return}
 		
@@ -286,7 +288,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func configureMulticamWideAngleCameraCapture() {
+	func configureMulticamWideAngleCameraCapture() {
 		
 		guard let delegate = delegate else {return}
 		
@@ -457,7 +459,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func configureMulticamUltraWideAngleCameraCapture() {
+	func configureMulticamUltraWideAngleCameraCapture() {
 		
 		guard let delegate = delegate else {return}
 		
@@ -554,7 +556,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func configureWideAngleCameraPreviewLayer() {
+	func configureWideAngleCameraPreviewLayer() {
 		let previewFrame = wideAnglePreviewView.bounds
 		
 		wideAngleCameraPreviewLayer.frame          	= previewFrame
@@ -564,7 +566,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func configureUltraWideAngleCameraPreviewLayer() {
+	func configureUltraWideAngleCameraPreviewLayer() {
 		let previewFrame = ultraWideAnglePreviewView.bounds
 		
 		ultraWideAngleCameraPreviewLayer.frame          = previewFrame
@@ -574,7 +576,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func configureUpOutlineLayer() {
+	func configureUpOutlineLayer() {
 		outlineLayer.frame = wideAngleCameraPreviewLayer.bounds
 		wideAngleCameraPreviewLayer.insertSublayer(outlineLayer, at: 1)
 	}
@@ -582,7 +584,7 @@ class CaptureSessionManager: NSObject {
 	
 	//MARK: Vision Rectangle Recognition Configuration
 	
-	private func detectPreviewRectangle(in cvBuffer: CVPixelBuffer) {
+	func detectPreviewRectangle(in cvBuffer: CVPixelBuffer) {
 		
 		guard let delegate = delegate else {return}
 		
@@ -662,7 +664,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func detectPhotoCaptureRectangle(in image: CIImage) {
+	func detectPhotoCaptureRectangle(in image: CIImage) {
 		
 		guard let delegate = delegate else {return}
 		
@@ -738,7 +740,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func drawBoundingBox(rect: VNRectangleObservation) {
+	func drawBoundingBox(rect: VNRectangleObservation) {
 		
 		let outlinePath = UIBezierPath()
 		
@@ -769,7 +771,7 @@ class CaptureSessionManager: NSObject {
 	}
 	
 	
-	private func resetRecognition() {
+	func resetRecognition() {
 		self.detectedRectangle = nil
 		self.drawBoundingBox(rect: VNRectangleObservation())
 		self.ciImage = nil
@@ -779,7 +781,7 @@ class CaptureSessionManager: NSObject {
 	
 	//MARK: Photo Capture Processing Configuration
 	
-	private func processPhotoCapture(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
+	func processPhotoCapture(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
 		
 		guard let delegate = delegate else {return}
 		
@@ -830,7 +832,7 @@ class CaptureSessionManager: NSObject {
 	
 	
 	
-	private func toggleFlash() {
+	func toggleFlash() {
 		
 		guard let delegate = delegate else {return}
 		
