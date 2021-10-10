@@ -9,9 +9,9 @@ import UIKit
 import AVFoundation
 import Vision
 
-class DocumentScanManager: NSObject {
+class DocumentScanningManager: NSObject {
 	
-	weak var viewController = UIViewController()
+	weak var viewController: UIViewController?
 	
 	//MARK: UIKit Properties
 	
@@ -918,14 +918,14 @@ class DocumentScanManager: NSObject {
 
 //MARK: AVFoundation Delegate Extensions
 
-extension DocumentScanManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+extension DocumentScanningManager: AVCaptureVideoDataOutputSampleBufferDelegate {
 	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
 		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
 		detectPreviewRectangle(in: frame)
 	}
 }
 
-extension DocumentScanManager: AVCapturePhotoCaptureDelegate {
+extension DocumentScanningManager: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
 		guard let viewController = viewController else {return}

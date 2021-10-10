@@ -32,7 +32,7 @@ class ScannerVC: UIViewController {
 		symbolName: "questionmark"
 	)
 	
-	private let captureSessionManager 					= DocumentScanManager()
+	private let captureSessionManager 					= DocumentScanningManager()
 
 	//MARK: ScannerVC Life Cycle Methods
 	
@@ -127,7 +127,7 @@ class ScannerVC: UIViewController {
 	private func configureFlashButton() {
 		view.addSubview(flashButton)
 		
-		flashButton.addTarget(captureSessionManager, action: #selector(DocumentScanManager.toggleFlashAction), for: .touchUpInside)
+		flashButton.addTarget(captureSessionManager, action: #selector(DocumentScanningManager.toggleFlashAction), for: .touchUpInside)
 		
 		NSLayoutConstraint.activate([
 			flashButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 20),
