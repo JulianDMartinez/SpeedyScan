@@ -9,7 +9,7 @@ import UIKit
 import AVFoundation
 import Vision
 
-class CaptureSessionManager: NSObject {
+class DocumentScanManager: NSObject {
 	
 	weak var viewController = UIViewController()
 	
@@ -709,8 +709,8 @@ class CaptureSessionManager: NSObject {
 					
 					self.detectedRectangle = rect
 					
-//					viewController.presentCaptureDetailVC(with: self.ciImage)
-					self.toggleFlash()
+					self.presentCaptureDetailVC(with: self.ciImage)
+					self.toggleFlashAction()
 				}
 			}
 			
@@ -830,9 +830,32 @@ class CaptureSessionManager: NSObject {
 		uiImage  = UIImage(cgImage: cgImage!, scale: 1, orientation: .up)
 	}
 	
+	//MARK: User Interaction Actions
 	
+	@objc func scanAction() {
+		
+		guard verifyCameraAccessOrNotDetermined() else {
+			return
+		}
+		
+		let availablePhotoCodecs = wideAnglePhotoOutput.availablePhotoCodecTypes.map { $0.rawValue }
+		
+		var photoSettings: AVCapturePhotoSettings {
+			if availablePhotoCodecs.contains("hvc1") {
+				return AVCapturePhotoSettings(format: [AVVideoCodecKey 	: AVVideoCodecType.hevc])
+			} else {
+				return AVCapturePhotoSettings(format: [AVVideoCodecKey 	: AVVideoCodecType.jpeg])
+			}
+		}
+		
+		photoSettings.isHighResolutionPhotoEnabled = true
+		photoSettings.photoQualityPrioritization = .balanced
+		
+		
+		wideAnglePhotoOutput.capturePhoto(with: photoSettings, delegate: self)
+	}
 	
-	func toggleFlash() {
+	@objc func toggleFlashAction() {
 		
 		guard let viewController = viewController else {return}
 		
@@ -875,18 +898,34 @@ class CaptureSessionManager: NSObject {
 		}
 	}
 	
+	//MARK: Presentation of Scan Capture
+	
+	private func presentCaptureDetailVC(with image: CIImage?) {
+		
+		guard let viewController = viewController else {return}
+
+		processPhotoCapture(detectedRectangle, from: image)
+
+		let captureDetailVC = CaptureDetailVC(image: uiImage)
+
+		captureDetailVC.modalPresentationStyle = .overCurrentContext
+
+		viewController.present(captureDetailVC, animated: true, completion: nil)
+
+	}
+	
 }
 
 //MARK: AVFoundation Delegate Extensions
 
-extension CaptureSessionManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+extension DocumentScanManager: AVCaptureVideoDataOutputSampleBufferDelegate {
 	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
 		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
 		detectPreviewRectangle(in: frame)
 	}
 }
 
-extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
+extension DocumentScanManager: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
 		guard let viewController = viewController else {return}

@@ -6,35 +6,33 @@
 //
 
 import UIKit
-import AVFoundation
-import Vision
 
 class ScannerVC: UIViewController {
 	
-	//MARK: UIKit Properties
+	//MARK: Properties
 	
 	private let wideAnglePreviewView					= SSPreviewView()
 	private let ultraWideAnglePreviewView				= SSPreviewView()
-	private let outlineLayer                			= CAShapeLayer()
-	private var uiImage                     			= UIImage()
-	private var framesWithoutRecognitionCounter   		= 0
-	private var ciImage : CIImage?
 	
+	private let captureButton   						= SSCircularButton(
+		buttonHeight: 70,
+		symbolConfiguration:  UIImage.SymbolConfiguration(pointSize: 65, weight: .ultraLight),
+		symbolName: "camera.circle"
+	)
 	
-	//MARK: AVFoundation Properties
+	private let flashButton   = SSCircularButton(
+		buttonHeight: 50,
+		symbolConfiguration: UIImage.SymbolConfiguration(pointSize: 35, weight: .ultraLight),
+		symbolName: "flashlight.off.fill"
+	)
 	
-	private let captureSessionManager 					= CaptureSessionManager()
-	private let wideAnglePhotoOutput					= AVCapturePhotoOutput()
-	private lazy var captureSession              		= AVCaptureSession()
-	private lazy var wideAngleCameraDevice          	= AVCaptureDevice(uniqueID: "")
-	private lazy var wideAngleCameraPreviewLayer 		= AVCaptureVideoPreviewLayer(session: captureSession)
-	private lazy var ultraWideAngleCameraPreviewLayer 	= AVCaptureVideoPreviewLayer(session: captureSession)
+	private let tipsButton   			= SSCircularButton(
+		buttonHeight: 30,
+		symbolConfiguration: UIImage.SymbolConfiguration(pointSize: 20, weight: .bold),
+		symbolName: "questionmark"
+	)
 	
-
-	//MARK: Vision Properties
-	
-	private var detectedRectangle	: VNRectangleObservation?
-	
+	private let captureSessionManager 					= DocumentScanManager()
 
 	//MARK: ScannerVC Life Cycle Methods
 	
@@ -43,7 +41,9 @@ class ScannerVC: UIViewController {
 		configureUltraWideAnglePreviewView()
 		configureWideAnglePreviewView()
 		configureVisualEffectView()
-		configureButtons()
+		configureCaptureButton()
+		configureFlashButton()
+		configureTipsButton()
 	}
 	
 	//The capture session is configured in viewDidAppear in order to show the subviews while the capture session is being configured.
@@ -110,16 +110,10 @@ class ScannerVC: UIViewController {
 	}
 	
 	
-	private func configureButtons() {
-		
-		//Capture Button Configuration
-		let captureButtonHeight: CGFloat 		= 70
-		let captureButtonSymbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: captureButtonHeight - 5, weight: .ultraLight)
-		let captureButton   					= SSCircularButton(buttonHeight: captureButtonHeight, symbolConfiguration: captureButtonSymbolConfiguration, symbolName: "camera.circle")
-		
+	private func configureCaptureButton() {
 		view.addSubview(captureButton)
 		
-		captureButton.addTarget(self, action: #selector(captureButtonTapped), for: .touchUpInside)
+		captureButton.addTarget(captureSessionManager, action: #selector(captureSessionManager.scanAction), for: .touchUpInside)
 		
 		NSLayoutConstraint.activate([
 			captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -127,16 +121,13 @@ class ScannerVC: UIViewController {
 			captureButton.heightAnchor.constraint(equalToConstant: captureButton.buttonHeight),
 			captureButton.widthAnchor.constraint(equalToConstant: captureButton.buttonHeight)
 		])
-		
-		//Flash Button Configuration
-		
-		let flashButtonHeight: CGFloat 	= 50
-		let flashButtonSymbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: flashButtonHeight - 15, weight: .ultraLight)
-		let flashButton   = SSCircularButton(buttonHeight: flashButtonHeight, symbolConfiguration: flashButtonSymbolConfiguration, symbolName: "flashlight.off.fill")
-		
+	}
+	
+	
+	private func configureFlashButton() {
 		view.addSubview(flashButton)
 		
-		flashButton.addTarget(self, action: #selector(flashButtonTapped), for: .touchUpInside)
+		flashButton.addTarget(captureSessionManager, action: #selector(DocumentScanManager.toggleFlashAction), for: .touchUpInside)
 		
 		NSLayoutConstraint.activate([
 			flashButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 20),
@@ -144,11 +135,10 @@ class ScannerVC: UIViewController {
 			flashButton.heightAnchor.constraint(equalToConstant: flashButton.buttonHeight),
 			flashButton.widthAnchor.constraint(equalToConstant: flashButton.buttonHeight)
 		])
-		
-		//TipsButtonConfiguration
-		let tipsButtonHeight: CGFloat 	= 30
-		let tipsButtonSymbolConfiguration 	= UIImage.SymbolConfiguration(pointSize: tipsButtonHeight-10, weight: .bold)
-		let tipsButton   			= SSCircularButton(buttonHeight: tipsButtonHeight, symbolConfiguration: tipsButtonSymbolConfiguration, symbolName: "questionmark")
+	}
+	
+	
+	private func configureTipsButton() {
 		let tipsButtonNormalBackgroundColor = UIColor.gray.withAlphaComponent(0.2)
 		let tipsButtonHighlightedBackgroundColor = UIColor.gray.withAlphaComponent(0.6)
 		view.addSubview(tipsButton)
@@ -168,82 +158,9 @@ class ScannerVC: UIViewController {
 			tipsButton.heightAnchor.constraint(equalToConstant: tipsButton.buttonHeight),
 			tipsButton.widthAnchor.constraint(equalToConstant: tipsButton.buttonHeight)
 		])
-		
 	}
 	
-	
-	//MARK: AVFoundation Capture Session Configuration
-	
-	private func verifyDeviceSupportAndCameraAccess() -> Bool {
-		//Verify primary camera device support.
-		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera],
-																	  mediaType: .video, position: .back)
-		
-		guard !deviceDiscoverySession.devices.isEmpty else {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Device Not Supported",
-					message: "Please submit a request to julian.martinez.s@outlook.com for added support.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return false
-		}
-		
-		// Verify that camera access authorization is provided and start capture session configuration if it is or is not determined yet.
-		guard verifyCameraAccessOrNotDetermined() else {return false}
-		
-		return true
-	}
-	
-	
-	private func verifyCameraAccessOrNotDetermined() -> Bool {
-		switch AVCaptureDevice.authorizationStatus(for: .video) {
-		case .authorized:
-			return true
-		case .notDetermined:
-			return true
-		case .restricted:
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Camera Restriction",
-					message: "Unable configure camera session due to device restriction.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return false
-		case .denied:
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Enable Camera Access",
-					message: "To scan please enable camera access in Settings -> SpeedyScan",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return false
-		@unknown default:
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Access Error",
-					message: "An error was encountered while verifying camera access.",
-					preferredStyle: .alert)
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-			return false
-		}
-	}
-	
+	//MARK: Preview View Layers Configuration
 	
 	private func configureWideAngleCameraPreviewLayer() {
 		let previewFrame = wideAnglePreviewView.bounds
@@ -264,333 +181,7 @@ class ScannerVC: UIViewController {
 		ultraWideAnglePreviewView.layer.addSublayer(captureSessionManager.ultraWideAngleCameraPreviewLayer)
 	}
 	
-	
-	//MARK: Vision Rectangle Recognition Configuration
-	
-	private func detectPreviewRectangle(in cvBuffer: CVPixelBuffer) {
-		
-		DispatchQueue.main.async {
-			
-			//Stop recognition if ScannerVC is not presented.
-			guard self.presentedViewController == nil else {
-				self.resetRecognition()
-				return
-			}
-			
-			let request = VNDetectRectanglesRequest { request, error in
-				DispatchQueue.main.async { [self] in
-					guard let results = request.results as? [VNRectangleObservation] else {
-						DispatchQueue.main.async {
-							let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-							let alert = UIAlertController(
-								title: "Document Recognition Error",
-								message: "An error was encountered while configuring recognition.",
-								preferredStyle: .alert)
-							
-							alert.addAction(okayAlertAction)
-							self.present(alert, animated: true)
-						}
-						return
-					}
-					
-					guard let rect = results.first else {
-						
-						//Allow up to 5 frames without recognition to prevent abrupt reset of drawing on screen.
-						if framesWithoutRecognitionCounter > 5 {
-							resetRecognition()
-						} else {
-							framesWithoutRecognitionCounter += 1
-						}
-						
-						return
-					}
-					
-					framesWithoutRecognitionCounter = 0
-					
-					self.detectedRectangle = rect
-					
-					guard let detectedRectangle = self.detectedRectangle else {
-						return
-					}
-					
-					
-					self.drawBoundingBox(rect: detectedRectangle)
-					
-				}
-			}
-			
-			request.minimumAspectRatio  = VNAspectRatio(0.1)
-			request.maximumAspectRatio  = VNAspectRatio(4)
-			request.minimumSize         = Float(0.15)
-			request.minimumConfidence   = 1.0
-			request.maximumObservations = 1
-			
-			let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: cvBuffer, options: [:])
-			
-			do {
-				try imageRequestHandler.perform([request])
-			} catch {
-				DispatchQueue.main.async {
-					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-					let alert = UIAlertController(
-						title: "Document Recognition Error",
-						message: "An error was encountered while performing recognition.",
-						preferredStyle: .alert)
-					
-					alert.addAction(okayAlertAction)
-					self.present(alert, animated: true)
-				}
-			}
-		}
-	}
-	
-	
-	private func detectPhotoCaptureRectangle(in image: CIImage) {
-		
-		DispatchQueue.main.async {
-			
-			let request = VNDetectRectanglesRequest { request, error in
-				DispatchQueue.main.async { [self] in
-					guard let results = request.results as? [VNRectangleObservation] else {
-						DispatchQueue.main.async {
-							let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-							let alert = UIAlertController(
-								title: "Document Recognition Error",
-								message: "An error was encountered while configuring recognition.",
-								preferredStyle: .alert)
-							
-							alert.addAction(okayAlertAction)
-							self.present(alert, animated: true)
-						}
-						return
-					}
-					
-					guard let rect = results.first else {
-						let imageAttachment = NSTextAttachment()
-						imageAttachment.image = UIImage(systemName: "questionmark.circle")?.withTintColor(.label)
-						
-						
-						let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
-						fullString.append(NSAttributedString(attachment: imageAttachment))
-						fullString.append(NSAttributedString(string: " to see more tips for best results."))
-						
-						let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-						let alert = UIAlertController(
-							title: "No Object Detected",
-							message: "",
-							preferredStyle: .alert)
-						alert.setValue(fullString, forKey: "attributedMessage")
-						
-						alert.addAction(okayAlertAction)
-						self.present(alert, animated: true)
-						return
-					}
-					
-					self.detectedRectangle = rect
-					
-					self.presentCaptureDetailVC(with: self.ciImage)
-					self.toggleFlash()
-				}
-			}
-			
-			request.minimumAspectRatio  = VNAspectRatio(0.1)
-			request.maximumAspectRatio  = VNAspectRatio(4)
-			request.minimumSize         = Float(0.15)
-			request.minimumConfidence   = 1.0
-			request.maximumObservations = 1
-			
-			let imageRequestHandler = VNImageRequestHandler(ciImage: image, options: [:])
-			
-			do {
-				try imageRequestHandler.perform([request])
-			} catch {
-				DispatchQueue.main.async {
-					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-					let alert = UIAlertController(
-						title: "Document Recognition Error",
-						message: "An error was encountered while performing recognition.",
-						preferredStyle: .alert)
-					
-					alert.addAction(okayAlertAction)
-					self.present(alert, animated: true)
-				}
-			}
-		}
-	}
-	
-	
-	private func drawBoundingBox(rect: VNRectangleObservation) {
-		
-		let outlinePath = UIBezierPath()
-		
-		outlineLayer.lineCap        = .butt
-		outlineLayer.lineJoin       = .round
-		outlineLayer.lineWidth      = 2
-		outlineLayer.strokeColor    = UIColor.systemGray2.cgColor
-		outlineLayer.fillColor      = UIColor.white.withAlphaComponent(0.3).cgColor
-		
-		let bottomTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -wideAngleCameraPreviewLayer.frame.height)
-		
-		let topRight    = VNImagePointForNormalizedPoint(rect.topRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		let topLeft     = VNImagePointForNormalizedPoint(rect.topLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		let bottomRight = VNImagePointForNormalizedPoint(rect.bottomRight, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		let bottomLeft  = VNImagePointForNormalizedPoint(rect.bottomLeft, Int(wideAngleCameraPreviewLayer.frame.width), Int(wideAngleCameraPreviewLayer.frame.height)).applying(bottomTopTransform)
-		
-		outlinePath.move(to: topLeft)
-		outlinePath.addLine(to: topRight)
-		outlinePath.addLine(to: bottomRight)
-		outlinePath.addLine(to: bottomLeft)
-		outlinePath.addLine(to: topLeft)
-		outlinePath.addLine(to: topRight)
-		outlinePath.addLine(to: bottomLeft)
-		outlinePath.move(to: bottomRight)
-		outlinePath.addLine(to: topLeft)
-		
-		outlineLayer.path = outlinePath.cgPath
-	}
-	
-	
-	private func resetRecognition() {
-		self.detectedRectangle = nil
-		self.drawBoundingBox(rect: VNRectangleObservation())
-		self.ciImage = nil
-		self.uiImage = UIImage()
-	}
-
-	
-	//MARK: Photo Capture Processing Configuration
-	
-	private func processPhotoCapture(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
-		
-		guard let ciImage = ciImage, let unwrappedObservation = observation else {
-			let imageAttachment = NSTextAttachment()
-			imageAttachment.image = UIImage(systemName: "questionmark.circle")
-			
-			
-			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
-			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see more tips for best results."))
-			
-			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-			let alert = UIAlertController(
-				title: "No Object Detected",
-				message: "",
-				preferredStyle: .alert)
-			alert.setValue(fullString, forKey: "attributedMessage")
-			
-			alert.addAction(okayAlertAction)
-			self.present(alert, animated: true)
-			return
-		}
-		
-		var image = ciImage
-		
-		let topLeft     = unwrappedObservation.topLeft.scaled(to: ciImage.extent.size)
-		let topRight    = unwrappedObservation.topRight.scaled(to: ciImage.extent.size)
-		let bottomLeft  = unwrappedObservation.bottomLeft.scaled(to: ciImage.extent.size)
-		let bottomRight = unwrappedObservation.bottomRight.scaled(to: ciImage.extent.size)
-		
-		image = image.applyingFilter("CIPerspectiveCorrection", parameters: [
-			"inputTopLeft"      : CIVector(cgPoint: topLeft),
-			"inputTopRight"     : CIVector(cgPoint: topRight),
-			"inputBottomLeft"   : CIVector(cgPoint: bottomLeft),
-			"inputBottomRight"  : CIVector(cgPoint: bottomRight)
-		]).applyingFilter("CIDocumentEnhancer", parameters: [
-			"inputAmount" : 1
-		]).applyingFilter("CIColorControls", parameters: [
-			"inputBrightness" : -0.2,
-			"inputContrast"	  : 1.4
-		])
-		
-		let context = CIContext()
-		let cgImage = context.createCGImage(image, from: image.extent)
-		uiImage  = UIImage(cgImage: cgImage!, scale: 1, orientation: .up)
-	}
-	
-	
 	//MARK: Button Action Configuration
-	
-	@objc private func captureButtonTapped() {
-		
-		guard verifyCameraAccessOrNotDetermined() else {
-			return
-		}
-		
-		let availablePhotoCodecs = wideAnglePhotoOutput.availablePhotoCodecTypes.map { $0.rawValue }
-		
-		var photoSettings: AVCapturePhotoSettings {
-			if availablePhotoCodecs.contains("hvc1") {
-				return AVCapturePhotoSettings(format: [AVVideoCodecKey 	: AVVideoCodecType.hevc])
-			} else {
-				return AVCapturePhotoSettings(format: [AVVideoCodecKey 	: AVVideoCodecType.jpeg])
-			}
-		}
-		
-		photoSettings.isHighResolutionPhotoEnabled = true
-		photoSettings.photoQualityPrioritization = .balanced
-		
-		
-		wideAnglePhotoOutput.capturePhoto(with: photoSettings, delegate: self)
-	}
-	
-	
-	private func presentCaptureDetailVC(with image: CIImage?) {
-		
-		processPhotoCapture(detectedRectangle, from: image)
-		
-		let captureDetailVC = CaptureDetailVC(image: uiImage)
-		
-		captureDetailVC.modalPresentationStyle = .overCurrentContext
-		
-		present(captureDetailVC, animated: true, completion: nil)
-		
-	}
-	
-	
-	@objc private func flashButtonTapped() {
-		toggleFlash()
-	}
-	
-	
-	private func toggleFlash() {
-		guard let device = wideAngleCameraDevice else {return}
-		
-		guard device.hasTorch else { return }
-		
-		do {
-			try device.lockForConfiguration()
-			
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) || (self.presentedViewController != nil) {
-				device.torchMode = AVCaptureDevice.TorchMode.off
-			} else {
-				do {
-					try device.setTorchModeOn(level: 0.1)
-				} catch {
-					let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-					let alert = UIAlertController(
-						title: "Flash Toggle Error",
-						message: "An error was encountered while accessing the flash light. Restarting the device may solve this error.",
-						preferredStyle: .alert)
-					
-					alert.addAction(okayAlertAction)
-					self.present(alert, animated: true)
-				}
-			}
-			
-			device.unlockForConfiguration()
-		} catch {
-			DispatchQueue.main.async {
-				let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-				let alert = UIAlertController(
-					title: "Flash Toggle Error",
-					message: "The system may have locked the flash light. Restarting the device may solve this error.",
-					preferredStyle: .alert)
-				
-				alert.addAction(okayAlertAction)
-				self.present(alert, animated: true)
-			}
-		}
-	}
 	
 	@objc private func tipsButtonTapped() {
 		let tipsVC = TipsVC()
@@ -600,93 +191,3 @@ class ScannerVC: UIViewController {
 		present(tipsVC, animated: true)
 	}
 }
-
-
-//MARK: AVFoundation Delegate Extensions
-
-//extension ScannerVC: AVCaptureVideoDataOutputSampleBufferDelegate {
-//	func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-//		guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {return}
-//		detectPreviewRectangle(in: frame)
-//	}
-//}
-
-extension ScannerVC: AVCapturePhotoCaptureDelegate {
-	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-		
-		guard let cgImage = photo.cgImageRepresentation() else {
-			let imageAttachment = NSTextAttachment()
-			imageAttachment.image = UIImage(systemName: "questionmark.circle")
-			
-			
-			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
-			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see more tips for best results."))
-			
-			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-			let alert = UIAlertController(
-				title: "No Object Detected",
-				message: "",
-				preferredStyle: .alert)
-			alert.setValue(fullString, forKey: "attributedMessage")
-			
-			alert.addAction(okayAlertAction)
-			self.present(alert, animated: true)
-			return
-		}
-		
-		ciImage = CIImage(cgImage: cgImage)
-		
-		guard let ciImage = ciImage else {
-			let imageAttachment = NSTextAttachment()
-			imageAttachment.image = UIImage(systemName: "questionmark.circle")
-			
-			
-			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
-			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see more tips for best results."))
-			
-			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-			let alert = UIAlertController(
-				title: "No Object Detected",
-				message: "",
-				preferredStyle: .alert)
-			alert.setValue(fullString, forKey: "attributedMessage")
-			
-			alert.addAction(okayAlertAction)
-			self.present(alert, animated: true)
-			return
-		}
-		
-		self.ciImage = ciImage.oriented(.right)
-		
-	}
-	
-	
-	func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
-		guard let ciImage = ciImage else {
-			let imageAttachment = NSTextAttachment()
-			imageAttachment.image = UIImage(systemName: "questionmark.circle")
-			
-			
-			let fullString = NSMutableAttributedString(string: "\nTry moving the device away until all edges of the object are within view and a bounding box is shown. \n\nPress ")
-			fullString.append(NSAttributedString(attachment: imageAttachment))
-			fullString.append(NSAttributedString(string: " to see more tips for best results."))
-			
-			let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
-			let alert = UIAlertController(
-				title: "No Object Detected",
-				message: "",
-				preferredStyle: .alert)
-			alert.setValue(fullString, forKey: "attributedMessage")
-			
-			alert.addAction(okayAlertAction)
-			self.present(alert, animated: true)
-			return
-		}
-		
-		detectPhotoCaptureRectangle(in: ciImage)
-	}
-}
-
-
