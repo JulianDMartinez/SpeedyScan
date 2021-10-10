@@ -11,7 +11,7 @@ import Vision
 
 class CaptureSessionManager: NSObject {
 	
-	var delegate: CaptureSessionManagerDelegate?
+	weak var viewController = UIViewController()
 	
 	//MARK: UIKit Properties
 	
@@ -40,7 +40,7 @@ class CaptureSessionManager: NSObject {
 	
 	func configureCaptureSession() {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		let availableDevices = AVCaptureDevice.DiscoverySession(
 			deviceTypes : [.builtInDualCamera, .builtInWideAngleCamera],
@@ -57,7 +57,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 			return
 		}
@@ -92,7 +92,7 @@ class CaptureSessionManager: NSObject {
 	
 	func verifyDeviceSupportAndCameraAccess() -> Bool {
 		
-		guard let delegate = delegate else {return false}
+		guard let viewController = viewController else {return false}
 		
 		//Verify primary camera device support.
 		let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera],
@@ -107,7 +107,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 			return false
 		}
@@ -121,7 +121,7 @@ class CaptureSessionManager: NSObject {
 	
 	func verifyCameraAccessOrNotDetermined() -> Bool {
 		
-		guard let delegate = delegate else {return false}
+		guard let viewController = viewController else {return false}
 		
 		switch AVCaptureDevice.authorizationStatus(for: .video) {
 		case .authorized:
@@ -137,7 +137,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 			return false
 		case .denied:
@@ -149,7 +149,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 			return false
 		@unknown default:
@@ -160,7 +160,7 @@ class CaptureSessionManager: NSObject {
 					message: "An error was encountered while verifying camera access.",
 					preferredStyle: .alert)
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 			return false
 		}
@@ -169,7 +169,7 @@ class CaptureSessionManager: NSObject {
 	
 	func configureWideAngleCameraCapture() {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		//Find the wide angle camera.
 		
@@ -186,7 +186,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 			return
 		}
@@ -224,7 +224,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 		}
 		
@@ -290,7 +290,7 @@ class CaptureSessionManager: NSObject {
 	
 	func configureMulticamWideAngleCameraCapture() {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		//Find the wide angle camera.
 		
@@ -307,7 +307,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 			return
 		}
@@ -394,7 +394,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 		}
 		
@@ -461,7 +461,7 @@ class CaptureSessionManager: NSObject {
 	
 	func configureMulticamUltraWideAngleCameraCapture() {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		//Find the ultra wide angle camera.
 		
@@ -512,7 +512,7 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 		}
 		
@@ -586,12 +586,12 @@ class CaptureSessionManager: NSObject {
 	
 	func detectPreviewRectangle(in cvBuffer: CVPixelBuffer) {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		DispatchQueue.main.async {
 			
 			//Stop recognition if ScannerVC is not presented.
-			guard delegate.presentedViewController == nil else {
+			guard viewController.presentedViewController == nil else {
 				self.resetRecognition()
 				return
 			}
@@ -607,7 +607,7 @@ class CaptureSessionManager: NSObject {
 								preferredStyle: .alert)
 							
 							alert.addAction(okayAlertAction)
-							delegate.present(alert, animated: true)
+							viewController.present(alert, animated: true)
 						}
 						return
 					}
@@ -657,7 +657,7 @@ class CaptureSessionManager: NSObject {
 						preferredStyle: .alert)
 					
 					alert.addAction(okayAlertAction)
-					delegate.present(alert, animated: true)
+					viewController.present(alert, animated: true)
 				}
 			}
 		}
@@ -666,7 +666,7 @@ class CaptureSessionManager: NSObject {
 	
 	func detectPhotoCaptureRectangle(in image: CIImage) {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		DispatchQueue.main.async {
 			
@@ -681,7 +681,7 @@ class CaptureSessionManager: NSObject {
 								preferredStyle: .alert)
 							
 							alert.addAction(okayAlertAction)
-							delegate.present(alert, animated: true)
+							viewController.present(alert, animated: true)
 						}
 						return
 					}
@@ -703,13 +703,13 @@ class CaptureSessionManager: NSObject {
 						alert.setValue(fullString, forKey: "attributedMessage")
 						
 						alert.addAction(okayAlertAction)
-						delegate.present(alert, animated: true)
+						viewController.present(alert, animated: true)
 						return
 					}
 					
 					self.detectedRectangle = rect
 					
-//					delegate.presentCaptureDetailVC(with: self.ciImage)
+//					viewController.presentCaptureDetailVC(with: self.ciImage)
 					self.toggleFlash()
 				}
 			}
@@ -733,7 +733,7 @@ class CaptureSessionManager: NSObject {
 						preferredStyle: .alert)
 					
 					alert.addAction(okayAlertAction)
-					delegate.present(alert, animated: true)
+					viewController.present(alert, animated: true)
 				}
 			}
 		}
@@ -783,7 +783,7 @@ class CaptureSessionManager: NSObject {
 	
 	func processPhotoCapture(_ observation: VNRectangleObservation?, from ciImage: CIImage?) {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		guard let ciImage = ciImage, let unwrappedObservation = observation else {
 			let imageAttachment = NSTextAttachment()
@@ -802,7 +802,7 @@ class CaptureSessionManager: NSObject {
 			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
-			delegate.present(alert, animated: true)
+			viewController.present(alert, animated: true)
 			return
 		}
 		
@@ -834,7 +834,7 @@ class CaptureSessionManager: NSObject {
 	
 	func toggleFlash() {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		guard let device = wideAngleCameraDevice else {return}
 		
@@ -843,7 +843,7 @@ class CaptureSessionManager: NSObject {
 		do {
 			try device.lockForConfiguration()
 			
-			if (device.torchMode == AVCaptureDevice.TorchMode.on) || (delegate.presentedViewController != nil) {
+			if (device.torchMode == AVCaptureDevice.TorchMode.on) || (viewController.presentedViewController != nil) {
 				device.torchMode = AVCaptureDevice.TorchMode.off
 			} else {
 				do {
@@ -856,7 +856,7 @@ class CaptureSessionManager: NSObject {
 						preferredStyle: .alert)
 					
 					alert.addAction(okayAlertAction)
-					delegate.present(alert, animated: true)
+					viewController.present(alert, animated: true)
 				}
 			}
 			
@@ -870,14 +870,10 @@ class CaptureSessionManager: NSObject {
 					preferredStyle: .alert)
 				
 				alert.addAction(okayAlertAction)
-				delegate.present(alert, animated: true)
+				viewController.present(alert, animated: true)
 			}
 		}
 	}
-	
-}
-
-protocol CaptureSessionManagerDelegate: UIViewController {
 	
 }
 
@@ -893,7 +889,7 @@ extension CaptureSessionManager: AVCaptureVideoDataOutputSampleBufferDelegate {
 extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		guard let cgImage = photo.cgImageRepresentation() else {
 			let imageAttachment = NSTextAttachment()
@@ -912,7 +908,7 @@ extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
 			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
-			delegate.present(alert, animated: true)
+			viewController.present(alert, animated: true)
 			return
 		}
 		
@@ -935,7 +931,7 @@ extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
 			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
-			delegate.present(alert, animated: true)
+			viewController.present(alert, animated: true)
 			return
 		}
 		
@@ -946,7 +942,7 @@ extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
 	
 	func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
 		
-		guard let delegate = delegate else {return}
+		guard let viewController = viewController else {return}
 		
 		guard let ciImage = ciImage else {
 			let imageAttachment = NSTextAttachment()
@@ -965,7 +961,7 @@ extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
 			alert.setValue(fullString, forKey: "attributedMessage")
 			
 			alert.addAction(okayAlertAction)
-			delegate.present(alert, animated: true)
+			viewController.present(alert, animated: true)
 			return
 		}
 		

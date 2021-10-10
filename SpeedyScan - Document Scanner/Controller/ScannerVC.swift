@@ -48,7 +48,7 @@ class ScannerVC: UIViewController {
 	
 	//The capture session is configured in viewDidAppear in order to show the subviews while the capture session is being configured.
 	override func viewDidAppear(_ animated: Bool) {
-		captureSessionManager.delegate = self
+		captureSessionManager.viewController = self
 		captureSessionManager.configureCaptureSession()
 		configureUltraWideAngleCameraPreviewLayer()
 		configureWideAngleCameraPreviewLayer()
@@ -689,6 +689,4 @@ extension ScannerVC: AVCapturePhotoCaptureDelegate {
 	}
 }
 
-extension ScannerVC: CaptureSessionManagerDelegate {
-	
-}
+
