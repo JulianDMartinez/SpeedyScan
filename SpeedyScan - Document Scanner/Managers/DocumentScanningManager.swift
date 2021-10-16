@@ -597,7 +597,10 @@ class DocumentScanningManager: NSObject {
 			}
 			
 			let request = VNDetectRectanglesRequest { request, error in
-				DispatchQueue.main.async { [self] in
+				DispatchQueue.main.async { [weak self] in
+                    
+                    guard let self = self else {return}
+                    
 					guard let results = request.results as? [VNRectangleObservation] else {
 						DispatchQueue.main.async {
 							let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
@@ -615,16 +618,16 @@ class DocumentScanningManager: NSObject {
 					guard let rect = results.first else {
 						
 						//Allow up to 5 frames without recognition to prevent abrupt reset of drawing on screen.
-						if framesWithoutRecognitionCounter > 5 {
-							resetRecognition()
+                        if self.framesWithoutRecognitionCounter > 5 {
+                            self.resetRecognition()
 						} else {
-							framesWithoutRecognitionCounter += 1
+                            self.framesWithoutRecognitionCounter += 1
 						}
 						
 						return
 					}
 					
-					framesWithoutRecognitionCounter = 0
+                    self.framesWithoutRecognitionCounter = 0
 					
 					self.detectedRectangle = rect
 					
@@ -634,7 +637,6 @@ class DocumentScanningManager: NSObject {
 					
 					
 					self.drawBoundingBox(rect: detectedRectangle)
-					
 				}
 			}
 			
@@ -671,7 +673,10 @@ class DocumentScanningManager: NSObject {
 		DispatchQueue.main.async {
 			
 			let request = VNDetectRectanglesRequest { request, error in
-				DispatchQueue.main.async { [self] in
+				DispatchQueue.main.async { [weak self] in
+                    
+                    guard let self = self else {return}
+                    
 					guard let results = request.results as? [VNRectangleObservation] else {
 						DispatchQueue.main.async {
 							let okayAlertAction = UIAlertAction(title: "Ok", style: .default)
